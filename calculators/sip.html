@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIP Calculator - India | FinPlan India</title>
+  <meta name="description" content="Calculate your mutual fund SIP (Systematic Investment Plan) returns in real-time. Optimize for Indian mutual funds with inflation adjustment and capital gains taxation.">
+  <meta name="keywords" content="sip calculator, mutual fund sip, sip interest, cagr compounding, ltcg tax equity">
+  <meta name="author" content="FinPlan India">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="SIP Calculator - Indian Mutual Fund & Personal Finance Planner">
+  <meta property="og:description" content="Calculate your mutual fund SIP (Systematic Investment Plan) returns in real-time. Optimize for Indian mutual funds with inflation adjustment and capital gains taxation.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://finplanindia.com/calculators/sip.html">
+  <meta property="og:site_name" content="FinPlan India">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script type="application/ld+json">
+    {
+  "@context": "https://schema.org",
+  "@type": "FinancialCalculator",
+  "name": "SIP Calculator",
+  "description": "Calculate your mutual fund SIP (Systematic Investment Plan) returns in real-time. Optimize for Indian mutual funds with inflation adjustment and capital gains taxation.",
+  "url": "https://finplanindia.com/calculators/sip.html",
+  "category": "Financial Tool"
+}
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <header id="global-header"></header>
+    
+    <div class="main-content">
+      <aside id="global-sidebar" class="sidebar"></aside>
+      
+      <main class="calculator-workspace">
+        <div class="calculator-header">
+          <h1>SIP Calculator</h1>
+          <p class="calculator-description">Calculate your mutual fund SIP (Systematic Investment Plan) returns in real-time. Optimize for Indian mutual funds with inflation adjustment and capital gains taxation.</p>
+        </div>
+        
+        <!-- Top Section: Parameters (Inputs) | Results (Summary Cards) -->
+        <div class="calculator-top-section">
+          <!-- Inputs Card (core numeric parameters only) -->
+          <div class="inputs-card">
+            
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="monthly_sip" class="draggable-label">Monthly SIP</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="monthly_sip" min="500" step="500" value="10000" aria-label="Monthly SIP">
+            <span class="input-suffix">Mo</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="return_rate" class="draggable-label">Expected Annual Return</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="return_rate" min="1" step="0.5" value="12" aria-label="Expected Annual Return">
+            <span class="input-suffix">%</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="years" class="draggable-label">Duration</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="years" min="1" step="1" value="15" aria-label="Duration">
+            <span class="input-suffix">Yrs</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+            
+          </div>
+          
+          <!-- Results Summary Card -->
+          <div class="results-summary-card">
+            <span class="results-title">Calculated Results</span>
+            <div class="summary-grid">
+              
+      <div class="metric-card" >
+        <span class="metric-label">Invested Amount</span>
+        <span class="metric-value" id="total-invested">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Total Gains</span>
+        <span class="metric-value" id="total-gains">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Nominal Corpus</span>
+        <span class="metric-value" id="total-corpus">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Real Corpus (Today's Purchasing Power)</span>
+        <span class="metric-value" id="adjusted-corpus">-</span>
+        <span class="metric-sub" id="real-gain-loss">-</span>
+      </div>
+    
+      <div class="metric-card metric-card-conditional" data-conditional="tax" style="display:none;">
+        <span class="metric-label">Post-Tax Corpus</span>
+        <span class="metric-value" id="post-tax-corpus">-</span>
+        
+      </div>
+    
+            </div>
+          </div>
+        </div>
+        
+        <!-- Horizontal Settings Bar (Compounding / Inflation / Tax) -->
+        
+        <div class="settings-bar">
+          
+          <div class="settings-bar-item">
+            <span class="settings-bar-label">Compounding</span>
+            <div class="settings-bar-toggle">
+              <button class="toggle-btn toggle-btn-active" id="freq-monthly-btn" type="button">Monthly</button>
+              <button class="toggle-btn" id="freq-yearly-btn" type="button">Yearly</button>
+            </div>
+            <input type="hidden" id="compounding-freq" value="monthly">
+          </div>
+          
+          <div class="settings-bar-item">
+            <span class="settings-bar-label">Inflation</span>
+            <div class="input-wrapper" style="width:120px;">
+              <input type="number" id="inflation-rate" min="0" max="15" step="0.5" value="6" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+          
+          <div class="settings-bar-item">
+            <span class="settings-bar-label">Taxation</span>
+            <div class="input-wrapper" style="width:260px;">
+              <select id="tax-type" style="font-size:0.85rem;padding:0.4rem 0.5rem;">
+                <option value="none">No Tax Estimation</option>
+                <option value="equity_ltcg" selected>Equity LTCG (12.5%, ₹1.25L exempt)</option>
+                <option value="equity_stcg">Equity STCG (20% flat)</option>
+                <option value="slab">Income Tax Slab Rate</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-bar-item" id="custom-tax-group" style="display:none;">
+            <span class="settings-bar-label">Slab Rate</span>
+            <div class="input-wrapper" style="width:100px;">
+              <input type="number" id="custom-tax-rate" min="0" max="50" step="1" value="30" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Graph Section (Full Width) -->
+        
+        <div class="chart-card full-width-card">
+          <div class="chart-header">
+            <span class="chart-title">Visual Projection</span>
+            <div class="chart-legend" id="chart-legend-container">
+              
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--text-secondary);"></span>Invested</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--accent-color);"></span>Corpus</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--success-color);"></span>Real Value</div>
+              
+            </div>
+          </div>
+          <div class="chart-svg-container" id="chart-container"></div>
+        </div>
+        
+        
+        <!-- Table Section (Full Width) -->
+        
+        <div class="action-toolbar full-width-toolbar">
+          <button class="btn btn-secondary" id="btn-copy-table">Copy Table</button>
+          <button class="btn btn-secondary" id="btn-export-json">Export JSON</button>
+          <button class="btn btn-primary" id="btn-export-csv">Export CSV</button>
+        </div>
+        
+        <div class="table-card full-width-card">
+          <span class="table-title">Yearly Breakdowns</span>
+          <table id="projections-table">
+            <thead>
+              <tr id="table-headers-row">
+                <!-- Headers generated in JS -->
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Data generated in JS -->
+            </tbody>
+          </table>
+        </div>
+        
+        
+        <!-- SEO Content -->
+        <section class="seo-content">
+          
+      <h2>Understanding Mutual Fund SIP Compounding</h2>
+      <p>A Systematic Investment Plan (SIP) allows you to invest a fixed amount regularly in mutual funds, helping you benefit from rupee cost averaging and power of compounding.</p>
+      <h3>Formula & Mathematical Approach</h3>
+      <p>Unlike standard simple calculators that divide the rate by 12, our system computes compounding returns based on the true <strong>monthly equivalent CAGR</strong> rate:</p>
+      <div class="formula-box">
+        <math display="block">
+          <mi>i</mi>
+          <mo>=</mo>
+          <msup>
+            <mrow>
+              <mo>(</mo>
+              <mn>1</mn>
+              <mo>+</mo>
+              <mfrac>
+                <mi>annualRate</mi>
+                <mn>100</mn>
+              </mfrac>
+              <mo>)</mo>
+            </mrow>
+            <mfrac>
+              <mn>1</mn>
+              <mn>12</mn>
+            </mfrac>
+          </msup>
+          <mo>−</mo>
+          <mn>1</mn>
+        </math>
+        <math display="block">
+          <mi>FV</mi>
+          <mo>=</mo>
+          <mi>P</mi>
+          <mo>×</mo>
+          <mfrac>
+            <mrow>
+              <msup>
+                <mrow>
+                  <mo>(</mo>
+                  <mn>1</mn>
+                  <mo>+</mo>
+                  <mi>i</mi>
+                  <mo>)</mo>
+                </mrow>
+                <mi>m</mi>
+              </msup>
+              <mo>−</mo>
+              <mn>1</mn>
+            </mrow>
+            <mi>i</mi>
+          </mfrac>
+          <mo>×</mo>
+          <mrow>
+            <mo>(</mo>
+            <mn>1</mn>
+            <mo>+</mo>
+            <mi>i</mi>
+            <mo>)</mo>
+          </mrow>
+        </math>
+      </div>
+      <p>Where <em>P</em> is monthly SIP, <em>i</em> is monthly rate, and <em>m</em> is the total number of months.</p>
+      <h3>Frequently Asked Questions</h3>
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-question">What is CAGR compounding?</div>
+          <div class="faq-answer">Compound Annual Growth Rate (CAGR) measures the geometric progression ratio that provides a constant rate of return over the period. Using CAGR monthly compounding is the standard for retail investment evaluations.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">How is Equity LTCG taxed in India?</div>
+          <div class="faq-answer">Starting FY 2024-25, Long-Term Capital Gains (LTCG) on equity investments are taxed at 12.5% for gains exceeding ₹1.25 Lakhs in a financial year.</div>
+        </div>
+      </div>
+    
+        </section>
+      </main>
+    </div>
+    
+    <footer id="global-footer"></footer>
+  </div>
+
+  <script src="../js/engine.js"></script>
+  <script src="../js/shared.js"></script>
+  <script>
+    // Calculator Specific Script
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      const defaults = { 'compounding-freq': 'monthly',  monthly_sip: 10000, return_rate: 12, years: 15, 'tax-type': 'equity_ltcg', 'custom-tax-rate': 12.5, 'inflation-rate': 6 };
+      let state = FinanceEngine.getUrlParams(defaults);
+      
+      const elements = [ 'compounding-freq', 'monthly_sip', 'return_rate', 'years', 'tax-type', 'custom-tax-rate', 'inflation-rate'];
+      
+      function syncUI() {
+        elements.forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (document.activeElement !== el) el.value = state[id];
+          const valDisplay = document.getElementById(id + '-val');
+          if (valDisplay) {
+            if (id === 'monthly_sip') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
+            else if (id === 'return_rate' || id === 'custom-tax-rate' || id === 'inflation-rate') valDisplay.textContent = state[id] + '%';
+            else valDisplay.textContent = state[id];
+          }
+        });
+        
+        // Hide/show flat tax input based on selection
+        const customTaxGroup = document.getElementById('custom-tax-group');
+        if (customTaxGroup) {
+          customTaxGroup.style.display = (state['tax-type'] === 'custom' || state['tax-type'] === 'slab') ? 'block' : 'none';
+        }
+      }
+      
+      function calculate() {
+        const P = isNaN(state.monthly_sip) ? 10000 : state.monthly_sip;
+        const annualRate = isNaN(state.return_rate) ? 12 : state.return_rate;
+        const years = isNaN(state.years) || state.years <= 0 ? 15 : state.years;
+        const i = FinanceEngine.getMonthlyRate(annualRate);
+        const months = years * 12;
+        const compoundingFreq = state['compounding-freq'] || 'monthly';
+        
+        const totalInvested = P * months;
+        const fv = P * ((Math.pow(1 + i, months) - 1) / i) * (1 + i);
+        const totalGains = fv - totalInvested;
+        
+        // Inflation adjustment
+        const inflationRate = state['inflation-rate'];
+        const r_real = ((1 + annualRate / 100) / (1 + inflationRate / 100)) - 1;
+        const realCorpus = FinanceEngine.getRealValue(fv, inflationRate, years);
+        const realGains = realCorpus - totalInvested;
+        
+        // Tax estimation
+        const taxResults = FinanceEngine.estimateTax(totalGains, state['tax-type'], state['custom-tax-rate']);
+        const estimatedTax = taxResults.tax;
+        const postTaxCorpus = fv - estimatedTax;
+        
+        // Update summary cards
+        document.getElementById('total-invested').textContent = FinanceEngine.formatINRSmart(totalInvested);
+        document.getElementById('total-gains').textContent = FinanceEngine.formatINRSmart(totalGains);
+        document.getElementById('total-corpus').textContent = FinanceEngine.formatINRSmart(fv);
+        document.getElementById('adjusted-corpus').textContent = FinanceEngine.formatINRSmart(realCorpus);
+        const realGainLossEl = document.getElementById('real-gain-loss');
+        if (realGainLossEl) {
+          const realCAGR = (r_real * 100).toFixed(2);
+          realGainLossEl.innerHTML = "Real CAGR: " + realCAGR + "% &nbsp;&middot;&nbsp; Real Gain: " + FinanceEngine.formatINRSmart(realGains);
+        }
+        // Post-tax card (conditional)
+        const postTaxEl = document.getElementById('post-tax-corpus');
+        if (postTaxEl) postTaxEl.textContent = FinanceEngine.formatINRSmart(postTaxCorpus);
+        document.querySelectorAll('[data-conditional="tax"]').forEach(el => {
+          el.style.display = (state['tax-type'] && state['tax-type'] !== 'none') ? '' : 'none';
+        });
+        
+        // Populate Table
+        const tableBody = document.getElementById('table-body');
+        const headersRow = document.getElementById('table-headers-row');
+        
+        const headers = ['Year', 'Invested', 'Returns', 'Corpus', 'Real Corpus', 'Taxable Gains', 'Estimated Tax', 'Post-Tax Corpus'];
+        headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
+        
+        let tableRows = [];
+        let runningBalance = 0;
+        let cumulativeInvested = 0;
+        
+        for (let y = 1; y <= years; y++) {
+          const startMonth = (y - 1) * 12 + 1;
+          const endMonth = y * 12;
+          
+          if (compoundingFreq === 'monthly') {
+            const compoundingFreq = state['compounding-freq'] || 'monthly';
+          if (compoundingFreq === 'monthly') {
+            for (let m = startMonth; m <= endMonth; m++) {
+              cumulativeInvested += P;
+              runningBalance = (runningBalance + P) * (1 + i);
+            }
+          } else {
+            const rate = annualRate / 100;
+            const interestOnStart = runningBalance * rate;
+            const interestOnDeposits = P * rate * 6.5;
+            cumulativeInvested += P * 12;
+            runningBalance = runningBalance + (P * 12) + interestOnStart + interestOnDeposits;
+          }
+          } else {
+            const rate = annualRate / 100;
+            const interestOnStart = runningBalance * rate;
+            const interestOnDeposits = P * rate * 6.5;
+            
+            cumulativeInvested += P * 12;
+            runningBalance = runningBalance + (P * 12) + interestOnStart + interestOnDeposits;
+          }
+          
+          const runningRealBalance = FinanceEngine.getRealValue(runningBalance, inflationRate, y);
+          
+          const yGains = runningBalance - cumulativeInvested;
+          const yTaxResults = FinanceEngine.estimateTax(yGains, state['tax-type'], state['custom-tax-rate']);
+          const yPostTaxCorpus = runningBalance - yTaxResults.tax;
+          
+          tableRows.push([
+            y,
+            Math.round(cumulativeInvested),
+            Math.round(yGains),
+            Math.round(runningBalance),
+            Math.round(runningRealBalance),
+            Math.round(yTaxResults.taxableGains),
+            Math.round(yTaxResults.tax),
+            Math.round(yPostTaxCorpus)
+          ]);
+        }
+        
+        tableBody.innerHTML = tableRows.map(row => 
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+        ).join('');
+        
+        // Update Chart
+        const chartData = tableRows.map(row => ({
+          label: 'Yr ' + row[0],
+          invested: row[1],
+          gains: row[2],
+          nominal: row[3],
+          real: row[4]
+        }));
+        FinanceEngine.renderLineChart('chart-container', chartData,
+          ['invested', 'gains', 'nominal', 'real'],
+          ['#6e6e73', '#ff9f0a', '#0071e3', '#30d158'],
+          ['Invested', 'Net Gains', 'Corpus', 'Real Value']);
+        
+        // Bind Export Buttons
+        const csvExporter = FinanceEngine.exportData('sip-calculator', 
+          { 'Monthly SIP': P, 'Return CAGR %': annualRate, 'Years': years, 'Inflation %': inflationRate },
+          { 'Invested Amount': totalInvested, 'Total Corpus': fv, 'Total Gains': totalGains, 'Inflation Adjusted': realCorpus, 'Estimated Tax': estimatedTax, 'Post-Tax Corpus': postTaxCorpus },
+          headers,
+          tableRows
+        );
+        
+        // Remove old event listeners
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
+      }
+      
+      // Event bindings
+      elements.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', (e) => {
+          state[id] = e.target.value;
+          if (typeof defaults[id] === 'number') state[id] = parseFloat(state[id]);
+          syncUI();
+          calculate();
+          FinanceEngine.updateUrlParams(state);
+        });
+      });
+      
+      syncUI();
+      calculate();
+    
+    });
+  </script>
+</body>
+</html>

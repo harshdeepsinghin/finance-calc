@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SWP Calculator - India | FinPlan India</title>
+  <meta name="description" content="Plan your regular withdrawals from mutual funds using a Systematic Withdrawal Plan (SWP) calculator. Calculate capital preservation and corpus lifespan.">
+  <meta name="keywords" content="swp calculator, systematic withdrawal plan, retirement monthly income, capital preservation">
+  <meta name="author" content="FinPlan India">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="SWP Calculator - Indian Mutual Fund & Personal Finance Planner">
+  <meta property="og:description" content="Plan your regular withdrawals from mutual funds using a Systematic Withdrawal Plan (SWP) calculator. Calculate capital preservation and corpus lifespan.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://finplanindia.com/calculators/swp.html">
+  <meta property="og:site_name" content="FinPlan India">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script type="application/ld+json">
+    {
+  "@context": "https://schema.org",
+  "@type": "FinancialCalculator",
+  "name": "SWP Calculator",
+  "description": "Plan your regular withdrawals from mutual funds using a Systematic Withdrawal Plan (SWP) calculator. Calculate capital preservation and corpus lifespan.",
+  "url": "https://finplanindia.com/calculators/swp.html",
+  "category": "Financial Tool"
+}
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <header id="global-header"></header>
+    
+    <div class="main-content">
+      <aside id="global-sidebar" class="sidebar"></aside>
+      
+      <main class="calculator-workspace">
+        <div class="calculator-header">
+          <h1>SWP Calculator</h1>
+          <p class="calculator-description">Plan your regular withdrawals from mutual funds using a Systematic Withdrawal Plan (SWP) calculator. Calculate capital preservation and corpus lifespan.</p>
+        </div>
+        
+        <!-- Top Section: Parameters (Inputs) | Results (Summary Cards) -->
+        <div class="calculator-top-section">
+          <!-- Inputs Card (core numeric parameters only) -->
+          <div class="inputs-card">
+            
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="initial_corpus" class="draggable-label">Initial Corpus</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="initial_corpus" min="100000" step="100000" value="5000000" aria-label="Initial Corpus">
+            
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="monthly_withdrawal" class="draggable-label">Monthly Withdrawal</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="monthly_withdrawal" min="1000" step="1000" value="30000" aria-label="Monthly Withdrawal">
+            <span class="input-suffix">Mo</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="return_rate" class="draggable-label">Expected Return</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="return_rate" min="1" step="0.5" value="9" aria-label="Expected Return">
+            <span class="input-suffix">%</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="years" class="draggable-label">Duration</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="years" min="1" step="1" value="15" aria-label="Duration">
+            <span class="input-suffix">Yrs</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+            
+          </div>
+          
+          <!-- Results Summary Card -->
+          <div class="results-summary-card">
+            <span class="results-title">Calculated Results</span>
+            <div class="summary-grid">
+              
+      <div class="metric-card" >
+        <span class="metric-label">Remaining Corpus</span>
+        <span class="metric-value" id="remaining-corpus">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Total Withdrawals</span>
+        <span class="metric-value" id="total-withdrawn">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Earned Returns</span>
+        <span class="metric-value" id="final-gains">-</span>
+        
+      </div>
+    
+            </div>
+          </div>
+        </div>
+        
+        <!-- Horizontal Settings Bar (Compounding / Inflation / Tax) -->
+        
+        <div class="settings-bar">
+          
+          <div class="settings-bar-item">
+            <span class="settings-bar-label">Compounding</span>
+            <div class="settings-bar-toggle">
+              <button class="toggle-btn toggle-btn-active" id="freq-monthly-btn" type="button">Monthly</button>
+              <button class="toggle-btn" id="freq-yearly-btn" type="button">Yearly</button>
+            </div>
+            <input type="hidden" id="compounding-freq" value="monthly">
+          </div>
+          
+          
+        </div>
+        
+        <!-- Graph Section (Full Width) -->
+        
+        <div class="chart-card full-width-card">
+          <div class="chart-header">
+            <span class="chart-title">Visual Projection</span>
+            <div class="chart-legend" id="chart-legend-container">
+              
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--text-secondary);"></span>Invested</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--accent-color);"></span>Corpus</div>
+                
+              
+            </div>
+          </div>
+          <div class="chart-svg-container" id="chart-container"></div>
+        </div>
+        
+        
+        <!-- Table Section (Full Width) -->
+        
+        <div class="action-toolbar full-width-toolbar">
+          <button class="btn btn-secondary" id="btn-copy-table">Copy Table</button>
+          <button class="btn btn-secondary" id="btn-export-json">Export JSON</button>
+          <button class="btn btn-primary" id="btn-export-csv">Export CSV</button>
+        </div>
+        
+        <div class="table-card full-width-card">
+          <span class="table-title">Yearly Breakdowns</span>
+          <table id="projections-table">
+            <thead>
+              <tr id="table-headers-row">
+                <!-- Headers generated in JS -->
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Data generated in JS -->
+            </tbody>
+          </table>
+        </div>
+        
+        
+        <!-- SEO Content -->
+        <section class="seo-content">
+          
+      <h2>Retirement Planning with SWP</h2>
+      <p>A Systematic Withdrawal Plan (SWP) allows you to withdraw a fixed amount of money regularly from your mutual fund investments, while the remaining balance continues to compound.</p>
+    
+        </section>
+      </main>
+    </div>
+    
+    <footer id="global-footer"></footer>
+  </div>
+
+  <script src="../js/engine.js"></script>
+  <script src="../js/shared.js"></script>
+  <script>
+    // Calculator Specific Script
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      const defaults = { 'compounding-freq': 'monthly',  initial_corpus: 5000000, monthly_withdrawal: 30000, return_rate: 9, years: 15 };
+      let state = FinanceEngine.getUrlParams(defaults);
+      const elements = [ 'compounding-freq', 'initial_corpus', 'monthly_withdrawal', 'return_rate', 'years'];
+      
+      function syncUI() {
+        elements.forEach(id => {
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const valDisplay = document.getElementById(id + '-val');
+          if (valDisplay) {
+            if (id === 'initial_corpus' || id === 'monthly_withdrawal') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
+            else if (id === 'return_rate') valDisplay.textContent = state[id] + '%';
+            else valDisplay.textContent = state[id];
+          }
+        });
+      }
+      
+      function calculate() {
+        const corpus = state.initial_corpus;
+        const withdrawal = state.monthly_withdrawal;
+        const r = state.return_rate;
+        const years = state.years;
+        
+        const i = FinanceEngine.getMonthlyRate(r);
+        
+        let balance = corpus;
+        let cumulativeWithdrawn = 0;
+        let cumulativeInterest = 0;
+        
+        const headers = ['Year', 'Beginning Balance', 'Withdrawn', 'Interest Earned', 'Ending Balance'];
+        let tableRows = [];
+        
+        for (let y = 1; y <= years; y++) {
+          const begBal = balance;
+          let yWithdrawn = 0;
+          let yInterest = 0;
+          
+          const compoundingFreq = state['compounding-freq'] || 'monthly';
+          if (compoundingFreq === 'monthly') {
+            for (let m = 1; m <= 12; m++) {
+              if (balance <= 0) {
+                balance = 0;
+                continue;
+              }
+              const interest = balance * i;
+              yInterest += interest;
+              balance = balance + interest;
+              const actualWithdraw = Math.min(balance, withdrawal);
+              yWithdrawn += actualWithdraw;
+              balance -= actualWithdraw;
+            }
+          } else {
+            const yearStart = balance;
+            for (let m = 1; m <= 12; m++) {
+              const actualWithdraw = Math.min(balance, withdrawal);
+              yWithdrawn += actualWithdraw;
+              balance -= actualWithdraw;
+            }
+            yInterest = Math.max(0, yearStart * (r / 100) - withdrawal * (r / 100) * 6.5);
+            balance = balance + yInterest;
+          }
+          
+          cumulativeWithdrawn += yWithdrawn;
+          cumulativeInterest += yInterest;
+          
+          tableRows.push([
+            y,
+            Math.round(begBal),
+            Math.round(yWithdrawn),
+            Math.round(yInterest),
+            Math.round(balance)
+          ]);
+        }
+        
+        document.getElementById('remaining-corpus').textContent = FinanceEngine.formatINR(balance);
+        document.getElementById('total-withdrawn').textContent = FinanceEngine.formatINR(cumulativeWithdrawn);
+        document.getElementById('final-gains').textContent = FinanceEngine.formatINR(cumulativeInterest);
+        
+        const tableBody = document.getElementById('table-body');
+        const headersRow = document.getElementById('table-headers-row');
+        headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
+        tableBody.innerHTML = tableRows.map(row => 
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+        ).join('');
+        
+        const chartData = tableRows.map(row => ({
+          label: 'Yr ' + row[0],
+          nominal: row[4]
+        }));
+        FinanceEngine.renderLineChart('chart-container', chartData, ['nominal'], ['#0071e3']);
+        
+        const csvExporter = FinanceEngine.exportData('swp-calculator', 
+          { 'Initial Corpus': corpus, 'Monthly Withdrawal': withdrawal, 'CAGR %': r, 'Years': years },
+          { 'Remaining Corpus': balance, 'Total Withdrawals': cumulativeWithdrawn, 'Interest Earned': cumulativeInterest },
+          headers,
+          tableRows
+        );
+        if (document.getElementById('btn-export-csv')) document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
+        if (document.getElementById('btn-export-json')) document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
+        if (document.getElementById('btn-copy-table')) document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+      }
+      
+      elements.forEach(id => {
+        document.getElementById(id).addEventListener('input', (e) => {
+          state[id] = parseFloat(e.target.value);
+          syncUI();
+          calculate();
+          FinanceEngine.updateUrlParams(state);
+        });
+      });
+      
+      syncUI();
+      calculate();
+    
+    });
+  </script>
+</body>
+</html>

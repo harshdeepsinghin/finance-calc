@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emergency Fund Calculator - India | FinPlan India</title>
+  <meta name="description" content="Find your target emergency savings size. Calculate fixed rent, utilities, food, and variable medical coverages.">
+  <meta name="keywords" content="emergency fund calculator, contingency savings, cash reserve planner">
+  <meta name="author" content="FinPlan India">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Emergency Fund Calculator - Indian Mutual Fund & Personal Finance Planner">
+  <meta property="og:description" content="Find your target emergency savings size. Calculate fixed rent, utilities, food, and variable medical coverages.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://finplanindia.com/calculators/emergency-fund.html">
+  <meta property="og:site_name" content="FinPlan India">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script type="application/ld+json">
+    {
+  "@context": "https://schema.org",
+  "@type": "FinancialCalculator",
+  "name": "Emergency Fund Calculator",
+  "description": "Find your target emergency savings size. Calculate fixed rent, utilities, food, and variable medical coverages.",
+  "url": "https://finplanindia.com/calculators/emergency-fund.html",
+  "category": "Financial Tool"
+}
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <header id="global-header"></header>
+    
+    <div class="main-content">
+      <aside id="global-sidebar" class="sidebar"></aside>
+      
+      <main class="calculator-workspace">
+        <div class="calculator-header">
+          <h1>Emergency Fund Calculator</h1>
+          <p class="calculator-description">Find your target emergency savings size. Calculate fixed rent, utilities, food, and variable medical coverages.</p>
+        </div>
+        
+        <!-- Top Section: Parameters (Inputs) | Results (Summary Cards) -->
+        <div class="calculator-top-section">
+          <!-- Inputs Card (core numeric parameters only) -->
+          <div class="inputs-card">
+            
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="fixed_expenses" class="draggable-label">Rent / Home Loan EMI</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="fixed_expenses" min="0" step="2000" value="20000" aria-label="Rent / Home Loan EMI">
+            
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="food_expenses" class="draggable-label">Groceries / Food Costs</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="food_expenses" min="0" step="1000" value="10000" aria-label="Groceries / Food Costs">
+            
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="insurance_utilities" class="draggable-label">Insurance & Utilities</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="insurance_utilities" min="0" step="1000" value="8000" aria-label="Insurance & Utilities">
+            
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="coverage_months" class="draggable-label">Coverage Duration (Months)</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="coverage_months" min="3" step="1" value="6" aria-label="Coverage Duration (Months)">
+            <span class="input-suffix">Yrs</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+            
+          </div>
+          
+          <!-- Results Summary Card -->
+          <div class="results-summary-card">
+            <span class="results-title">Calculated Results</span>
+            <div class="summary-grid">
+              
+      <div class="metric-card" >
+        <span class="metric-label">Total Contingency Fund</span>
+        <span class="metric-value" id="target-fund">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Total Monthly Expense</span>
+        <span class="metric-value" id="monthly-total">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Allocation: Liquid Cash (30%)</span>
+        <span class="metric-value" id="allocation-cash">-</span>
+        
+      </div>
+    
+            </div>
+          </div>
+        </div>
+        
+        <!-- Horizontal Settings Bar (Compounding / Inflation / Tax) -->
+        
+        
+        <!-- Graph Section (Full Width) -->
+        
+        <div class="chart-card full-width-card">
+          <div class="chart-header">
+            <span class="chart-title">Visual Projection</span>
+            <div class="chart-legend" id="chart-legend-container">
+              
+      <div class="legend-item"><span class="legend-color" style="background-color: #ffd60a;"></span>Cash/Savings</div>
+      <div class="legend-item"><span class="legend-color" style="background-color: #0071e3;"></span>Liquid/Arbitrage</div>
+      <div class="legend-item"><span class="legend-color" style="background-color: #30d158;"></span>Short-Term FD</div>
+    
+            </div>
+          </div>
+          <div class="chart-svg-container" id="chart-container"></div>
+        </div>
+        
+        
+        <!-- Table Section (Full Width) -->
+        
+        <div class="action-toolbar full-width-toolbar">
+          <button class="btn btn-secondary" id="btn-copy-table">Copy Table</button>
+          <button class="btn btn-secondary" id="btn-export-json">Export JSON</button>
+          <button class="btn btn-primary" id="btn-export-csv">Export CSV</button>
+        </div>
+        
+        <div class="table-card full-width-card">
+          <span class="table-title">Yearly Breakdowns</span>
+          <table id="projections-table">
+            <thead>
+              <tr id="table-headers-row">
+                <!-- Headers generated in JS -->
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Data generated in JS -->
+            </tbody>
+          </table>
+        </div>
+        
+        
+        <!-- SEO Content -->
+        <section class="seo-content">
+          
+      <h2>The Contingency Nest Egg</h2>
+      <p>An emergency fund provides safety against job loss, medical emergencies, or unexpected capital bills. Having 3 to 12 months is standard.</p>
+    
+        </section>
+      </main>
+    </div>
+    
+    <footer id="global-footer"></footer>
+  </div>
+
+  <script src="../js/engine.js"></script>
+  <script src="../js/shared.js"></script>
+  <script>
+    // Calculator Specific Script
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      const defaults = { fixed_expenses: 20000, food_expenses: 10000, insurance_utilities: 8000, coverage_months: 6 };
+      let state = FinanceEngine.getUrlParams(defaults);
+      const elements = ['fixed_expenses', 'food_expenses', 'insurance_utilities', 'coverage_months'];
+      
+      function syncUI() {
+        elements.forEach(id => {
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const valDisplay = document.getElementById(id + '-val');
+          if (valDisplay) {
+            if (id === 'coverage_months') valDisplay.textContent = state[id];
+            else valDisplay.textContent = FinanceEngine.formatINR(state[id]);
+          }
+        });
+      }
+      
+      function calculate() {
+        const fixed = state.fixed_expenses;
+        const food = state.food_expenses;
+        const ins = state.insurance_utilities;
+        const months = state.coverage_months;
+        
+        const monthlyTotal = fixed + food + ins;
+        const targetFund = monthlyTotal * months;
+        
+        const cashAllocation = targetFund * 0.3;
+        const liquidAllocation = targetFund * 0.5;
+        const fdAllocation = targetFund * 0.2;
+        
+        document.getElementById('target-fund').textContent = FinanceEngine.formatINR(targetFund);
+        document.getElementById('monthly-total').textContent = FinanceEngine.formatINR(monthlyTotal) + ' / mo';
+        document.getElementById('allocation-cash').textContent = FinanceEngine.formatINR(cashAllocation);
+        
+        const headers = ['Asset Class', 'Recommneded %', 'Allocated Amount', 'Typical Instruments'];
+        const tableRows = [
+          ['Liquid Cash', '30%', Math.round(cashAllocation), 'Savings A/c / Instant Cash'],
+          ['Liquid / Arbitrage Funds', '50%', Math.round(liquidAllocation), 'Mutual Fund Liquid/Arbitrage'],
+          ['Short-Term FD', '20%', Math.round(fdAllocation), 'Sweep-In Fixed Deposit']
+        ];
+        
+        const tableBody = document.getElementById('table-body');
+        const headersRow = document.getElementById('table-headers-row');
+        headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
+        tableBody.innerHTML = tableRows.map(row => 
+          '<tr>' + row.map((v, idx) => idx === 2 ? '<td>' + FinanceEngine.formatINR(v, false) + '</td>' : '<td>' + v + '</td>').join('') + '</tr>'
+        ).join('');
+        
+        // Render Donut Chart
+        const slices = [
+          { label: 'Cash', value: cashAllocation, color: '#ffd60a' },
+          { label: 'Liquid', value: liquidAllocation, color: '#0071e3' },
+          { label: 'FD', value: fdAllocation, color: '#30d158' }
+        ];
+        FinanceEngine.renderDonutChart('chart-container', slices);
+        
+        const csvExporter = FinanceEngine.exportData('emergency-fund', 
+          { 'Fixed Exp': fixed, 'Food': food, 'Ins & Utl': ins, 'Coverage Months': months },
+          { 'Contingency Fund': targetFund },
+          headers,
+          tableRows
+        );
+        if (document.getElementById('btn-export-csv')) document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
+        if (document.getElementById('btn-export-json')) document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
+        if (document.getElementById('btn-copy-table')) document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+      }
+      
+      elements.forEach(id => {
+        document.getElementById(id).addEventListener('input', (e) => {
+          state[id] = parseFloat(e.target.value);
+          syncUI();
+          calculate();
+          FinanceEngine.updateUrlParams(state);
+        });
+      });
+      
+      syncUI();
+      calculate();
+    
+    });
+  </script>
+</body>
+</html>

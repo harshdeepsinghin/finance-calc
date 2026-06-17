@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>XIRR Calculator - India | FinPlan India</title>
+  <meta name="description" content="Calculate the Extended Internal Rate of Return (XIRR) for irregular transaction cashflows (SIPs, lump sums, and withdrawals).">
+  <meta name="keywords" content="xirr calculator, irregular cashflow return, xirr mutual funds, xirr solver">
+  <meta name="author" content="FinPlan India">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="XIRR Calculator - Indian Mutual Fund & Personal Finance Planner">
+  <meta property="og:description" content="Calculate the Extended Internal Rate of Return (XIRR) for irregular transaction cashflows (SIPs, lump sums, and withdrawals).">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://finplanindia.com/calculators/xirr.html">
+  <meta property="og:site_name" content="FinPlan India">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script type="application/ld+json">
+    {
+  "@context": "https://schema.org",
+  "@type": "FinancialCalculator",
+  "name": "XIRR Calculator",
+  "description": "Calculate the Extended Internal Rate of Return (XIRR) for irregular transaction cashflows (SIPs, lump sums, and withdrawals).",
+  "url": "https://finplanindia.com/calculators/xirr.html",
+  "category": "Financial Tool"
+}
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <header id="global-header"></header>
+    
+    <div class="main-content">
+      <aside id="global-sidebar" class="sidebar"></aside>
+      
+      <main class="calculator-workspace">
+        <div class="calculator-header">
+          <h1>XIRR Calculator</h1>
+          <p class="calculator-description">Calculate the Extended Internal Rate of Return (XIRR) for irregular transaction cashflows (SIPs, lump sums, and withdrawals).</p>
+        </div>
+        
+        <!-- Top Section: Parameters (Inputs) | Results (Summary Cards) -->
+        <div class="calculator-top-section">
+          <!-- Inputs Card (core numeric parameters only) -->
+          <div class="inputs-card">
+            
+            
+      <div id="cashflow-builder" style="margin-top: 1.5rem;">
+        <span style="font-weight: 600; display:block; margin-bottom: 0.5rem;">Cash Flows (Negative = Investment, Positive = Return/Balance)</span>
+        <div id="flows-list" style="display:flex; flex-direction:column; gap:0.75rem;">
+          <!-- Flow rows -->
+        </div>
+        <button class="btn btn-secondary" id="btn-add-flow" style="margin-top: 1rem; width:100%; justify-content:center;">+ Add Cash Flow</button>
+      </div>
+    
+          </div>
+          
+          <!-- Results Summary Card -->
+          <div class="results-summary-card">
+            <span class="results-title">Calculated Results</span>
+            <div class="summary-grid">
+              
+      <div class="metric-card" >
+        <span class="metric-label">Calculated XIRR (Annualized CAGR)</span>
+        <span class="metric-value" id="xirr-result">-</span>
+        
+      </div>
+    
+            </div>
+          </div>
+        </div>
+        
+        <!-- Horizontal Settings Bar (Compounding / Inflation / Tax) -->
+        
+        
+        <!-- Graph Section (Full Width) -->
+        
+        
+        <!-- Table Section (Full Width) -->
+        
+        
+        <!-- SEO Content -->
+        <section class="seo-content">
+          
+      <h2>Calculating Returns on Irregular Cash Flows</h2>
+      <p>XIRR is the standard method used in personal finance to compute annualized CAGR when investments, additions, and withdrawals occur on irregular dates.</p>
+    
+        </section>
+      </main>
+    </div>
+    
+    <footer id="global-footer"></footer>
+  </div>
+
+  <script src="../js/engine.js"></script>
+  <script src="../js/shared.js"></script>
+  <script>
+    // Calculator Specific Script
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      let cashFlows = [
+        { date: '2025-01-01', amount: -10000 },
+        { date: '2025-06-15', amount: -5000 },
+        { date: '2026-01-01', amount: 17000 }
+      ];
+      
+      function renderFlows() {
+        const container = document.getElementById('flows-list');
+        container.innerHTML = '';
+        
+        cashFlows.forEach((flow, idx) => {
+          const row = document.createElement('div');
+          row.style.display = 'flex';
+          row.style.gap = '0.5rem';
+          row.style.alignItems = 'center';
+          
+          row.innerHTML = `
+            <input type="date" value="${flow.date}" class="flow-date" style="flex: 1;" aria-label="Date">
+            <input type="number" value="${flow.amount}" class="flow-amount" style="flex: 1;" placeholder="Amount (negative if invested)" aria-label="Amount">
+            <button class="btn-delete-flow" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; padding: 0.5rem;" aria-label="Delete">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            </button>
+          `;
+          
+          row.querySelector('.flow-date').addEventListener('change', (e) => {
+            cashFlows[idx].date = e.target.value;
+            calculate();
+          });
+          
+          row.querySelector('.flow-amount').addEventListener('input', (e) => {
+            cashFlows[idx].amount = parseFloat(e.target.value) || 0;
+            calculate();
+          });
+          
+          row.querySelector('.btn-delete-flow').addEventListener('click', () => {
+            if (cashFlows.length <= 2) {
+              FinanceEngine.showToast('At least 2 cash flows are required');
+              return;
+            }
+            cashFlows.splice(idx, 1);
+            renderFlows();
+            calculate();
+          });
+          
+          container.appendChild(row);
+        });
+      }
+      
+      function calculate() {
+        const parsedFlows = cashFlows.map(f => ({
+          date: new Date(f.date),
+          amount: f.amount
+        })).filter(f => !isNaN(f.date.getTime()));
+        
+        const xirr = FinanceEngine.calculateXIRR(parsedFlows);
+        const resultDisplay = document.getElementById('xirr-result');
+        
+        if (isNaN(xirr)) {
+          resultDisplay.textContent = 'Solver Error (check values)';
+        } else {
+          resultDisplay.textContent = xirr.toFixed(2) + '%';
+        }
+        
+        const csvExporter = FinanceEngine.exportData('xirr-calculator', 
+          { 'Cashflows Count': cashFlows.length },
+          { 'XIRR %': xirr },
+          ['Date', 'Amount'],
+          cashFlows.map(f => [f.date, f.amount])
+        );
+        if (document.getElementById('btn-export-csv')) document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
+        if (document.getElementById('btn-export-json')) document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
+        if (document.getElementById('btn-copy-table')) document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(['Date', 'Amount'], cashFlows.map(f => [f.date, f.amount]));
+      }
+      
+      document.getElementById('btn-add-flow').onclick = () => {
+        const lastFlow = cashFlows[cashFlows.length - 1];
+        const nextDate = new Date(lastFlow.date);
+        nextDate.setMonth(nextDate.getMonth() + 6);
+        
+        cashFlows.push({
+          date: nextDate.toISOString().slice(0, 10),
+          amount: -5000
+        });
+        renderFlows();
+        calculate();
+      };
+      
+      renderFlows();
+      calculate();
+    
+    });
+  </script>
+</body>
+</html>

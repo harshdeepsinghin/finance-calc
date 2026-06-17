@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAGR Calculator - India | FinPlan India</title>
+  <meta name="description" content="Find the Compound Annual Growth Rate (CAGR) of your investments over any period of years.">
+  <meta name="keywords" content="cagr calculator, compound annual growth rate, cagr calculation formula, investment return cagr">
+  <meta name="author" content="FinPlan India">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="CAGR Calculator - Indian Mutual Fund & Personal Finance Planner">
+  <meta property="og:description" content="Find the Compound Annual Growth Rate (CAGR) of your investments over any period of years.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://finplanindia.com/calculators/cagr.html">
+  <meta property="og:site_name" content="FinPlan India">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script type="application/ld+json">
+    {
+  "@context": "https://schema.org",
+  "@type": "FinancialCalculator",
+  "name": "CAGR Calculator",
+  "description": "Find the Compound Annual Growth Rate (CAGR) of your investments over any period of years.",
+  "url": "https://finplanindia.com/calculators/cagr.html",
+  "category": "Financial Tool"
+}
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <header id="global-header"></header>
+    
+    <div class="main-content">
+      <aside id="global-sidebar" class="sidebar"></aside>
+      
+      <main class="calculator-workspace">
+        <div class="calculator-header">
+          <h1>CAGR Calculator</h1>
+          <p class="calculator-description">Find the Compound Annual Growth Rate (CAGR) of your investments over any period of years.</p>
+        </div>
+        
+        <!-- Top Section: Parameters (Inputs) | Results (Summary Cards) -->
+        <div class="calculator-top-section">
+          <!-- Inputs Card (core numeric parameters only) -->
+          <div class="inputs-card">
+            
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="initial_val" class="draggable-label">Initial Value</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="initial_val" min="100" step="500" value="100000" aria-label="Initial Value">
+            
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="final_val" class="draggable-label">Final Value</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="final_val" min="100" step="1000" value="250000" aria-label="Final Value">
+            
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="years" class="draggable-label">Duration</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="years" min="0.1" step="0.1" value="5" aria-label="Duration">
+            <span class="input-suffix">Yrs</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+            
+          </div>
+          
+          <!-- Results Summary Card -->
+          <div class="results-summary-card">
+            <span class="results-title">Calculated Results</span>
+            <div class="summary-grid">
+              
+      <div class="metric-card" >
+        <span class="metric-label">Compound Annual Growth Rate (CAGR)</span>
+        <span class="metric-value" id="cagr-result">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Absolute Return</span>
+        <span class="metric-value" id="absolute-return">-</span>
+        
+      </div>
+    
+            </div>
+          </div>
+        </div>
+        
+        <!-- Horizontal Settings Bar (Compounding / Inflation / Tax) -->
+        
+        
+        <!-- Graph Section (Full Width) -->
+        
+        
+        <!-- Table Section (Full Width) -->
+        
+        
+        <!-- SEO Content -->
+        <section class="seo-content">
+          
+      <h2>Compound Annual Growth Rate</h2>
+      <p>CAGR measures the mean annual growth rate of an investment over a specified period of time longer than one year, assuming the investment compounds annually.</p>
+      <div class="formula-box">
+        <math display="block">
+          <mi>CAGR</mi>
+          <mo>=</mo>
+          <msup>
+            <mrow>
+              <mo>(</mo>
+              <mfrac>
+                <mi>Final Value</mi>
+                <mi>Initial Value</mi>
+              </mfrac>
+              <mo>)</mo>
+            </mrow>
+            <mfrac>
+              <mn>1</mn>
+              <mi>Years</mi>
+            </mfrac>
+          </msup>
+          <mo>−</mo>
+          <mn>1</mn>
+        </math>
+      </div>
+    
+        </section>
+      </main>
+    </div>
+    
+    <footer id="global-footer"></footer>
+  </div>
+
+  <script src="../js/engine.js"></script>
+  <script src="../js/shared.js"></script>
+  <script>
+    // Calculator Specific Script
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      const defaults = { initial_val: 100000, final_val: 250000, years: 5 };
+      let state = FinanceEngine.getUrlParams(defaults);
+      const elements = ['initial_val', 'final_val', 'years'];
+      
+      function syncUI() {
+        elements.forEach(id => {
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const valDisplay = document.getElementById(id + '-val');
+          if (valDisplay) {
+            if (id === 'years') valDisplay.textContent = state[id];
+            else valDisplay.textContent = FinanceEngine.formatINR(state[id]);
+          }
+        });
+      }
+      
+      function calculate() {
+        const init = state.initial_val;
+        const final = state.final_val;
+        const years = state.years;
+        
+        const cagr = (Math.pow(final / init, 1 / years) - 1) * 100;
+        const absReturn = ((final - init) / init) * 100;
+        
+        document.getElementById('cagr-result').textContent = cagr.toFixed(2) + '%';
+        document.getElementById('absolute-return').textContent = absReturn.toFixed(2) + '%';
+        
+        const csvExporter = FinanceEngine.exportData('cagr-calculator', 
+          { 'Initial': init, 'Final': final, 'Years': years },
+          { 'CAGR %': cagr, 'Absolute Return %': absReturn }
+        );
+        if (document.getElementById('btn-export-csv')) document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
+        if (document.getElementById('btn-export-json')) document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
+        if (document.getElementById('btn-copy-table')) document.getElementById('btn-copy-table').style.display = 'none';
+      }
+      
+      elements.forEach(id => {
+        document.getElementById(id).addEventListener('input', (e) => {
+          state[id] = parseFloat(e.target.value);
+          syncUI();
+          calculate();
+          FinanceEngine.updateUrlParams(state);
+        });
+      });
+      
+      syncUI();
+      calculate();
+    
+    });
+  </script>
+</body>
+</html>

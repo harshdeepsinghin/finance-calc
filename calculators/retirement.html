@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retirement Planner - India | FinPlan India</title>
+  <meta name="description" content="Find your target retirement nest egg. Estimate required monthly savings, inflation-adjusted post-retirement expenses, and annuity lifespan.">
+  <meta name="keywords" content="retirement planner, retirement corpus calculator, fire nest egg size, retirement sip planner">
+  <meta name="author" content="FinPlan India">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Retirement Planner - Indian Mutual Fund & Personal Finance Planner">
+  <meta property="og:description" content="Find your target retirement nest egg. Estimate required monthly savings, inflation-adjusted post-retirement expenses, and annuity lifespan.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://finplanindia.com/calculators/retirement.html">
+  <meta property="og:site_name" content="FinPlan India">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script type="application/ld+json">
+    {
+  "@context": "https://schema.org",
+  "@type": "FinancialCalculator",
+  "name": "Retirement Planner",
+  "description": "Find your target retirement nest egg. Estimate required monthly savings, inflation-adjusted post-retirement expenses, and annuity lifespan.",
+  "url": "https://finplanindia.com/calculators/retirement.html",
+  "category": "Financial Tool"
+}
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <header id="global-header"></header>
+    
+    <div class="main-content">
+      <aside id="global-sidebar" class="sidebar"></aside>
+      
+      <main class="calculator-workspace">
+        <div class="calculator-header">
+          <h1>Retirement Planner</h1>
+          <p class="calculator-description">Find your target retirement nest egg. Estimate required monthly savings, inflation-adjusted post-retirement expenses, and annuity lifespan.</p>
+        </div>
+        
+        <!-- Top Section: Parameters (Inputs) | Results (Summary Cards) -->
+        <div class="calculator-top-section">
+          <!-- Inputs Card (core numeric parameters only) -->
+          <div class="inputs-card">
+            
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="current_age" class="draggable-label">Current Age</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="current_age" min="18" step="1" value="30" aria-label="Current Age">
+            <span class="input-suffix">Yrs</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="retire_age" class="draggable-label">Retirement Age</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="retire_age" min="35" step="1" value="55" aria-label="Retirement Age">
+            <span class="input-suffix">Yrs</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="life_expectancy" class="draggable-label">Life Expectancy</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="life_expectancy" min="70" step="1" value="85" aria-label="Life Expectancy">
+            <span class="input-suffix">Yrs</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="monthly_expenses" class="draggable-label">Current Monthly Expenses</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="monthly_expenses" min="10000" step="5000" value="50000" aria-label="Current Monthly Expenses">
+            <span class="input-suffix">Mo</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="pre_return" class="draggable-label">Pre-retirement Return CAGR</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="pre_return" min="4" step="0.5" value="12" aria-label="Pre-retirement Return CAGR">
+            <span class="input-suffix">%</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="post_return" class="draggable-label">Post-retirement Return CAGR</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="post_return" min="3" step="0.5" value="8" aria-label="Post-retirement Return CAGR">
+            <span class="input-suffix">%</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+            
+          </div>
+          
+          <!-- Results Summary Card -->
+          <div class="results-summary-card">
+            <span class="results-title">Calculated Results</span>
+            <div class="summary-grid">
+              
+      <div class="metric-card" >
+        <span class="metric-label">Required Corpus at Retirement</span>
+        <span class="metric-value" id="required-corpus">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Required Monthly SIP Today</span>
+        <span class="metric-value" id="required-sip">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Monthly Expense at Retirement</span>
+        <span class="metric-value" id="inflated-expenses">-</span>
+        
+      </div>
+    
+            </div>
+          </div>
+        </div>
+        
+        <!-- Horizontal Settings Bar (Compounding / Inflation / Tax) -->
+        
+        <div class="settings-bar">
+          
+          <div class="settings-bar-item">
+            <span class="settings-bar-label">Compounding</span>
+            <div class="settings-bar-toggle">
+              <button class="toggle-btn toggle-btn-active" id="freq-monthly-btn" type="button">Monthly</button>
+              <button class="toggle-btn" id="freq-yearly-btn" type="button">Yearly</button>
+            </div>
+            <input type="hidden" id="compounding-freq" value="monthly">
+          </div>
+          
+          <div class="settings-bar-item">
+            <span class="settings-bar-label">Inflation</span>
+            <div class="input-wrapper" style="width:120px;">
+              <input type="number" id="inflation-rate" min="0" max="15" step="0.5" value="6" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+          
+        </div>
+        
+        <!-- Graph Section (Full Width) -->
+        
+        <div class="chart-card full-width-card">
+          <div class="chart-header">
+            <span class="chart-title">Visual Projection</span>
+            <div class="chart-legend" id="chart-legend-container">
+              
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--text-secondary);"></span>Invested</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--accent-color);"></span>Corpus</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--success-color);"></span>Real Value</div>
+              
+            </div>
+          </div>
+          <div class="chart-svg-container" id="chart-container"></div>
+        </div>
+        
+        
+        <!-- Table Section (Full Width) -->
+        
+        <div class="action-toolbar full-width-toolbar">
+          <button class="btn btn-secondary" id="btn-copy-table">Copy Table</button>
+          <button class="btn btn-secondary" id="btn-export-json">Export JSON</button>
+          <button class="btn btn-primary" id="btn-export-csv">Export CSV</button>
+        </div>
+        
+        <div class="table-card full-width-card">
+          <span class="table-title">Yearly Breakdowns</span>
+          <table id="projections-table">
+            <thead>
+              <tr id="table-headers-row">
+                <!-- Headers generated in JS -->
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Data generated in JS -->
+            </tbody>
+          </table>
+        </div>
+        
+        
+        <!-- SEO Content -->
+        <section class="seo-content">
+          
+      <h2>Retirement Nest Egg Strategy</h2>
+      <p>Inflation is the biggest threat to retirement. A monthly expense of ₹50,000 today will expand dramatically over 20-30 years. This planner calculates your target corpus and required monthly savings.</p>
+    
+        </section>
+      </main>
+    </div>
+    
+    <footer id="global-footer"></footer>
+  </div>
+
+  <script src="../js/engine.js"></script>
+  <script src="../js/shared.js"></script>
+  <script>
+    // Calculator Specific Script
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      const defaults = { 'compounding-freq': 'monthly',  current_age: 30, retire_age: 55, life_expectancy: 85, monthly_expenses: 50000, pre_return: 12, post_return: 8, 'inflation-rate': 6 };
+      let state = FinanceEngine.getUrlParams(defaults);
+      const elements = [ 'compounding-freq', 'current_age', 'retire_age', 'life_expectancy', 'monthly_expenses', 'pre_return', 'post_return', 'inflation-rate'];
+      
+      function syncUI() {
+        elements.forEach(id => {
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const valDisplay = document.getElementById(id + '-val');
+          if (valDisplay) {
+            if (id === 'monthly_expenses') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
+            else if (id === 'pre_return' || id === 'post_return' || id === 'inflation-rate') valDisplay.textContent = state[id] + '%';
+            else valDisplay.textContent = state[id];
+          }
+        });
+      }
+      
+      function calculate() {
+        const curAge = state.current_age;
+        let retAge = state.retire_age;
+        if (retAge <= curAge) {
+          retAge = curAge + 1;
+          state.retire_age = retAge;
+          document.getElementById('retire_age').value = retAge;
+          document.getElementById('retire_age-val').textContent = retAge;
+        }
+        
+        let lifeExp = state.life_expectancy;
+        if (lifeExp <= retAge) {
+          lifeExp = retAge + 5;
+          state.life_expectancy = lifeExp;
+          document.getElementById('life_expectancy').value = lifeExp;
+          document.getElementById('life_expectancy-val').textContent = lifeExp;
+        }
+        
+        const expenses = state.monthly_expenses;
+        const preR = state.pre_return;
+        const postR = state.post_return;
+        const inf = state['inflation-rate'];
+        
+        const yearsToRet = retAge - curAge;
+        const yearsInRet = lifeExp - retAge;
+        
+        // Expenses at retirement
+        const inflatedW = expenses * Math.pow(1 + inf / 100, yearsToRet);
+        
+        // Post retirement compounding
+        const iPost = FinanceEngine.getMonthlyRate(postR);
+        const infM = FinanceEngine.getMonthlyRate(inf);
+        const retirementMonths = yearsInRet * 12;
+        
+        // Calculate PV of retirement annuity: sum of inflated withdrawals discounted at postR
+        let reqCorpus = 0;
+        const compoundingFreq = state['compounding-freq'] || 'monthly';
+        if (compoundingFreq === 'monthly') {
+          for (let m = 1; m <= retirementMonths; m++) {
+            const w = inflatedW * Math.pow(1 + infM, m - 1);
+            reqCorpus += w / Math.pow(1 + iPost, m);
+          }
+        } else {
+          let tempCorpus = 0;
+          let low = 0, high = inflatedW * 12 * yearsInRet * 2;
+          for (let iter = 0; iter < 100; iter++) {
+            tempCorpus = (low + high) / 2;
+            let balance = tempCorpus;
+            let ok = true;
+            for (let y = 1; y <= yearsInRet; y++) {
+              const currentW = inflatedW * Math.pow(1 + inf / 100, y - 1);
+              const yearStart = balance;
+              for (let m = 1; m <= 12; m++) {
+                balance -= currentW;
+              }
+              if (balance < 0) {
+                ok = false;
+                break;
+              }
+              const interest = Math.max(0, yearStart * (postR / 100) - currentW * (postR / 100) * 6.5);
+              balance += interest;
+            }
+            if (ok) high = tempCorpus;
+            else low = tempCorpus;
+          }
+          reqCorpus = high;
+        }
+        
+        // Pre retirement SIP accumulation to reach reqCorpus
+        const iPre = FinanceEngine.getMonthlyRate(preR);
+        const preMonths = yearsToRet * 12;
+        let reqSIP = 0;
+        if (compoundingFreq === 'monthly') {
+          reqSIP = reqCorpus * iPre / ((Math.pow(1 + iPre, preMonths) - 1) * (1 + iPre));
+        } else {
+          let low = 0, high = reqCorpus;
+          for (let iter = 0; iter < 100; iter++) {
+            const mid = (low + high) / 2;
+            const rows = FinanceEngine.calculateGrowth(0, mid, yearsToRet, preR, 'yearly', 0);
+            if (rows[rows.length - 1].corpus < reqCorpus) low = mid;
+            else high = mid;
+          }
+          reqSIP = low;
+        }
+        
+        document.getElementById('required-corpus').textContent = FinanceEngine.formatINR(reqCorpus);
+        document.getElementById('required-sip').textContent = FinanceEngine.formatINR(reqSIP) + ' / mo';
+        document.getElementById('inflated-expenses').textContent = FinanceEngine.formatINR(inflatedW) + ' / mo';
+        
+        const headers = ['Year', 'Age', 'Accumulated Corpus', 'Inflation-Adjusted Corpus'];
+        let tableRows = [];
+        let balance = 0;
+        
+        for (let y = 1; y <= yearsToRet; y++) {
+          if (compoundingFreq === 'monthly') {
+            for (let m = 1; m <= 12; m++) {
+              balance = (balance + reqSIP) * (1 + iPre);
+            }
+          } else {
+            const rate = preR / 100;
+            const interest = balance * rate + reqSIP * rate * 6.5;
+            balance = balance + reqSIP * 12 + interest;
+          }
+          tableRows.push([
+            y,
+            curAge + y,
+            Math.round(balance),
+            Math.round(FinanceEngine.getRealValue(balance, inf, y))
+          ]);
+        }
+        
+        const tableBody = document.getElementById('table-body');
+        const headersRow = document.getElementById('table-headers-row');
+        headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
+        tableBody.innerHTML = tableRows.map(row => 
+          '<tr>' + row.map((v, idx) => '<td>' + (idx <= 1 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+        ).join('');
+        
+        const chartData = tableRows.map(row => ({
+          label: 'Age ' + row[1],
+          nominal: row[2],
+          real: row[3]
+        }));
+        FinanceEngine.renderLineChart('chart-container', chartData, ['nominal', 'real'], ['#0071e3', '#30d158']);
+        
+        const csvExporter = FinanceEngine.exportData('retirement-planner', 
+          { 'Current Age': curAge, 'Retire Age': retAge, 'Life Expectancy': lifeExp, 'Current Expenses': expenses, 'Pre CAGR': preR, 'Post CAGR': postR, 'Inflation': inf },
+          { 'Required Corpus': reqCorpus, 'Required SIP': reqSIP, 'Expenses At Retirement': inflatedW },
+          headers,
+          tableRows
+        );
+        if (document.getElementById('btn-export-csv')) document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
+        if (document.getElementById('btn-export-json')) document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
+        if (document.getElementById('btn-copy-table')) document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+      }
+      
+      elements.forEach(id => {
+        document.getElementById(id).addEventListener('input', (e) => {
+          state[id] = parseFloat(e.target.value);
+          syncUI();
+          calculate();
+          FinanceEngine.updateUrlParams(state);
+        });
+      });
+      
+      syncUI();
+      calculate();
+    
+    });
+  </script>
+</body>
+</html>

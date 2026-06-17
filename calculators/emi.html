@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EMI Calculator - India | FinPlan India</title>
+  <meta name="description" content="Calculate Equated Monthly Installments (EMI) for home, car, or personal loans. Generate standard interest summaries and amortization schedules.">
+  <meta name="keywords" content="emi calculator, loan emi, home loan calculator, reducing balance emi">
+  <meta name="author" content="FinPlan India">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="EMI Calculator - Indian Mutual Fund & Personal Finance Planner">
+  <meta property="og:description" content="Calculate Equated Monthly Installments (EMI) for home, car, or personal loans. Generate standard interest summaries and amortization schedules.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://finplanindia.com/calculators/emi.html">
+  <meta property="og:site_name" content="FinPlan India">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script type="application/ld+json">
+    {
+  "@context": "https://schema.org",
+  "@type": "FinancialCalculator",
+  "name": "EMI Calculator",
+  "description": "Calculate Equated Monthly Installments (EMI) for home, car, or personal loans. Generate standard interest summaries and amortization schedules.",
+  "url": "https://finplanindia.com/calculators/emi.html",
+  "category": "Financial Tool"
+}
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <header id="global-header"></header>
+    
+    <div class="main-content">
+      <aside id="global-sidebar" class="sidebar"></aside>
+      
+      <main class="calculator-workspace">
+        <div class="calculator-header">
+          <h1>EMI Calculator</h1>
+          <p class="calculator-description">Calculate Equated Monthly Installments (EMI) for home, car, or personal loans. Generate standard interest summaries and amortization schedules.</p>
+        </div>
+        
+        <!-- Top Section: Parameters (Inputs) | Results (Summary Cards) -->
+        <div class="calculator-top-section">
+          <!-- Inputs Card (core numeric parameters only) -->
+          <div class="inputs-card">
+            
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="loan_amount" class="draggable-label">Loan Amount</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="loan_amount" min="10000" step="10000" value="5000000" aria-label="Loan Amount">
+            
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="interest_rate" class="draggable-label">Interest Rate (Nominal annual %)</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="interest_rate" min="4" step="0.1" value="8.5" aria-label="Interest Rate (Nominal annual %)">
+            <span class="input-suffix">%</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="tenure" class="draggable-label">Loan Tenure</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="tenure" min="1" step="1" value="20" aria-label="Loan Tenure">
+            <span class="input-suffix">Yrs</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+            
+          </div>
+          
+          <!-- Results Summary Card -->
+          <div class="results-summary-card">
+            <span class="results-title">Calculated Results</span>
+            <div class="summary-grid">
+              
+      <div class="metric-card" >
+        <span class="metric-label">Equated Monthly Installment (EMI)</span>
+        <span class="metric-value" id="emi-result">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Total Interest Payable</span>
+        <span class="metric-value" id="total-interest">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Total Loan Payments</span>
+        <span class="metric-value" id="total-payment">-</span>
+        
+      </div>
+    
+            </div>
+          </div>
+        </div>
+        
+        <!-- Horizontal Settings Bar (Compounding / Inflation / Tax) -->
+        
+        
+        <!-- Graph Section (Full Width) -->
+        
+        <div class="chart-card full-width-card">
+          <div class="chart-header">
+            <span class="chart-title">Visual Projection</span>
+            <div class="chart-legend" id="chart-legend-container">
+              
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--text-secondary);"></span>Invested</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--accent-color);"></span>Corpus</div>
+                
+              
+            </div>
+          </div>
+          <div class="chart-svg-container" id="chart-container"></div>
+        </div>
+        
+        
+        <!-- Table Section (Full Width) -->
+        
+        <div class="action-toolbar full-width-toolbar">
+          <button class="btn btn-secondary" id="btn-copy-table">Copy Table</button>
+          <button class="btn btn-secondary" id="btn-export-json">Export JSON</button>
+          <button class="btn btn-primary" id="btn-export-csv">Export CSV</button>
+        </div>
+        
+        <div class="table-card full-width-card">
+          <span class="table-title">Yearly Breakdowns</span>
+          <table id="projections-table">
+            <thead>
+              <tr id="table-headers-row">
+                <!-- Headers generated in JS -->
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Data generated in JS -->
+            </tbody>
+          </table>
+        </div>
+        
+        
+        <!-- SEO Content -->
+        <section class="seo-content">
+          
+      <h2>Understanding Reducing Interest Loans</h2>
+      <p>EMIs are computed using a reducing balance method where interest is computed monthly on the outstanding loan balance.</p>
+    
+        </section>
+      </main>
+    </div>
+    
+    <footer id="global-footer"></footer>
+  </div>
+
+  <script src="../js/engine.js"></script>
+  <script src="../js/shared.js"></script>
+  <script>
+    // Calculator Specific Script
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      const defaults = { loan_amount: 5000000, interest_rate: 8.5, tenure: 20 };
+      let state = FinanceEngine.getUrlParams(defaults);
+      const elements = ['loan_amount', 'interest_rate', 'tenure'];
+      
+      function syncUI() {
+        elements.forEach(id => {
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const valDisplay = document.getElementById(id + '-val');
+          if (valDisplay) {
+            if (id === 'interest_rate') valDisplay.textContent = state[id] + '%';
+            else if (id === 'tenure') valDisplay.textContent = state[id];
+            else valDisplay.textContent = FinanceEngine.formatINR(state[id]);
+          }
+        });
+      }
+      
+      function calculate() {
+        const P = state.loan_amount;
+        const R = state.interest_rate;
+        const y = state.tenure;
+        
+        const r_m = R / 12 / 100; // nominal interest rate/12
+        const m = y * 12;
+        
+        const emi = P * r_m * Math.pow(1 + r_m, m) / (Math.pow(1 + r_m, m) - 1);
+        const totalPay = emi * m;
+        const totalInt = totalPay - P;
+        
+        document.getElementById('emi-result').textContent = FinanceEngine.formatINR(emi) + ' / mo';
+        document.getElementById('total-interest').textContent = FinanceEngine.formatINR(totalInt);
+        document.getElementById('total-payment').textContent = FinanceEngine.formatINR(totalPay);
+        
+        const headers = ['Year', 'Principal Paid', 'Interest Paid', 'Total Paid', 'Remaining Balance'];
+        let tableRows = [];
+        let balance = P;
+        
+        for (let yr = 1; yr <= y; yr++) {
+          let yrInterest = 0;
+          let yrPrincipal = 0;
+          
+          for (let month = 1; month <= 12; month++) {
+            const interest = balance * r_m;
+            const principal = emi - interest;
+            yrInterest += interest;
+            yrPrincipal += principal;
+            balance -= principal;
+          }
+          
+          tableRows.push([
+            yr,
+            Math.round(yrPrincipal),
+            Math.round(yrInterest),
+            Math.round(yrPrincipal + yrInterest),
+            Math.round(Math.max(0, balance))
+          ]);
+        }
+        
+        const tableBody = document.getElementById('table-body');
+        const headersRow = document.getElementById('table-headers-row');
+        headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
+        tableBody.innerHTML = tableRows.map(row => 
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+        ).join('');
+        
+        const chartData = tableRows.map(row => ({
+          label: 'Yr ' + row[0],
+          invested: row[4], // remaining balance
+          nominal: row[4]
+        }));
+        FinanceEngine.renderLineChart('chart-container', chartData, ['invested'], ['#e5484d']);
+        
+        const csvExporter = FinanceEngine.exportData('emi-calculator', 
+          { 'Loan Amount': P, 'Rate': R, 'Tenure': y },
+          { 'EMI': emi, 'Total Interest': totalInt, 'Total Payment': totalPay },
+          headers,
+          tableRows
+        );
+        if (document.getElementById('btn-export-csv')) document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
+        if (document.getElementById('btn-export-json')) document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
+        if (document.getElementById('btn-copy-table')) document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+      }
+      
+      elements.forEach(id => {
+        document.getElementById(id).addEventListener('input', (e) => {
+          state[id] = parseFloat(e.target.value);
+          syncUI();
+          calculate();
+          FinanceEngine.updateUrlParams(state);
+        });
+      });
+      
+      syncUI();
+      calculate();
+    
+    });
+  </script>
+</body>
+</html>

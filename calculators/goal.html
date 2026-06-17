@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Goal Planner - India | FinPlan India</title>
+  <meta name="description" content="Find required SIP and lump sum investments needed to hit a target money goal.">
+  <meta name="keywords" content="goal calculator, goal planner, sip goal planner, financial targets calculator">
+  <meta name="author" content="FinPlan India">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Goal Planner - Indian Mutual Fund & Personal Finance Planner">
+  <meta property="og:description" content="Find required SIP and lump sum investments needed to hit a target money goal.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://finplanindia.com/calculators/goal.html">
+  <meta property="og:site_name" content="FinPlan India">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script type="application/ld+json">
+    {
+  "@context": "https://schema.org",
+  "@type": "FinancialCalculator",
+  "name": "Goal Planner",
+  "description": "Find required SIP and lump sum investments needed to hit a target money goal.",
+  "url": "https://finplanindia.com/calculators/goal.html",
+  "category": "Financial Tool"
+}
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <header id="global-header"></header>
+    
+    <div class="main-content">
+      <aside id="global-sidebar" class="sidebar"></aside>
+      
+      <main class="calculator-workspace">
+        <div class="calculator-header">
+          <h1>Goal Planner</h1>
+          <p class="calculator-description">Find required SIP and lump sum investments needed to hit a target money goal.</p>
+        </div>
+        
+        <!-- Top Section: Parameters (Inputs) | Results (Summary Cards) -->
+        <div class="calculator-top-section">
+          <!-- Inputs Card (core numeric parameters only) -->
+          <div class="inputs-card">
+            
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="target_goal" class="draggable-label">Goal Target Amount</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="target_goal" min="10000" step="10000" value="5000000" aria-label="Goal Target Amount">
+            
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="years" class="draggable-label">Years to Goal</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="years" min="1" step="1" value="8" aria-label="Years to Goal">
+            <span class="input-suffix">Yrs</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="return_rate" class="draggable-label">Expected CAGR</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="return_rate" min="1" step="0.5" value="12" aria-label="Expected CAGR">
+            <span class="input-suffix">%</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+            
+          </div>
+          
+          <!-- Results Summary Card -->
+          <div class="results-summary-card">
+            <span class="results-title">Calculated Results</span>
+            <div class="summary-grid">
+              
+      <div class="metric-card" >
+        <span class="metric-label">Inflation-Adjusted Target</span>
+        <span class="metric-value" id="inflated-goal">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Required Monthly SIP</span>
+        <span class="metric-value" id="required-sip">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Required Lump Sum</span>
+        <span class="metric-value" id="required-lump">-</span>
+        
+      </div>
+    
+            </div>
+          </div>
+        </div>
+        
+        <!-- Horizontal Settings Bar (Compounding / Inflation / Tax) -->
+        
+        <div class="settings-bar">
+          
+          <div class="settings-bar-item">
+            <span class="settings-bar-label">Compounding</span>
+            <div class="settings-bar-toggle">
+              <button class="toggle-btn toggle-btn-active" id="freq-monthly-btn" type="button">Monthly</button>
+              <button class="toggle-btn" id="freq-yearly-btn" type="button">Yearly</button>
+            </div>
+            <input type="hidden" id="compounding-freq" value="monthly">
+          </div>
+          
+          <div class="settings-bar-item">
+            <span class="settings-bar-label">Inflation</span>
+            <div class="input-wrapper" style="width:120px;">
+              <input type="number" id="inflation-rate" min="0" max="15" step="0.5" value="6" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+          
+        </div>
+        
+        <!-- Graph Section (Full Width) -->
+        
+        <div class="chart-card full-width-card">
+          <div class="chart-header">
+            <span class="chart-title">Visual Projection</span>
+            <div class="chart-legend" id="chart-legend-container">
+              
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--text-secondary);"></span>Invested</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--accent-color);"></span>Corpus</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--success-color);"></span>Real Value</div>
+              
+            </div>
+          </div>
+          <div class="chart-svg-container" id="chart-container"></div>
+        </div>
+        
+        
+        <!-- Table Section (Full Width) -->
+        
+        <div class="action-toolbar full-width-toolbar">
+          <button class="btn btn-secondary" id="btn-copy-table">Copy Table</button>
+          <button class="btn btn-secondary" id="btn-export-json">Export JSON</button>
+          <button class="btn btn-primary" id="btn-export-csv">Export CSV</button>
+        </div>
+        
+        <div class="table-card full-width-card">
+          <span class="table-title">Yearly Breakdowns</span>
+          <table id="projections-table">
+            <thead>
+              <tr id="table-headers-row">
+                <!-- Headers generated in JS -->
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Data generated in JS -->
+            </tbody>
+          </table>
+        </div>
+        
+        
+        <!-- SEO Content -->
+        <section class="seo-content">
+          
+      <h2>Financial Goal Planning</h2>
+      <p>Estimate the target amount needed to satisfy a goal in the future, adjusting for inflation, and view the required savings rate to achieve it.</p>
+    
+        </section>
+      </main>
+    </div>
+    
+    <footer id="global-footer"></footer>
+  </div>
+
+  <script src="../js/engine.js"></script>
+  <script src="../js/shared.js"></script>
+  <script>
+    // Calculator Specific Script
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      const defaults = { 'compounding-freq': 'monthly',  target_goal: 5000000, years: 8, return_rate: 12, 'inflation-rate': 6 };
+      let state = FinanceEngine.getUrlParams(defaults);
+      const elements = [ 'compounding-freq', 'target_goal', 'years', 'return_rate', 'inflation-rate'];
+      
+      function syncUI() {
+        elements.forEach(id => {
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const valDisplay = document.getElementById(id + '-val');
+          if (valDisplay) {
+            if (id === 'target_goal') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
+            else if (id === 'return_rate' || id === 'inflation-rate') valDisplay.textContent = state[id] + '%';
+            else valDisplay.textContent = state[id];
+          }
+        });
+      }
+      
+      function calculate() {
+        const goal = state.target_goal;
+        const years = state.years;
+        const r = state.return_rate;
+        const inf = state['inflation-rate'];
+        
+        const inflatedGoal = goal * Math.pow(1 + inf / 100, years);
+        const i = FinanceEngine.getMonthlyRate(r);
+        const months = years * 12;
+        
+        let reqSIP = 0;
+        const compoundingFreq = state['compounding-freq'] || 'monthly';
+        if (compoundingFreq === 'monthly') {
+          reqSIP = inflatedGoal * i / ((Math.pow(1 + i, months) - 1) * (1 + i));
+        } else {
+          let low = 0, high = inflatedGoal;
+          for (let iter = 0; iter < 100; iter++) {
+            const mid = (low + high) / 2;
+            const rows = FinanceEngine.calculateGrowth(0, mid, years, r, 'yearly', 0);
+            if (rows[rows.length - 1].corpus < inflatedGoal) low = mid;
+            else high = mid;
+          }
+          reqSIP = low;
+        }
+        const reqLump = inflatedGoal / Math.pow(1 + r/100, years);
+        
+        document.getElementById('inflated-goal').textContent = FinanceEngine.formatINR(inflatedGoal);
+        document.getElementById('required-sip').textContent = FinanceEngine.formatINR(reqSIP) + ' / mo';
+        document.getElementById('required-lump').textContent = FinanceEngine.formatINR(reqLump);
+        
+        const headers = ['Year', 'SIP Cumulative Invested', 'SIP Corpus', 'Lump Sum Corpus'];
+        let tableRows = [];
+        let sipBal = 0;
+        let sipInvested = 0;
+        
+        for (let y = 1; y <= years; y++) {
+          const compoundingFreq = state['compounding-freq'] || 'monthly';
+          if (compoundingFreq === 'monthly') {
+            for (let m = 1; m <= 12; m++) {
+              sipInvested += reqSIP;
+              sipBal = (sipBal + reqSIP) * (1 + i);
+            }
+          } else {
+            const rate = r / 100;
+            const interestOnStart = sipBal * rate;
+            const interestOnDeposits = reqSIP * rate * 6.5;
+            sipInvested += reqSIP * 12;
+            sipBal = sipBal + (reqSIP * 12) + interestOnStart + interestOnDeposits;
+          }
+          const lumpBal = reqLump * Math.pow(1 + r/100, y);
+          tableRows.push([
+            y,
+            Math.round(sipInvested),
+            Math.round(sipBal),
+            Math.round(lumpBal)
+          ]);
+        }
+        
+        const tableBody = document.getElementById('table-body');
+        const headersRow = document.getElementById('table-headers-row');
+        headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
+        tableBody.innerHTML = tableRows.map(row => 
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+        ).join('');
+        
+        const chartData = tableRows.map(row => ({
+          label: 'Yr ' + row[0],
+          invested: row[2],
+          nominal: row[3]
+        }));
+        FinanceEngine.renderLineChart('chart-container', chartData, ['invested', 'nominal'], ['#0071e3', '#30d158']);
+        
+        const csvExporter = FinanceEngine.exportData('goal-planner', 
+          { 'Goal': goal, 'Years': years, 'CAGR %': r, 'Inflation': inf },
+          { 'Inflated Target': inflatedGoal, 'Required SIP': reqSIP, 'Required Lump': reqLump },
+          headers,
+          tableRows
+        );
+        if (document.getElementById('btn-export-csv')) document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
+        if (document.getElementById('btn-export-json')) document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
+        if (document.getElementById('btn-copy-table')) document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+      }
+      
+      elements.forEach(id => {
+        document.getElementById(id).addEventListener('input', (e) => {
+          state[id] = parseFloat(e.target.value);
+          syncUI();
+          calculate();
+          FinanceEngine.updateUrlParams(state);
+        });
+      });
+      
+      syncUI();
+      calculate();
+    
+    });
+  </script>
+</body>
+</html>

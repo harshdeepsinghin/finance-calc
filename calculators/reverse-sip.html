@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reverse SIP Calculator - India | FinPlan India</title>
+  <meta name="description" content="Find the required monthly SIP contribution to reach your target savings or investment corpus. Input expected CAGR and target duration.">
+  <meta name="keywords" content="reverse sip, target corpus calculator, monthly sip goal planner, required sip">
+  <meta name="author" content="FinPlan India">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Reverse SIP Calculator - Indian Mutual Fund & Personal Finance Planner">
+  <meta property="og:description" content="Find the required monthly SIP contribution to reach your target savings or investment corpus. Input expected CAGR and target duration.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://finplanindia.com/calculators/reverse-sip.html">
+  <meta property="og:site_name" content="FinPlan India">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script type="application/ld+json">
+    {
+  "@context": "https://schema.org",
+  "@type": "FinancialCalculator",
+  "name": "Reverse SIP Calculator",
+  "description": "Find the required monthly SIP contribution to reach your target savings or investment corpus. Input expected CAGR and target duration.",
+  "url": "https://finplanindia.com/calculators/reverse-sip.html",
+  "category": "Financial Tool"
+}
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <header id="global-header"></header>
+    
+    <div class="main-content">
+      <aside id="global-sidebar" class="sidebar"></aside>
+      
+      <main class="calculator-workspace">
+        <div class="calculator-header">
+          <h1>Reverse SIP Calculator</h1>
+          <p class="calculator-description">Find the required monthly SIP contribution to reach your target savings or investment corpus. Input expected CAGR and target duration.</p>
+        </div>
+        
+        <!-- Top Section: Parameters (Inputs) | Results (Summary Cards) -->
+        <div class="calculator-top-section">
+          <!-- Inputs Card (core numeric parameters only) -->
+          <div class="inputs-card">
+            
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="target_corpus" class="draggable-label">Target Corpus</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="target_corpus" min="100000" step="100000" value="10000000" aria-label="Target Corpus">
+            
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="return_rate" class="draggable-label">Expected Return</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="return_rate" min="1" step="0.5" value="12" aria-label="Expected Return">
+            <span class="input-suffix">%</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="years" class="draggable-label">Duration</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="years" min="1" step="1" value="15" aria-label="Duration">
+            <span class="input-suffix">Yrs</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+            
+          </div>
+          
+          <!-- Results Summary Card -->
+          <div class="results-summary-card">
+            <span class="results-title">Calculated Results</span>
+            <div class="summary-grid">
+              
+      <div class="metric-card" >
+        <span class="metric-label">Required Monthly SIP</span>
+        <span class="metric-value" id="required-sip">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Total Invested Amount</span>
+        <span class="metric-value" id="total-invested">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Estimated Gains</span>
+        <span class="metric-value" id="total-gains">-</span>
+        
+      </div>
+    
+            </div>
+          </div>
+        </div>
+        
+        <!-- Horizontal Settings Bar (Compounding / Inflation / Tax) -->
+        
+        <div class="settings-bar">
+          
+          <div class="settings-bar-item">
+            <span class="settings-bar-label">Compounding</span>
+            <div class="settings-bar-toggle">
+              <button class="toggle-btn toggle-btn-active" id="freq-monthly-btn" type="button">Monthly</button>
+              <button class="toggle-btn" id="freq-yearly-btn" type="button">Yearly</button>
+            </div>
+            <input type="hidden" id="compounding-freq" value="monthly">
+          </div>
+          
+          
+        </div>
+        
+        <!-- Graph Section (Full Width) -->
+        
+        <div class="chart-card full-width-card">
+          <div class="chart-header">
+            <span class="chart-title">Visual Projection</span>
+            <div class="chart-legend" id="chart-legend-container">
+              
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--text-secondary);"></span>Invested</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--accent-color);"></span>Corpus</div>
+                
+              
+            </div>
+          </div>
+          <div class="chart-svg-container" id="chart-container"></div>
+        </div>
+        
+        
+        <!-- Table Section (Full Width) -->
+        
+        <div class="action-toolbar full-width-toolbar">
+          <button class="btn btn-secondary" id="btn-copy-table">Copy Table</button>
+          <button class="btn btn-secondary" id="btn-export-json">Export JSON</button>
+          <button class="btn btn-primary" id="btn-export-csv">Export CSV</button>
+        </div>
+        
+        <div class="table-card full-width-card">
+          <span class="table-title">Yearly Breakdowns</span>
+          <table id="projections-table">
+            <thead>
+              <tr id="table-headers-row">
+                <!-- Headers generated in JS -->
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Data generated in JS -->
+            </tbody>
+          </table>
+        </div>
+        
+        
+        <!-- SEO Content -->
+        <section class="seo-content">
+          
+      <h2>Goal-Based Planning with Reverse SIP</h2>
+      <p>Instead of calculating what a given SIP yields, the Reverse SIP Calculator determines exactly how much you must invest monthly today to meet a specific goal tomorrow.</p>
+    
+        </section>
+      </main>
+    </div>
+    
+    <footer id="global-footer"></footer>
+  </div>
+
+  <script src="../js/engine.js"></script>
+  <script src="../js/shared.js"></script>
+  <script>
+    // Calculator Specific Script
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      const defaults = { 'compounding-freq': 'monthly',  target_corpus: 10000000, return_rate: 12, years: 15 };
+      let state = FinanceEngine.getUrlParams(defaults);
+      
+      const elements = [ 'compounding-freq', 'target_corpus', 'return_rate', 'years'];
+      
+      function syncUI() {
+        elements.forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (document.activeElement !== el) el.value = state[id];
+          const valDisplay = document.getElementById(id + '-val');
+          if (valDisplay) {
+            if (id === 'target_corpus') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
+            else if (id === 'return_rate') valDisplay.textContent = state[id] + '%';
+            else valDisplay.textContent = state[id];
+          }
+        });
+      }
+      
+      function calculate() {
+        const target = state.target_corpus;
+        const annualRate = state.return_rate;
+        const years = state.years;
+        
+        const i = FinanceEngine.getMonthlyRate(annualRate);
+        const months = years * 12;
+        
+        // Required SIP: target / [ ((1+i)^m - 1)/i * (1+i) ]
+        let requiredSIP = 0;
+        const compoundingFreq = state['compounding-freq'] || 'monthly';
+        if (compoundingFreq === 'monthly') {
+          requiredSIP = target / (((Math.pow(1 + i, months) - 1) / i) * (1 + i));
+        } else {
+          let low = 0, high = target;
+          for (let iter = 0; iter < 100; iter++) {
+            const mid = (low + high) / 2;
+            const rows = FinanceEngine.calculateGrowth(0, mid, years, annualRate, 'yearly', 0);
+            if (rows[rows.length - 1].corpus < target) low = mid;
+            else high = mid;
+          }
+          requiredSIP = low;
+        }
+        const totalInvested = requiredSIP * months;
+        const gains = target - totalInvested;
+        
+        document.getElementById('required-sip').textContent = FinanceEngine.formatINR(requiredSIP) + ' / mo';
+        document.getElementById('total-invested').textContent = FinanceEngine.formatINR(totalInvested);
+        document.getElementById('total-gains').textContent = FinanceEngine.formatINR(gains);
+        
+        const headers = ['Year', 'Monthly SIP', 'Invested', 'Returns', 'Corpus'];
+        let tableRows = [];
+        let runningBalance = 0;
+        let cumulativeInvested = 0;
+        
+        for (let y = 1; y <= years; y++) {
+          if (compoundingFreq === 'monthly') {
+            for (let m = 1; m <= 12; m++) {
+              cumulativeInvested += requiredSIP;
+              runningBalance = (runningBalance + requiredSIP) * (1 + i);
+            }
+          } else {
+            const rate = annualRate / 100;
+            const interestOnStart = runningBalance * rate;
+            const interestOnDeposits = requiredSIP * rate * 6.5;
+            cumulativeInvested += requiredSIP * 12;
+            runningBalance = runningBalance + (requiredSIP * 12) + interestOnStart + interestOnDeposits;
+          }
+          
+          tableRows.push([
+            y,
+            Math.round(requiredSIP),
+            Math.round(cumulativeInvested),
+            Math.round(runningBalance - cumulativeInvested),
+            Math.round(runningBalance)
+          ]);
+        }
+        
+        const tableBody = document.getElementById('table-body');
+        const headersRow = document.getElementById('table-headers-row');
+        headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
+        tableBody.innerHTML = tableRows.map(row => 
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+        ).join('');
+        
+        const chartData = tableRows.map(row => ({
+          label: 'Yr ' + row[0],
+          invested: row[2],
+          nominal: row[4]
+        }));
+        
+        FinanceEngine.renderLineChart('chart-container', chartData, ['invested', 'nominal'], ['#6e6e73', '#0071e3']);
+        
+        const csvExporter = FinanceEngine.exportData('reverse-sip-calculator', 
+          { 'Target Corpus': target, 'Return CAGR %': annualRate, 'Years': years },
+          { 'Required Monthly SIP': requiredSIP, 'Total Invested': totalInvested, 'Total Gains': gains },
+          headers,
+          tableRows
+        );
+        
+        if (document.getElementById('btn-export-csv')) document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
+        if (document.getElementById('btn-export-json')) document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
+        if (document.getElementById('btn-copy-table')) document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+      }
+      
+      elements.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', (e) => {
+          state[id] = parseFloat(e.target.value);
+          syncUI();
+          calculate();
+          FinanceEngine.updateUrlParams(state);
+        });
+      });
+      
+      syncUI();
+      calculate();
+    
+    });
+  </script>
+</body>
+</html>

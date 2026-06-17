@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIRE Calculator - India | FinPlan India</title>
+  <meta name="description" content="Find your Financial Independence, Retire Early (FIRE) metrics. Calculate Lean FIRE, Fat FIRE, and SWR sustainability rules.">
+  <meta name="keywords" content="fire calculator, lean fire, fat fire, financial independence retire early, safe withdrawal rate">
+  <meta name="author" content="FinPlan India">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="FIRE Calculator - Indian Mutual Fund & Personal Finance Planner">
+  <meta property="og:description" content="Find your Financial Independence, Retire Early (FIRE) metrics. Calculate Lean FIRE, Fat FIRE, and SWR sustainability rules.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://finplanindia.com/calculators/fire.html">
+  <meta property="og:site_name" content="FinPlan India">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script type="application/ld+json">
+    {
+  "@context": "https://schema.org",
+  "@type": "FinancialCalculator",
+  "name": "FIRE Calculator",
+  "description": "Find your Financial Independence, Retire Early (FIRE) metrics. Calculate Lean FIRE, Fat FIRE, and SWR sustainability rules.",
+  "url": "https://finplanindia.com/calculators/fire.html",
+  "category": "Financial Tool"
+}
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <header id="global-header"></header>
+    
+    <div class="main-content">
+      <aside id="global-sidebar" class="sidebar"></aside>
+      
+      <main class="calculator-workspace">
+        <div class="calculator-header">
+          <h1>FIRE Calculator</h1>
+          <p class="calculator-description">Find your Financial Independence, Retire Early (FIRE) metrics. Calculate Lean FIRE, Fat FIRE, and SWR sustainability rules.</p>
+        </div>
+        
+        <!-- Top Section: Parameters (Inputs) | Results (Summary Cards) -->
+        <div class="calculator-top-section">
+          <!-- Inputs Card (core numeric parameters only) -->
+          <div class="inputs-card">
+            
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="annual_expenses" class="draggable-label">Annual Expenses</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="annual_expenses" min="100000" step="50000" value="600000" aria-label="Annual Expenses">
+            
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="swr" class="draggable-label">Safe Withdrawal Rate (SWR %)</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="swr" min="2" step="0.1" value="3.5" aria-label="Safe Withdrawal Rate (SWR %)">
+            <span class="input-suffix">%</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="current_savings" class="draggable-label">Current Net Worth</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="current_savings" min="0" step="100000" value="2000000" aria-label="Current Net Worth">
+            
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="monthly_savings" class="draggable-label">Monthly Savings Rate</label>
+          </div>
+          <div class="input-wrapper">
+            <span class="input-prefix">₹</span>
+            <input type="number" id="monthly_savings" min="0" step="2000" value="40000" aria-label="Monthly Savings Rate">
+            <span class="input-suffix">%</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
+            <label for="return_rate" class="draggable-label">Return CAGR</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="return_rate" min="4" step="0.5" value="12" aria-label="Return CAGR">
+            <span class="input-suffix">%</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+        </div>
+      
+            
+          </div>
+          
+          <!-- Results Summary Card -->
+          <div class="results-summary-card">
+            <span class="results-title">Calculated Results</span>
+            <div class="summary-grid">
+              
+      <div class="metric-card" >
+        <span class="metric-label">Standard FIRE Number</span>
+        <span class="metric-value" id="fire-number">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Lean FIRE</span>
+        <span class="metric-value" id="lean-fire">-</span>
+        
+      </div>
+    
+      <div class="metric-card" >
+        <span class="metric-label">Fat FIRE</span>
+        <span class="metric-value" id="fat-fire">-</span>
+        
+      </div>
+    
+            </div>
+          </div>
+        </div>
+        
+        <!-- Horizontal Settings Bar (Compounding / Inflation / Tax) -->
+        
+        <div class="settings-bar">
+          
+          <div class="settings-bar-item">
+            <span class="settings-bar-label">Compounding</span>
+            <div class="settings-bar-toggle">
+              <button class="toggle-btn toggle-btn-active" id="freq-monthly-btn" type="button">Monthly</button>
+              <button class="toggle-btn" id="freq-yearly-btn" type="button">Yearly</button>
+            </div>
+            <input type="hidden" id="compounding-freq" value="monthly">
+          </div>
+          
+          <div class="settings-bar-item">
+            <span class="settings-bar-label">Inflation</span>
+            <div class="input-wrapper" style="width:120px;">
+              <input type="number" id="inflation-rate" min="0" max="15" step="0.5" value="6" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+          
+        </div>
+        
+        <!-- Graph Section (Full Width) -->
+        
+        <div class="chart-card full-width-card">
+          <div class="chart-header">
+            <span class="chart-title">Visual Projection</span>
+            <div class="chart-legend" id="chart-legend-container">
+              
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--text-secondary);"></span>Invested</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--accent-color);"></span>Corpus</div>
+                <div class="legend-item"><span class="legend-color" style="background-color: var(--success-color);"></span>Real Value</div>
+              
+            </div>
+          </div>
+          <div class="chart-svg-container" id="chart-container"></div>
+        </div>
+        
+        
+        <!-- Table Section (Full Width) -->
+        
+        <div class="action-toolbar full-width-toolbar">
+          <button class="btn btn-secondary" id="btn-copy-table">Copy Table</button>
+          <button class="btn btn-secondary" id="btn-export-json">Export JSON</button>
+          <button class="btn btn-primary" id="btn-export-csv">Export CSV</button>
+        </div>
+        
+        <div class="table-card full-width-card">
+          <span class="table-title">Yearly Breakdowns</span>
+          <table id="projections-table">
+            <thead>
+              <tr id="table-headers-row">
+                <!-- Headers generated in JS -->
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Data generated in JS -->
+            </tbody>
+          </table>
+        </div>
+        
+        
+        <!-- SEO Content -->
+        <section class="seo-content">
+          
+      <h2>Financial Independence Retire Early (FIRE) Strategy</h2>
+      <p>Your FIRE Number represents the target investment portfolio size where your annual expenses are fully covered by a safe, inflation-adjusted withdrawal rate (typically 3% to 4%) indefinitely.</p>
+    
+        </section>
+      </main>
+    </div>
+    
+    <footer id="global-footer"></footer>
+  </div>
+
+  <script src="../js/engine.js"></script>
+  <script src="../js/shared.js"></script>
+  <script>
+    // Calculator Specific Script
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      const defaults = { 'compounding-freq': 'monthly',  annual_expenses: 600000, swr: 3.5, current_savings: 2000000, monthly_savings: 40000, return_rate: 12, 'inflation-rate': 6 };
+      let state = FinanceEngine.getUrlParams(defaults);
+      const elements = [ 'compounding-freq', 'annual_expenses', 'swr', 'current_savings', 'monthly_savings', 'return_rate', 'inflation-rate'];
+      
+      function syncUI() {
+        elements.forEach(id => {
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const valDisplay = document.getElementById(id + '-val');
+          if (valDisplay) {
+            if (id === 'annual_expenses' || id === 'current_savings' || id === 'monthly_savings') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
+            else if (id === 'swr' || id === 'return_rate' || id === 'inflation-rate') valDisplay.textContent = state[id] + '%';
+            else valDisplay.textContent = state[id];
+          }
+        });
+      }
+      
+      function calculate() {
+        const expenses = state.annual_expenses;
+        const swr = state.swr;
+        const savings = state.current_savings;
+        const monthlyS = state.monthly_savings;
+        const r = state.return_rate;
+        const inf = state['inflation-rate'];
+        
+        const fireNo = expenses / (swr / 100);
+        const leanFire = fireNo * 0.75;
+        const fatFire = fireNo * 1.5;
+        
+        document.getElementById('fire-number').textContent = FinanceEngine.formatINR(fireNo);
+        document.getElementById('lean-fire').textContent = FinanceEngine.formatINR(leanFire);
+        document.getElementById('fat-fire').textContent = FinanceEngine.formatINR(fatFire);
+        
+        const headers = ['Year', 'Annual Expenses (Inflated)', 'Net Worth', 'FIRE Target'];
+        let tableRows = [];
+        let nw = savings;
+        const i = FinanceEngine.getMonthlyRate(r);
+        
+        for (let y = 1; y <= 35; y++) {
+          const infExpenses = expenses * Math.pow(1 + inf / 100, y);
+          const yTarget = infExpenses / (swr / 100);
+          
+          const compoundingFreq = state['compounding-freq'] || 'monthly';
+          if (compoundingFreq === 'monthly') {
+            for (let m = 1; m <= 12; m++) {
+              nw = (nw + monthlyS) * (1 + i);
+            }
+          } else {
+            const rate = r / 100;
+            const interestOnStart = nw * rate;
+            const interestOnDeposits = monthlyS * rate * 6.5;
+            nw = nw + (monthlyS * 12) + interestOnStart + interestOnDeposits;
+          }
+          
+          tableRows.push([
+            y,
+            Math.round(infExpenses),
+            Math.round(nw),
+            Math.round(yTarget)
+          ]);
+        }
+        
+        const tableBody = document.getElementById('table-body');
+        const headersRow = document.getElementById('table-headers-row');
+        headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
+        tableBody.innerHTML = tableRows.map(row => 
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+        ).join('');
+        
+        const chartData = tableRows.map(row => ({
+          label: 'Yr ' + row[0],
+          invested: row[3], // fire target
+          nominal: row[2]   // net worth
+        }));
+        FinanceEngine.renderLineChart('chart-container', chartData, ['invested', 'nominal'], ['#6e6e73', '#0071e3']);
+        
+        const csvExporter = FinanceEngine.exportData('fire-calculator', 
+          { 'Expenses': expenses, 'SWR %': swr, 'Savings NW': savings, 'Monthly Add': monthlyS, 'CAGR %': r },
+          { 'FIRE Number': fireNo, 'Lean FIRE': leanFire, 'Fat FIRE': fatFire },
+          headers,
+          tableRows
+        );
+        if (document.getElementById('btn-export-csv')) document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
+        if (document.getElementById('btn-export-json')) document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
+        if (document.getElementById('btn-copy-table')) document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+      }
+      
+      elements.forEach(id => {
+        document.getElementById(id).addEventListener('input', (e) => {
+          state[id] = parseFloat(e.target.value);
+          syncUI();
+          calculate();
+          FinanceEngine.updateUrlParams(state);
+        });
+      });
+      
+      syncUI();
+      calculate();
+    
+    });
+  </script>
+</body>
+</html>

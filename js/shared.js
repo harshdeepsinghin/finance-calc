@@ -1183,7 +1183,7 @@ function injectScreenshotButton() {
   const header = document.querySelector('.calculator-header');
   if (!header) return;
 
-  if (document.getElementById('header-screenshot-btn')) return;
+  if (document.getElementById('header-share-btn')) return;
 
   const title = header.querySelector('h1');
   const desc = header.querySelector('p');
@@ -1200,224 +1200,344 @@ function injectScreenshotButton() {
   header.innerHTML = '';
   header.appendChild(textContainer);
 
+  // Wrapper for button and dropdown popup
+  const wrapper = document.createElement('div');
+  wrapper.className = 'share-btn-wrapper';
+  wrapper.style.marginTop = '0.5rem';
+  wrapper.style.flexShrink = '0';
+
   const btn = document.createElement('button');
-  btn.className = 'btn btn-secondary screenshot-btn';
-  btn.id = 'header-screenshot-btn';
-  btn.style.marginTop = '0.5rem';
-  btn.style.flexShrink = '0';
+  btn.className = 'btn btn-secondary share-btn';
+  btn.id = 'header-share-btn';
   btn.innerHTML = `
     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right: 0.4rem; vertical-align: middle;">
-      <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+      <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/>
     </svg>
-    Export PDF
+    Share
   `;
 
-  header.appendChild(btn);
+  const dropdown = document.createElement('div');
+  dropdown.className = 'share-dropdown-menu';
+  dropdown.innerHTML = `
+    <button class="share-dropdown-item" data-type="pdf">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M20 2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8.5 7.5c0 .83-.67 1.5-1.5 1.5H9v2H7.5V8H10c.83 0 1.5.67 1.5 1.5zm5 2c0 .83-.67 1.5-1.5 1.5h-2.5V8h2.5c.83 0 1.5.67 1.5 1.5v2zm4-2.5H19v1h1.5V11H19v2h-1.5V8h3v1.5zm-8 1.5h1v-2h-1v2z"/></svg>
+      Export PDF
+    </button>
+    <button class="share-dropdown-item" data-type="png">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+      Export PNG
+    </button>
+    <button class="share-dropdown-item" data-type="link">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>
+      Share Link
+    </button>
+  `;
 
-  btn.addEventListener('click', () => {
-    btn.disabled = true;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = 'Generating PDF...';
+  wrapper.appendChild(btn);
+  wrapper.appendChild(dropdown);
+  header.appendChild(wrapper);
 
-    loadScreenshotScripts(() => {
-      const target = document.querySelector('.calculator-workspace');
-      if (!target) {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
+  // Toggle dropdown popup
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle('show');
+  });
+
+  // Close dropdown popup when clicking elsewhere
+  document.addEventListener('click', () => {
+    dropdown.classList.remove('show');
+  });
+
+  // Actions click bindings
+  dropdown.querySelectorAll('.share-dropdown-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown.classList.remove('show');
+      const shareType = item.getAttribute('data-type');
+      
+      if (shareType === 'link') {
+        handleLinkShare();
         return;
       }
 
-      // Create force-desktop overrides style tag
-      const style = document.createElement('style');
-      style.id = 'force-desktop-styles';
-      style.innerHTML = `
-        .force-desktop-target {
-          padding: 2.5rem !important;
-          max-width: 1200px !important;
-          width: 1200px !important;
-        }
-        .force-desktop-target .calculator-top-section {
-          grid-template-columns: 380px minmax(0, 1fr) !important;
-          gap: 2.5rem !important;
-        }
-        .force-desktop-target .settings-bar {
-          flex-direction: row !important;
-          align-items: center !important;
-          gap: 0.75rem 2rem !important;
-        }
-        .force-desktop-target .settings-bar-item {
-          width: auto !important;
-        }
-        .force-desktop-target .settings-bar-item .input-wrapper {
-          width: inherit !important;
-          max-width: none !important;
-        }
-        .force-desktop-target .summary-grid {
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
-          gap: 1.25rem !important;
-        }
-        .force-desktop-target .metric-card {
-          padding: 1.5rem !important;
-          min-height: 110px !important;
-        }
-        .force-desktop-target .metric-label {
-          font-size: 0.85rem !important;
-          margin-bottom: 0.5rem !important;
-        }
-        .force-desktop-target .metric-value {
-          font-size: 1.5rem !important;
-        }
-        .force-desktop-target .metric-words {
-          font-size: 0.75rem !important;
-        }
-        .force-desktop-target .metric-sub {
-          font-size: 0.75rem !important;
-        }
-        .force-desktop-target .chart-svg-container {
-          height: 350px !important;
-          width: 100% !important;
-        }
-        .force-desktop-target .chart-header {
-          flex-direction: row !important;
-          align-items: center !important;
-          gap: inherit !important;
-        }
-        .force-desktop-target .chart-legend {
-          gap: 1rem !important;
-        }
-        .force-desktop-target .action-toolbar {
-          justify-content: flex-end !important;
-          gap: 1rem !important;
-        }
-        .force-desktop-target .action-toolbar .btn {
-          flex: none !important;
-          width: auto !important;
-          font-size: 0.9rem !important;
-          padding: 0.6rem 1.2rem !important;
-        }
-        .force-desktop-target .table-card {
-          padding: 1.5rem !important;
-        }
-        .force-desktop-target table {
-          font-size: 0.88rem !important;
-        }
-        .force-desktop-target table th, .force-desktop-target table td {
-          padding: 0.75rem 1rem !important;
-        }
-      `;
-      document.head.appendChild(style);
+      btn.disabled = true;
+      const originalText = btn.innerHTML;
+      btn.innerHTML = shareType === 'pdf' ? 'Generating PDF...' : 'Generating PNG...';
 
-      // Clone target
-      const clone = target.cloneNode(true);
-      clone.classList.add('force-desktop-target');
-
-      // Create off-screen container styled at 1200px width
-      const container = document.createElement('div');
-      container.style.position = 'absolute';
-      container.style.left = '-9999px';
-      container.style.top = '-9999px';
-      container.style.width = '1200px';
-      container.style.background = getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim();
-      container.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') || 'light');
-      
-      container.appendChild(clone);
-      document.body.appendChild(container);
-
-      // Re-render SVG charts inside clone at desktop resolution
-      const originalContainers = target.querySelectorAll('.chart-svg-container');
-      const clonedContainers = clone.querySelectorAll('.chart-svg-container');
-      originalContainers.forEach((orig, idx) => {
-        const cloned = clonedContainers[idx];
-        if (orig && cloned && orig.chartData) {
-          cloned.chartData = orig.chartData;
-          const tempId = 'cloned-chart-container-' + idx + '-' + Date.now();
-          cloned.id = tempId;
-          const { type, data, valueKeys, colors, lineLabels, slices } = cloned.chartData;
-          if (type === 'line') {
-            FinanceEngine.renderLineChart(tempId, data, valueKeys, colors, lineLabels, false);
-          } else if (type === 'donut') {
-            FinanceEngine.renderDonutChart(tempId, slices, false);
-          }
-        }
-      });
-
-      // Hide non-content buttons in clone
-      const cloneScreenshotBtn = clone.querySelector('#header-screenshot-btn');
-      if (cloneScreenshotBtn) cloneScreenshotBtn.style.display = 'none';
-
-      const cloneToolbars = clone.querySelectorAll('.action-toolbar');
-      cloneToolbars.forEach(tb => tb.style.display = 'none');
-
-      // Wait a moment for layouts to settle
-      setTimeout(() => {
-        html2canvas(clone, {
-          useCORS: true,
-          logging: false,
-          scale: 2,
-          backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim()
-        }).then(canvas => {
-          // Cleanup
-          document.body.removeChild(container);
-          document.head.removeChild(style);
-
-          // Restore original button
+      loadScreenshotScripts(() => {
+        const target = document.querySelector('.calculator-workspace');
+        if (!target) {
           btn.disabled = false;
           btn.innerHTML = originalText;
+          return;
+        }
 
-          // Generate jsPDF
-          const imgData = canvas.toDataURL('image/png');
-          const { jsPDF } = window.jspdf;
-          const pdf = new jsPDF('p', 'mm', 'a4');
-          const pdfWidth = 210;
-          const pdfHeight = 297;
-          const imgWidth = pdfWidth;
-          const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-          let heightLeft = imgHeight;
-          let position = 0;
-
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= pdfHeight;
-
-          while (heightLeft > 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pdfHeight;
+        // Create force-desktop overrides style tag
+        const style = document.createElement('style');
+        style.id = 'force-desktop-styles';
+        style.innerHTML = `
+          .force-desktop-target {
+            padding: 2.5rem !important;
+            max-width: 1200px !important;
+            width: 1200px !important;
           }
+          .force-desktop-target .calculator-top-section {
+            grid-template-columns: 380px minmax(0, 1fr) !important;
+            gap: 2.5rem !important;
+          }
+          .force-desktop-target .settings-bar {
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 0.75rem 2rem !important;
+          }
+          .force-desktop-target .settings-bar-item {
+            width: auto !important;
+          }
+          .force-desktop-target .settings-bar-item .input-wrapper {
+            width: inherit !important;
+            max-width: none !important;
+          }
+          .force-desktop-target .summary-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+            gap: 1.25rem !important;
+          }
+          .force-desktop-target .metric-card {
+            padding: 1.5rem !important;
+            min-height: 110px !important;
+          }
+          .force-desktop-target .metric-label {
+            font-size: 0.85rem !important;
+            margin-bottom: 0.5rem !important;
+          }
+          .force-desktop-target .metric-value {
+            font-size: 1.5rem !important;
+          }
+          .force-desktop-target .metric-words {
+            font-size: 0.75rem !important;
+          }
+          .force-desktop-target .metric-sub {
+            font-size: 0.75rem !important;
+          }
+          .force-desktop-target .chart-svg-container {
+            height: 350px !important;
+            width: 100% !important;
+          }
+          .force-desktop-target .chart-header {
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: inherit !important;
+          }
+          .force-desktop-target .chart-legend {
+            gap: 1rem !important;
+          }
+          .force-desktop-target .action-toolbar {
+            justify-content: flex-end !important;
+            gap: 1rem !important;
+          }
+          .force-desktop-target .action-toolbar .btn {
+            flex: none !important;
+            width: auto !important;
+            font-size: 0.9rem !important;
+            padding: 0.6rem 1.2rem !important;
+          }
+          .force-desktop-target .table-card {
+            padding: 1.5rem !important;
+          }
+          .force-desktop-target table {
+            font-size: 0.88rem !important;
+          }
+          .force-desktop-target table th, .force-desktop-target table td {
+            padding: 0.75rem 1rem !important;
+          }
+        `;
+        document.head.appendChild(style);
 
-          const filename = `${document.title.split(' | ')[0].replace(/\s+/g, '_')}.pdf`;
-          handlePdfExport(pdf, filename);
+        // Clone target
+        const clone = target.cloneNode(true);
+        clone.classList.add('force-desktop-target');
 
-        }).catch(err => {
-          document.body.removeChild(container);
-          document.head.removeChild(style);
-          btn.disabled = false;
-          btn.innerHTML = originalText;
-          console.error('PDF generation failed:', err);
-          FinanceEngine.showToast('Failed to generate PDF');
+        // Create off-screen container styled at 1200px width
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        container.style.top = '-9999px';
+        container.style.width = '1200px';
+        container.style.background = getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim();
+        container.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') || 'light');
+        
+        container.appendChild(clone);
+        document.body.appendChild(container);
+
+        // Re-render SVG charts inside clone at desktop resolution
+        const originalContainers = target.querySelectorAll('.chart-svg-container');
+        const clonedContainers = clone.querySelectorAll('.chart-svg-container');
+        originalContainers.forEach((orig, idx) => {
+          const cloned = clonedContainers[idx];
+          if (orig && cloned && orig.chartData) {
+            cloned.chartData = orig.chartData;
+            const tempId = 'cloned-chart-container-' + idx + '-' + Date.now();
+            cloned.id = tempId;
+            const { type, data, valueKeys, colors, lineLabels, slices } = cloned.chartData;
+            if (type === 'line') {
+              FinanceEngine.renderLineChart(tempId, data, valueKeys, colors, lineLabels, false);
+            } else if (type === 'donut') {
+              FinanceEngine.renderDonutChart(tempId, slices, false);
+            }
+          }
         });
-      }, 100);
+
+        // Hide share button and bottom actions bar in clone
+        const cloneShareBtn = clone.querySelector('.share-btn-wrapper');
+        if (cloneShareBtn) cloneShareBtn.style.display = 'none';
+
+        const cloneToolbars = clone.querySelectorAll('.action-toolbar');
+        cloneToolbars.forEach(tb => tb.style.display = 'none');
+
+        // Wait a brief moment for layouts to settle
+        setTimeout(() => {
+          html2canvas(clone, {
+            useCORS: true,
+            logging: false,
+            scale: 2,
+            backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim()
+          }).then(canvas => {
+            // Cleanup
+            document.body.removeChild(container);
+            document.head.removeChild(style);
+
+            // Restore original button
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+
+            const baseFilename = `${document.title.split(' | ')[0].replace(/\s+/g, '_')}`;
+
+            if (shareType === 'pdf') {
+              // Generate jsPDF
+              const imgData = canvas.toDataURL('image/png');
+              const { jsPDF } = window.jspdf;
+              const pdf = new jsPDF('p', 'mm', 'a4');
+              const pdfWidth = 210;
+              const pdfHeight = 297;
+              const imgWidth = pdfWidth;
+              const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+              let heightLeft = imgHeight;
+              let position = 0;
+
+              pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+              heightLeft -= pdfHeight;
+
+              while (heightLeft > 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pdfHeight;
+              }
+
+              const filename = `${baseFilename}.pdf`;
+              const blob = pdf.output('blob');
+              handleFileShare(blob, filename, 'application/pdf');
+            } else {
+              // Generate PNG image
+              canvas.toBlob((blob) => {
+                if (!blob) {
+                  FinanceEngine.showToast('Failed to generate PNG');
+                  return;
+                }
+                const filename = `${baseFilename}.png`;
+                handleFileShare(blob, filename, 'image/png');
+              }, 'image/png');
+            }
+
+          }).catch(err => {
+            document.body.removeChild(container);
+            document.head.removeChild(style);
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            console.error('Share generation failed:', err);
+            FinanceEngine.showToast('Failed to share calculation');
+          });
+        }, 100);
+      });
     });
   });
 }
 
-function handlePdfExport(pdf, filename) {
+function handleLinkShare() {
+  const url = window.location.href;
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  
+  if (isMobile && navigator.share) {
+    navigator.share({
+      title: document.title,
+      text: 'Check out my calculation on FinPlan India:',
+      url: url
+    }).catch(err => {
+      console.log('Share link cancelled or failed', err);
+    });
+  } else {
+    // Copy link to clipboard on desktop
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        FinanceEngine.showToast('Calculation link copied to clipboard!');
+      }).catch(() => {
+        fallbackCopyText(url);
+      });
+    } else {
+      fallbackCopyText(url);
+    }
+  }
+}
+
+function fallbackCopyText(text) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.opacity = '0';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    const successful = document.execCommand('copy');
+    if (successful) {
+      FinanceEngine.showToast('Calculation link copied to clipboard!');
+    } else {
+      FinanceEngine.showToast('Failed to copy link.');
+    }
+  } catch (err) {
+    FinanceEngine.showToast('Failed to copy link.');
+  }
+  document.body.removeChild(textArea);
+}
+
+function handleFileShare(blob, filename, mimeType) {
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   if (isMobile && navigator.share && navigator.canShare) {
-    const blob = pdf.output('blob');
-    const file = new File([blob], filename, { type: 'application/pdf' });
+    const file = new File([blob], filename, { type: mimeType });
     if (navigator.canShare({ files: [file] })) {
       navigator.share({
         files: [file],
-        title: 'Calculation PDF',
-        text: 'My financial calculation from FinPlan India'
-      }).catch(() => {
-        pdf.save(filename);
+        title: 'Calculator Calculation',
+        text: 'Check out my calculation from FinPlan India'
+      }).catch(err => {
+        console.log('Share file cancelled', err);
+        triggerFileDownload(blob, filename);
       });
     } else {
-      pdf.save(filename);
+      triggerFileDownload(blob, filename);
     }
   } else {
-    pdf.save(filename);
+    triggerFileDownload(blob, filename);
   }
+}
+
+function triggerFileDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }

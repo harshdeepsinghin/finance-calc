@@ -1374,7 +1374,7 @@ input:checked + .slider-switch:before {
   .calculator-description {
     font-size: 0.95rem;
   }
-  .screenshot-btn {
+  .share-btn-wrapper {
     align-self: flex-start;
     margin-top: 0 !important;
     width: auto;
@@ -1401,12 +1401,17 @@ input:checked + .slider-switch:before {
     gap: 1rem;
   }
   .settings-bar-item {
+    display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
     width: 100%;
   }
   .settings-bar-item .input-wrapper {
     width: 100% !important; /* Overrides inline HTML widths */
-    max-width: 200px;
+    max-width: 100%;
+    flex-grow: 1;
   }
 
   /* Metric summary grid - 2 columns for a compact view on mobile */
@@ -1502,4 +1507,66 @@ input:checked + .slider-switch:before {
   .pref-item {
     padding: 0.5rem 0;
   }
+}
+
+/* --- Share Button & Dropdown Menu --- */
+.share-btn-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.share-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  z-index: 500;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-5px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.share-dropdown-menu.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.share-dropdown-item {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  padding: 0.6rem 1rem;
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  transition: background-color 0.15s;
+  width: 100%;
+}
+
+.share-dropdown-item:hover {
+  background-color: var(--input-bg);
+}
+
+.share-dropdown-item svg {
+  color: var(--text-secondary);
+  transition: color 0.15s;
+}
+
+.share-dropdown-item:hover svg {
+  color: var(--accent-color);
 }

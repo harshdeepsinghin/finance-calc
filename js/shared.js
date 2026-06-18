@@ -1157,6 +1157,9 @@ function loadHtml2Canvas(callback) {
 }
 
 function injectScreenshotButton() {
+  const isCalcPage = window.location.pathname.includes('/calculators/');
+  if (!isCalcPage) return;
+
   const header = document.querySelector('.calculator-header');
   if (!header) return;
 

@@ -1141,19 +1141,39 @@ function triggerCalculatorRecalculate() {
   }
 }
 
-function loadHtml2Canvas(callback) {
-  if (window.html2canvas) {
-    if (callback) callback();
-    return;
+function loadScreenshotScripts(callback) {
+  let loadedCount = 0;
+  function onScriptLoaded() {
+    loadedCount++;
+    if (loadedCount === 2 && callback) {
+      callback();
+    }
   }
+
   const isCalcPage = window.location.pathname.includes('/calculators/');
   const prefix = isCalcPage ? '../' : '';
-  const script = document.createElement('script');
-  script.src = `${prefix}js/html2canvas.min.js`;
-  script.onload = () => {
-    if (callback) callback();
-  };
-  document.head.appendChild(script);
+
+  if (window.html2canvas) {
+    loadedCount++;
+  } else {
+    const s1 = document.createElement('script');
+    s1.src = `${prefix}js/html2canvas.min.js`;
+    s1.onload = onScriptLoaded;
+    document.head.appendChild(s1);
+  }
+
+  if (window.jspdf) {
+    loadedCount++;
+  } else {
+    const s2 = document.createElement('script');
+    s2.src = `${prefix}js/jspdf.umd.min.js`;
+    s2.onload = onScriptLoaded;
+    document.head.appendChild(s2);
+  }
+
+  if (loadedCount === 2 && callback) {
+    callback();
+  }
 }
 
 function injectScreenshotButton() {
@@ -1189,7 +1209,7 @@ function injectScreenshotButton() {
     <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right: 0.4rem; vertical-align: middle;">
       <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
     </svg>
-    Screenshot
+    Export PDF
   `;
 
   header.appendChild(btn);
@@ -1197,71 +1217,207 @@ function injectScreenshotButton() {
   btn.addEventListener('click', () => {
     btn.disabled = true;
     const originalText = btn.innerHTML;
-    btn.innerHTML = 'Capturing...';
+    btn.innerHTML = 'Generating PDF...';
 
-    loadHtml2Canvas(() => {
+    loadScreenshotScripts(() => {
       const target = document.querySelector('.calculator-workspace');
-      btn.style.display = 'none';
+      if (!target) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        return;
+      }
+
+      // Create force-desktop overrides style tag
+      const style = document.createElement('style');
+      style.id = 'force-desktop-styles';
+      style.innerHTML = `
+        .force-desktop-target {
+          padding: 2.5rem !important;
+          max-width: 1200px !important;
+          width: 1200px !important;
+        }
+        .force-desktop-target .calculator-top-section {
+          grid-template-columns: 380px minmax(0, 1fr) !important;
+          gap: 2.5rem !important;
+        }
+        .force-desktop-target .settings-bar {
+          flex-direction: row !important;
+          align-items: center !important;
+          gap: 0.75rem 2rem !important;
+        }
+        .force-desktop-target .settings-bar-item {
+          width: auto !important;
+        }
+        .force-desktop-target .settings-bar-item .input-wrapper {
+          width: inherit !important;
+          max-width: none !important;
+        }
+        .force-desktop-target .summary-grid {
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+          gap: 1.25rem !important;
+        }
+        .force-desktop-target .metric-card {
+          padding: 1.5rem !important;
+          min-height: 110px !important;
+        }
+        .force-desktop-target .metric-label {
+          font-size: 0.85rem !important;
+          margin-bottom: 0.5rem !important;
+        }
+        .force-desktop-target .metric-value {
+          font-size: 1.5rem !important;
+        }
+        .force-desktop-target .metric-words {
+          font-size: 0.75rem !important;
+        }
+        .force-desktop-target .metric-sub {
+          font-size: 0.75rem !important;
+        }
+        .force-desktop-target .chart-svg-container {
+          height: 350px !important;
+          width: 100% !important;
+        }
+        .force-desktop-target .chart-header {
+          flex-direction: row !important;
+          align-items: center !important;
+          gap: inherit !important;
+        }
+        .force-desktop-target .chart-legend {
+          gap: 1rem !important;
+        }
+        .force-desktop-target .action-toolbar {
+          justify-content: flex-end !important;
+          gap: 1rem !important;
+        }
+        .force-desktop-target .action-toolbar .btn {
+          flex: none !important;
+          width: auto !important;
+          font-size: 0.9rem !important;
+          padding: 0.6rem 1.2rem !important;
+        }
+        .force-desktop-target .table-card {
+          padding: 1.5rem !important;
+        }
+        .force-desktop-target table {
+          font-size: 0.88rem !important;
+        }
+        .force-desktop-target table th, .force-desktop-target table td {
+          padding: 0.75rem 1rem !important;
+        }
+      `;
+      document.head.appendChild(style);
+
+      // Clone target
+      const clone = target.cloneNode(true);
+      clone.classList.add('force-desktop-target');
+
+      // Create off-screen container styled at 1200px width
+      const container = document.createElement('div');
+      container.style.position = 'absolute';
+      container.style.left = '-9999px';
+      container.style.top = '-9999px';
+      container.style.width = '1200px';
+      container.style.background = getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim();
+      container.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') || 'light');
       
-      const toolbars = document.querySelectorAll('.action-toolbar');
-      toolbars.forEach(tb => tb.style.display = 'none');
+      container.appendChild(clone);
+      document.body.appendChild(container);
 
-      html2canvas(target, {
-        useCORS: true,
-        logging: false,
-        scale: 2,
-        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim()
-      }).then(canvas => {
-        btn.style.display = '';
-        toolbars.forEach(tb => {
-          tb.style.display = getPreference('showTable') ? '' : 'none';
-        });
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-
-        handleScreenshotShare(canvas);
-      }).catch(err => {
-        btn.style.display = '';
-        toolbars.forEach(tb => {
-          tb.style.display = getPreference('showTable') ? '' : 'none';
-        });
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-        console.error('Screenshot capture failed:', err);
+      // Re-render SVG charts inside clone at desktop resolution
+      const originalContainers = target.querySelectorAll('.chart-svg-container');
+      const clonedContainers = clone.querySelectorAll('.chart-svg-container');
+      originalContainers.forEach((orig, idx) => {
+        const cloned = clonedContainers[idx];
+        if (orig && cloned && orig.chartData) {
+          cloned.chartData = orig.chartData;
+          const tempId = 'cloned-chart-container-' + idx + '-' + Date.now();
+          cloned.id = tempId;
+          const { type, data, valueKeys, colors, lineLabels, slices } = cloned.chartData;
+          if (type === 'line') {
+            FinanceEngine.renderLineChart(tempId, data, valueKeys, colors, lineLabels, false);
+          } else if (type === 'donut') {
+            FinanceEngine.renderDonutChart(tempId, slices, false);
+          }
+        }
       });
+
+      // Hide non-content buttons in clone
+      const cloneScreenshotBtn = clone.querySelector('#header-screenshot-btn');
+      if (cloneScreenshotBtn) cloneScreenshotBtn.style.display = 'none';
+
+      const cloneToolbars = clone.querySelectorAll('.action-toolbar');
+      cloneToolbars.forEach(tb => tb.style.display = 'none');
+
+      // Wait a moment for layouts to settle
+      setTimeout(() => {
+        html2canvas(clone, {
+          useCORS: true,
+          logging: false,
+          scale: 2,
+          backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim()
+        }).then(canvas => {
+          // Cleanup
+          document.body.removeChild(container);
+          document.head.removeChild(style);
+
+          // Restore original button
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+
+          // Generate jsPDF
+          const imgData = canvas.toDataURL('image/png');
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          const pdfWidth = 210;
+          const pdfHeight = 297;
+          const imgWidth = pdfWidth;
+          const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+          let heightLeft = imgHeight;
+          let position = 0;
+
+          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pdfHeight;
+
+          while (heightLeft > 0) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pdfHeight;
+          }
+
+          const filename = `${document.title.split(' | ')[0].replace(/\s+/g, '_')}.pdf`;
+          handlePdfExport(pdf, filename);
+
+        }).catch(err => {
+          document.body.removeChild(container);
+          document.head.removeChild(style);
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+          console.error('PDF generation failed:', err);
+          FinanceEngine.showToast('Failed to generate PDF');
+        });
+      }, 100);
     });
   });
 }
 
-function handleScreenshotShare(canvas) {
+function handlePdfExport(pdf, filename) {
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   if (isMobile && navigator.share && navigator.canShare) {
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        downloadCanvas(canvas);
-        return;
-      }
-      const file = new File([blob], 'calculation.png', { type: 'image/png' });
-      if (navigator.canShare({ files: [file] })) {
-        navigator.share({
-          files: [file],
-          title: 'Calculator Calculation',
-          text: 'Check out my calculation from FinPlan India'
-        }).catch(err => {
-          downloadCanvas(canvas);
-        });
-      } else {
-        downloadCanvas(canvas);
-      }
-    }, 'image/png');
+    const blob = pdf.output('blob');
+    const file = new File([blob], filename, { type: 'application/pdf' });
+    if (navigator.canShare({ files: [file] })) {
+      navigator.share({
+        files: [file],
+        title: 'Calculation PDF',
+        text: 'My financial calculation from FinPlan India'
+      }).catch(() => {
+        pdf.save(filename);
+      });
+    } else {
+      pdf.save(filename);
+    }
   } else {
-    downloadCanvas(canvas);
+    pdf.save(filename);
   }
-}
-
-function downloadCanvas(canvas) {
-  const link = document.createElement('a');
-  link.download = `${document.title.split(' | ')[0].replace(/\s+/g, '_')}.png`;
-  link.href = canvas.toDataURL('image/png');
-  link.click();
 }

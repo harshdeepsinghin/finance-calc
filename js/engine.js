@@ -209,6 +209,101 @@ const FinanceEngine = {
     return value.toFixed(decimals) + '%';
   },
 
+  /**
+   * Convert number to words in the Indian Numbering System
+   */
+  numberToIndianWords(num) {
+    if (num === null || num === undefined || isNaN(num)) return '';
+    num = Math.round(num);
+    if (num === 0) return 'Zero';
+    if (num < 0) return 'Minus ' + this.numberToIndianWords(Math.abs(num));
+
+    const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 
+                   'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+    function convertLessThanOneThousand(n) {
+      let str = '';
+      if (n >= 100) {
+        str += units[Math.floor(n / 100)] + ' Hundred ';
+        n %= 100;
+      }
+      if (n >= 20) {
+        str += tens[Math.floor(n / 10)] + ' ';
+        n %= 10;
+      }
+      if (n > 0) {
+        str += units[n] + ' ';
+      }
+      return str.trim();
+    }
+
+    let result = '';
+    let crores = Math.floor(num / 10000000);
+    let remainder = num % 10000000;
+    let lakhs = Math.floor(remainder / 100000);
+    remainder %= 100000;
+    let thousands = Math.floor(remainder / 1000);
+    remainder %= 1000;
+
+    if (crores > 0) {
+      result += (crores >= 100 ? this.numberToIndianWords(crores) : convertLessThanOneThousand(crores)) + ' Crore ';
+    }
+    if (lakhs > 0) {
+      result += convertLessThanOneThousand(lakhs) + ' Lakh ';
+    }
+    if (thousands > 0) {
+      result += convertLessThanOneThousand(thousands) + ' Thousand ';
+    }
+    if (remainder > 0) {
+      result += convertLessThanOneThousand(remainder) + ' ';
+    }
+
+    return result.trim().replace(/\s+/g, ' ');
+  },
+
+  /**
+   * Return HTML string with color-coded tags for the Indian Numbering System
+   */
+  getColorCodedINRHtml(text) {
+    if (!text || (typeof text !== 'string')) return null;
+    const trimmed = text.trim();
+    if (!trimmed.includes('₹') && !/^\d/.test(trimmed.replace(/[,\s-]/g, ''))) {
+      return null;
+    }
+    const hasSymbol = trimmed.startsWith('₹') || trimmed.includes('₹');
+    const isNegative = trimmed.includes('-');
+    let cleanText = trimmed.replace(/[₹\s-]/g, '');
+
+    // Split by decimal
+    const parts = cleanText.split('.');
+    const integerPart = parts[0];
+    const decimalPart = parts[1];
+
+    // Split integer part by commas
+    const groups = integerPart.split(',');
+    const len = groups.length;
+
+    const wrappedGroups = groups.map((group, idx) => {
+      const posFromRight = len - 1 - idx;
+      let className = '';
+      if (posFromRight === 0) className = 'color-ones-tens-hundreds';
+      else if (posFromRight === 1) className = 'color-thousands';
+      else if (posFromRight === 2) className = 'color-lakhs';
+      else className = 'color-crores';
+      return `<span class="${className}">${group}</span>`;
+    });
+
+    let html = '';
+    if (isNegative) html += '-';
+    if (hasSymbol) html += '<span class="color-currency-symbol">₹</span>';
+    html += wrappedGroups.join(',');
+    if (decimalPart !== undefined) {
+      html += `.<span class="color-decimals">${decimalPart}</span>`;
+    }
+    return html;
+  },
+
   // 3. XIRR Newton-Raphson Solver
   
   /**

@@ -47,6 +47,18 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Setup Search Modal
   setupSearch();
+
+  // Initialize Preferences & UI
+  initPreferences();
+
+  // Setup MutationObserver and input listeners for words and color-coding
+  setupMetricWordsObserver();
+
+  // Setup Screenshot Button Injection
+  injectScreenshotButton();
+
+  // Setup Dynamic Inflation Injections
+  injectInflationSetting();
 });
 
 // --- Theme Management ---
@@ -109,6 +121,11 @@ function injectHeader() {
       </a>
     </div>
     <div class="header-actions" style="display: flex; align-items: center; gap: 0.5rem;">
+      <button class="preferences-btn" id="preferences-btn" aria-label="Preferences">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+        </svg>
+      </button>
       <button class="search-toggle-btn" id="search-btn" aria-label="Search calculator">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
           <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
@@ -123,6 +140,12 @@ function injectHeader() {
   const toggleBtn = headerContainer.querySelector('.theme-toggle-btn');
   if (toggleBtn) {
     toggleBtn.addEventListener('click', toggleTheme);
+  }
+
+  // Preferences btn click
+  const prefBtn = headerContainer.querySelector('.preferences-btn');
+  if (prefBtn) {
+    prefBtn.addEventListener('click', openPreferences);
   }
 }
 
@@ -577,4 +600,665 @@ function setupSearch() {
       }
     }
   });
+}
+
+// --- Preferences, Word Conversions, Color Coding, & Screenshots System ---
+
+const defaultPreferences = {
+  showWords: true,
+  colorCoding: true,
+  showGraph: true,
+  showTable: true,
+  showInflation: true,
+  showTaxation: true,
+  globalInflationRate: 6.0
+};
+
+function getPreference(key) {
+  try {
+    const prefs = JSON.parse(localStorage.getItem('finplan_user_prefs')) || {};
+    return prefs[key] !== undefined ? prefs[key] : defaultPreferences[key];
+  } catch (e) {
+    return defaultPreferences[key];
+  }
+}
+
+function setPreference(key, value) {
+  try {
+    const prefs = JSON.parse(localStorage.getItem('finplan_user_prefs')) || {};
+    prefs[key] = value;
+    localStorage.setItem('finplan_user_prefs', JSON.stringify(prefs));
+    applyPreferences();
+  } catch (e) {}
+}
+
+function applyPreferences() {
+  // Graph
+  const chartCards = document.querySelectorAll('.chart-card');
+  const showGraph = getPreference('showGraph');
+  chartCards.forEach(card => {
+    card.style.display = showGraph ? '' : 'none';
+  });
+
+  // Table
+  const tableCards = document.querySelectorAll('.table-card, .action-toolbar');
+  const showTable = getPreference('showTable');
+  tableCards.forEach(card => {
+    card.style.display = showTable ? '' : 'none';
+  });
+
+  // Inflation Adjusted values:
+  const showInflation = getPreference('showInflation');
+  document.querySelectorAll('.metric-card').forEach(card => {
+    const label = card.querySelector('.metric-label')?.textContent.toLowerCase() || '';
+    if (label.includes('real') || label.includes('adjusted') || label.includes('inflation')) {
+      card.style.display = showInflation ? '' : 'none';
+    }
+  });
+  document.querySelectorAll('.settings-bar-item').forEach(item => {
+    const label = item.querySelector('.settings-bar-label')?.textContent.toLowerCase() || '';
+    if (label.includes('inflation')) {
+      item.style.display = showInflation ? '' : 'none';
+    }
+  });
+  document.querySelectorAll('.dynamic-inflation-setting').forEach(el => {
+    el.style.display = showInflation ? '' : 'none';
+  });
+
+  // Taxation:
+  const showTaxation = getPreference('showTaxation');
+  document.querySelectorAll('.metric-card').forEach(card => {
+    const label = card.querySelector('.metric-label')?.textContent.toLowerCase() || '';
+    const isTax = label.includes('tax') || card.getAttribute('data-conditional') === 'tax';
+    if (isTax) {
+      if (!showTaxation) {
+        card.style.setProperty('display', 'none', 'important');
+      } else {
+        const taxTypeEl = document.getElementById('tax-type');
+        if (taxTypeEl && taxTypeEl.value === 'none') {
+          card.style.display = 'none';
+        } else {
+          card.style.removeProperty('display');
+        }
+      }
+    }
+  });
+  document.querySelectorAll('.settings-bar-item').forEach(item => {
+    const label = item.querySelector('.settings-bar-label')?.textContent.toLowerCase() || '';
+    if (label.includes('tax') || item.id === 'custom-tax-group') {
+      item.style.display = showTaxation ? '' : 'none';
+    }
+  });
+
+  // Re-trigger metric words and color coding
+  document.querySelectorAll('.metric-value').forEach(el => {
+    updateMetricWords(el);
+    updateMetricColorCoding(el);
+  });
+  colorCodeTableCells();
+
+  // Re-trigger input words
+  document.querySelectorAll('input[type="number"]').forEach(input => {
+    updateInputWords(input);
+  });
+}
+
+function initPreferences() {
+  if (document.getElementById('preferences-modal')) return;
+
+  // Inject preferences modal HTML
+  const modal = document.createElement('div');
+  modal.id = 'preferences-modal';
+  modal.className = 'preferences-modal-overlay';
+  modal.style.display = 'none';
+  modal.innerHTML = `
+    <div class="preferences-modal-content">
+      <div class="preferences-modal-header">
+        <h2>Preferences</h2>
+        <button id="preferences-close-btn" aria-label="Close preferences">&times;</button>
+      </div>
+      <div class="preferences-modal-body">
+        <div class="pref-group">
+          <h3>Display Settings</h3>
+          
+          <div class="pref-item">
+            <div class="pref-info">
+              <span class="pref-title">Show Value in Words</span>
+              <span class="pref-desc">Display the amount in words (e.g. One Lakh) below numeric values</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="pref-show-words">
+              <span class="slider-switch"></span>
+            </label>
+          </div>
+
+          <div class="pref-item">
+            <div class="pref-info">
+              <span class="pref-title">Indian Number Color Coding</span>
+              <span class="pref-desc">Color-code digits by place value (Lakhs, Thousands, etc.) for readability</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="pref-color-coding">
+              <span class="slider-switch"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="pref-group">
+          <h3>Calculator Features</h3>
+
+          <div class="pref-item">
+            <div class="pref-info">
+              <span class="pref-title">Show Visual Projection Graph</span>
+              <span class="pref-desc">Render the interactive SVG projection charts</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="pref-show-graph">
+              <span class="slider-switch"></span>
+            </label>
+          </div>
+
+          <div class="pref-item">
+            <div class="pref-info">
+              <span class="pref-title">Show Yearly Breakdown Table</span>
+              <span class="pref-desc">Display the detailed yearly cash flow and tax breakdown tables</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="pref-show-table">
+              <span class="slider-switch"></span>
+            </label>
+          </div>
+
+          <div class="pref-item">
+            <div class="pref-info">
+              <span class="pref-title">Inflation Adjusted Values</span>
+              <span class="pref-desc">Calculate and display inflation-adjusted real purchasing power</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="pref-show-inflation">
+              <span class="slider-switch"></span>
+            </label>
+          </div>
+
+          <div class="pref-item">
+            <div class="pref-info">
+              <span class="pref-title">Taxation Estimations</span>
+              <span class="pref-desc">Estimate LTCG, STCG, or slab rate taxes for gains</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="pref-show-taxation">
+              <span class="slider-switch"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  const closeBtn = document.getElementById('preferences-close-btn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closePreferences);
+  }
+
+  // Close on click backdrop
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closePreferences();
+  });
+
+  // Esc key close
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display === 'flex') {
+      closePreferences();
+    }
+  });
+
+  // Initialize toggle states
+  const toggleMapping = {
+    'pref-show-words': 'showWords',
+    'pref-color-coding': 'colorCoding',
+    'pref-show-graph': 'showGraph',
+    'pref-show-table': 'showTable',
+    'pref-show-inflation': 'showInflation',
+    'pref-show-taxation': 'showTaxation'
+  };
+
+  for (const id in toggleMapping) {
+    const checkbox = document.getElementById(id);
+    if (checkbox) {
+      checkbox.checked = getPreference(toggleMapping[id]);
+      checkbox.addEventListener('change', (e) => {
+        setPreference(toggleMapping[id], e.target.checked);
+      });
+    }
+  }
+
+  // Apply initial preferences
+  applyPreferences();
+}
+
+function openPreferences() {
+  const modal = document.getElementById('preferences-modal');
+  if (modal) {
+    const toggleMapping = {
+      'pref-show-words': 'showWords',
+      'pref-color-coding': 'colorCoding',
+      'pref-show-graph': 'showGraph',
+      'pref-show-table': 'showTable',
+      'pref-show-inflation': 'showInflation',
+      'pref-show-taxation': 'showTaxation'
+    };
+    for (const id in toggleMapping) {
+      const checkbox = document.getElementById(id);
+      if (checkbox) checkbox.checked = getPreference(toggleMapping[id]);
+    }
+    modal.style.display = 'flex';
+  }
+}
+
+function closePreferences() {
+  const modal = document.getElementById('preferences-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function updateInputWords(input) {
+  const existing = input.closest('.input-group')?.querySelector('.input-words');
+  if (!getPreference('showWords')) {
+    if (existing) existing.remove();
+    return;
+  }
+  const wrapper = input.closest('.input-wrapper');
+  if (!wrapper) return;
+  const hasRupeePrefix = !!wrapper.querySelector('.input-prefix');
+  if (!hasRupeePrefix) return;
+
+  const val = parseFloat(input.value);
+  const words = (isNaN(val) || val <= 0) ? '' : FinanceEngine.numberToIndianWords(val);
+
+  let wordsEl = input.closest('.input-group').querySelector('.input-words');
+  if (!wordsEl) {
+    wordsEl = document.createElement('div');
+    wordsEl.className = 'input-words';
+    wordsEl.style.fontSize = '0.75rem';
+    wordsEl.style.color = 'var(--text-secondary)';
+    wordsEl.style.marginTop = '0.25rem';
+    wordsEl.style.paddingLeft = '0.25rem';
+    input.closest('.input-group').appendChild(wordsEl);
+  }
+  wordsEl.textContent = words ? words : '';
+}
+
+function updateMetricWords(el) {
+  const existing = el.parentElement.querySelector('.metric-words');
+  if (!getPreference('showWords')) {
+    if (existing) existing.remove();
+    return;
+  }
+  
+  const text = el.textContent.trim();
+  if (!text || text === '-') {
+    if (existing) existing.textContent = '';
+    return;
+  }
+
+  const val = parseFloat(text.replace(/[₹,\s]/g, ''));
+  const words = (isNaN(val) || val <= 0) ? '' : FinanceEngine.numberToIndianWords(val);
+
+  let wordsEl = el.parentElement.querySelector('.metric-words');
+  if (!wordsEl) {
+    wordsEl = document.createElement('span');
+    wordsEl.className = 'metric-words';
+    wordsEl.style.fontSize = '0.75rem';
+    wordsEl.style.color = 'var(--text-secondary)';
+    wordsEl.style.marginTop = '0.25rem';
+    wordsEl.style.display = 'block';
+    el.parentElement.appendChild(wordsEl);
+  }
+  wordsEl.textContent = words ? words : '';
+}
+
+function updateMetricColorCoding(el) {
+  const hasSpans = el.querySelector('span');
+  if (hasSpans && getPreference('colorCoding')) {
+    return;
+  }
+
+  if (!getPreference('colorCoding')) {
+    if (hasSpans) {
+      el.textContent = el.textContent; // strips HTML
+    }
+    return;
+  }
+
+  const rawText = el.textContent.trim();
+  if (!rawText || rawText === '-') return;
+
+  const html = FinanceEngine.getColorCodedINRHtml(rawText);
+  if (html) {
+    el.innerHTML = html;
+  }
+}
+
+function colorCodeTableCells() {
+  const cells = document.querySelectorAll('#projections-table tbody td');
+  cells.forEach(cell => {
+    const hasSpans = cell.querySelector('span');
+    if (!getPreference('colorCoding')) {
+      if (hasSpans) {
+        cell.textContent = cell.textContent; // strips HTML
+      }
+      return;
+    }
+
+    if (hasSpans) return;
+
+    const text = cell.textContent.trim();
+    if (text && text.includes(',') && !isNaN(parseFloat(text.replace(/[₹,\s]/g, '')))) {
+      const html = FinanceEngine.getColorCodedINRHtml(text);
+      if (html) {
+        cell.innerHTML = html;
+      }
+    }
+  });
+}
+
+function setupMetricWordsObserver() {
+  const observer = new MutationObserver((mutations) => {
+    let metricChanged = false;
+    let tableChanged = false;
+
+    mutations.forEach((mutation) => {
+      const target = mutation.target.closest ? mutation.target.closest('.metric-value') : mutation.target.parentElement?.closest('.metric-value');
+      if (target) {
+        metricChanged = true;
+        updateMetricWords(target);
+        updateMetricColorCoding(target);
+      }
+
+      const isTable = mutation.target.closest ? mutation.target.closest('#projections-table') : mutation.target.parentElement?.closest('#projections-table');
+      if (isTable) {
+        tableChanged = true;
+      }
+    });
+
+    if (tableChanged) {
+      colorCodeTableCells();
+    }
+    
+    if (metricChanged) {
+      adjustForInflation();
+    }
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+
+  // Initial runs
+  document.querySelectorAll('.metric-value').forEach(el => {
+    updateMetricWords(el);
+    updateMetricColorCoding(el);
+  });
+  colorCodeTableCells();
+  adjustForInflation();
+
+  // Input listeners
+  document.addEventListener('input', (e) => {
+    if (e.target.tagName === 'INPUT' && e.target.type === 'number') {
+      updateInputWords(e.target);
+    }
+  });
+
+  document.querySelectorAll('input[type="number"]').forEach(input => {
+    updateInputWords(input);
+  });
+}
+
+function adjustForInflation() {
+  if (!getPreference('showInflation')) {
+    document.querySelectorAll('.dynamic-inflation-card').forEach(el => el.style.display = 'none');
+    return;
+  }
+
+  let inflationRate = 6.0;
+  const inflationInput = document.getElementById('inflation-rate') || document.getElementById('inflation_rate');
+  if (inflationInput) {
+    inflationRate = parseFloat(inflationInput.value) || 6.0;
+  } else {
+    inflationRate = getPreference('globalInflationRate') || 6.0;
+  }
+
+  let years = 1;
+  const yearsInput = document.getElementById('years') || document.getElementById('duration') || document.getElementById('tenure') || document.getElementById('years_to_goal') || document.getElementById('years_to_fi');
+  if (yearsInput) {
+    years = parseFloat(yearsInput.value) || 1;
+  }
+
+  // 1. CAGR / XIRR
+  const cagrEl = document.getElementById('cagr-result') || document.getElementById('xirr-result') || document.getElementById('cagr');
+  if (cagrEl) {
+    const cagrVal = parseFloat(cagrEl.textContent.replace(/[%]/g, ''));
+    if (!isNaN(cagrVal)) {
+      const realCAGR = ((1 + cagrVal / 100) / (1 + inflationRate / 100) - 1) * 100;
+      updateDynamicMetric(cagrEl, 'Real Rate (Inflation Adjusted)', realCAGR.toFixed(2) + '%');
+    }
+  }
+
+  // 2. EMI / Loan Prepayment
+  const emiEl = document.getElementById('total-payment');
+  if (emiEl) {
+    const totalPaymentVal = parseFloat(emiEl.textContent.replace(/[₹,\s]/g, ''));
+    if (!isNaN(totalPaymentVal)) {
+      const monthlyPayment = totalPaymentVal / (years * 12);
+      let realTotal = 0;
+      const monthlyInf = Math.pow(1 + inflationRate / 100, 1 / 12) - 1;
+      for (let m = 1; m <= years * 12; m++) {
+        realTotal += monthlyPayment / Math.pow(1 + monthlyInf, m);
+      }
+      updateDynamicMetric(emiEl, 'Real Cost (Today\'s Value)', FinanceEngine.formatINRSmart(realTotal));
+    }
+  }
+
+  // 3. Generic corpus outputs
+  const corpusEl = document.getElementById('total-corpus') || document.getElementById('target_corpus_display') || document.getElementById('emergency-corpus') || document.getElementById('required-corpus');
+  if (corpusEl && !document.getElementById('adjusted-corpus')) {
+    const corpusVal = parseFloat(corpusEl.textContent.replace(/[₹,\s]/g, ''));
+    if (!isNaN(corpusVal)) {
+      const realCorpus = corpusVal / Math.pow(1 + inflationRate / 100, years);
+      updateDynamicMetric(corpusEl, 'Real Value (Today\'s Purchasing Power)', FinanceEngine.formatINRSmart(realCorpus));
+    }
+  }
+}
+
+function updateDynamicMetric(parentEl, label, valueText) {
+  const card = parentEl.closest('.metric-card');
+  if (!card) return;
+
+  const parentGrid = card.parentElement;
+  if (!parentGrid) return;
+
+  let dynamicCard = parentGrid.querySelector(`.dynamic-inflation-card[data-source="${parentEl.id}"]`);
+  if (!dynamicCard) {
+    dynamicCard = document.createElement('div');
+    dynamicCard.className = 'metric-card dynamic-inflation-card';
+    dynamicCard.setAttribute('data-source', parentEl.id);
+    dynamicCard.innerHTML = `
+      <span class="metric-label">${label}</span>
+      <span class="metric-value">-</span>
+    `;
+    card.after(dynamicCard);
+  }
+
+  dynamicCard.style.display = getPreference('showInflation') ? '' : 'none';
+  const valEl = dynamicCard.querySelector('.metric-value');
+  valEl.textContent = valueText;
+  
+  updateMetricWords(valEl);
+  updateMetricColorCoding(valEl);
+}
+
+function injectInflationSetting() {
+  const settingsBar = document.querySelector('.settings-bar');
+  if (!settingsBar) return;
+
+  const hasInflation = !!settingsBar.querySelector('input[id*="inflation"]');
+  if (hasInflation) return;
+
+  const item = document.createElement('div');
+  item.className = 'settings-bar-item dynamic-inflation-setting';
+  const prefRate = getPreference('globalInflationRate') || 6.0;
+
+  item.innerHTML = `
+    <span class="settings-bar-label">Inflation</span>
+    <div class="input-wrapper" style="width:120px;">
+      <input type="number" id="inflation-rate" min="0" max="15" step="0.1" value="${prefRate}" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
+      <span class="input-suffix">%</span>
+    </div>
+  `;
+  
+  const taxItem = Array.from(settingsBar.children).find(el => el.textContent.toLowerCase().includes('tax'));
+  if (taxItem) {
+    settingsBar.insertBefore(item, taxItem);
+  } else {
+    settingsBar.appendChild(item);
+  }
+
+  const input = item.querySelector('input');
+  input.addEventListener('input', (e) => {
+    setPreference('globalInflationRate', parseFloat(e.target.value) || 6.0);
+    triggerCalculatorRecalculate();
+  });
+
+  item.style.display = getPreference('showInflation') ? '' : 'none';
+}
+
+function triggerCalculatorRecalculate() {
+  const yearsInput = document.getElementById('years') || document.getElementById('duration') || document.getElementById('tenure') || document.getElementById('target_corpus') || document.getElementById('years_to_goal') || document.getElementById('years_to_fi');
+  if (yearsInput) {
+    yearsInput.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+}
+
+function loadHtml2Canvas(callback) {
+  if (window.html2canvas) {
+    if (callback) callback();
+    return;
+  }
+  const isCalcPage = window.location.pathname.includes('/calculators/');
+  const prefix = isCalcPage ? '../' : '';
+  const script = document.createElement('script');
+  script.src = `${prefix}js/html2canvas.min.js`;
+  script.onload = () => {
+    if (callback) callback();
+  };
+  document.head.appendChild(script);
+}
+
+function injectScreenshotButton() {
+  const header = document.querySelector('.calculator-header');
+  if (!header) return;
+
+  if (document.getElementById('header-screenshot-btn')) return;
+
+  const title = header.querySelector('h1');
+  const desc = header.querySelector('p');
+  
+  header.style.display = 'flex';
+  header.style.justifyContent = 'space-between';
+  header.style.alignItems = 'flex-start';
+  header.style.gap = '1.5rem';
+
+  const textContainer = document.createElement('div');
+  if (title) textContainer.appendChild(title.cloneNode(true));
+  if (desc) textContainer.appendChild(desc.cloneNode(true));
+  
+  header.innerHTML = '';
+  header.appendChild(textContainer);
+
+  const btn = document.createElement('button');
+  btn.className = 'btn btn-secondary screenshot-btn';
+  btn.id = 'header-screenshot-btn';
+  btn.style.marginTop = '0.5rem';
+  btn.style.flexShrink = '0';
+  btn.innerHTML = `
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="margin-right: 0.4rem; vertical-align: middle;">
+      <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+    </svg>
+    Screenshot
+  `;
+
+  header.appendChild(btn);
+
+  btn.addEventListener('click', () => {
+    btn.disabled = true;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = 'Capturing...';
+
+    loadHtml2Canvas(() => {
+      const target = document.querySelector('.calculator-workspace');
+      btn.style.display = 'none';
+      
+      const toolbars = document.querySelectorAll('.action-toolbar');
+      toolbars.forEach(tb => tb.style.display = 'none');
+
+      html2canvas(target, {
+        useCORS: true,
+        logging: false,
+        scale: 2,
+        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim()
+      }).then(canvas => {
+        btn.style.display = '';
+        toolbars.forEach(tb => {
+          tb.style.display = getPreference('showTable') ? '' : 'none';
+        });
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+
+        handleScreenshotShare(canvas);
+      }).catch(err => {
+        btn.style.display = '';
+        toolbars.forEach(tb => {
+          tb.style.display = getPreference('showTable') ? '' : 'none';
+        });
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        console.error('Screenshot capture failed:', err);
+      });
+    });
+  });
+}
+
+function handleScreenshotShare(canvas) {
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  if (isMobile && navigator.share && navigator.canShare) {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        downloadCanvas(canvas);
+        return;
+      }
+      const file = new File([blob], 'calculation.png', { type: 'image/png' });
+      if (navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          title: 'Calculator Calculation',
+          text: 'Check out my calculation from FinPlan India'
+        }).catch(err => {
+          downloadCanvas(canvas);
+        });
+      } else {
+        downloadCanvas(canvas);
+      }
+    }, 'image/png');
+  } else {
+    downloadCanvas(canvas);
+  }
+}
+
+function downloadCanvas(canvas) {
+  const link = document.createElement('a');
+  link.download = `${document.title.split(' | ')[0].replace(/\s+/g, '_')}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
 }

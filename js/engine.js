@@ -36,7 +36,7 @@ const FinanceEngine = {
    * Convert annual return to monthly return rate using CAGR method
    */
   getMonthlyRate(annualRatePercentage) {
-    return (annualRatePercentage / 100) / 12;
+    return Math.pow(1 + annualRatePercentage / 100, 1 / 12) - 1;
   },
 
   /**
@@ -428,8 +428,29 @@ const FinanceEngine = {
           result[key] = val;
         }
       }
+
+      // Enforce max bounds to prevent browser hanging on large input projections
+      if (['years', 'duration', 'tenure', 'years_to_goal', 'years_to_fi', 'years_to_college', 'years_to_marriage'].includes(key)) {
+        const maxVal = key === 'tenure' ? 35 : 100;
+        if (result[key] > maxVal) {
+          result[key] = maxVal;
+        }
+      }
     }
-    return result;
+    const proxy = new Proxy(result, {
+      set(target, prop, value) {
+        let finalVal = value;
+        if (typeof value === 'number' && isNaN(value)) {
+          if (defaults && typeof defaults[prop] === 'string') {
+            const el = document.getElementById(prop);
+            finalVal = el ? el.value : defaults[prop];
+          }
+        }
+        target[prop] = finalVal;
+        return true;
+      }
+    });
+    return proxy;
   },
 
   /**
@@ -513,9 +534,16 @@ const FinanceEngine = {
     }
     const container = document.getElementById(containerId);
     if (!container) return;
-    
-    // Clear container
-    container.innerHTML = '';
+
+    if (container.pendingAnimationFrame) {
+      cancelAnimationFrame(container.pendingAnimationFrame);
+    }
+
+    container.pendingAnimationFrame = requestAnimationFrame(() => {
+      container.pendingAnimationFrame = null;
+      
+      // Clear container
+      container.innerHTML = '';
     
     // Store data for ResizeObserver
     container.chartData = { type: 'line', data, valueKeys, colors, lineLabels };
@@ -803,9 +831,10 @@ const FinanceEngine = {
       tooltip.style.top = `${top}px`;
     };
 
-    const onMouseLeave = () => { hoverGroup.setAttribute('visibility', 'hidden'); tooltip.style.display = 'none'; };
-    overlay.addEventListener('mousemove', onMouseMove);
-    overlay.addEventListener('mouseleave', onMouseLeave);
+      const onMouseLeave = () => { hoverGroup.setAttribute('visibility', 'hidden'); tooltip.style.display = 'none'; };
+      overlay.addEventListener('mousemove', onMouseMove);
+      overlay.addEventListener('mouseleave', onMouseLeave);
+    });
   },
 
   // 6. SVG Donut Chart Generator (e.g. for Asset Allocation)
@@ -818,7 +847,14 @@ const FinanceEngine = {
   renderDonutChart(containerId, slices, observe = true) {
     const container = document.getElementById(containerId);
     if (!container) return;
-    container.innerHTML = '';
+
+    if (container.pendingAnimationFrame) {
+      cancelAnimationFrame(container.pendingAnimationFrame);
+    }
+
+    container.pendingAnimationFrame = requestAnimationFrame(() => {
+      container.pendingAnimationFrame = null;
+      container.innerHTML = '';
 
     container.chartData = { type: 'donut', slices };
     if (observe) {
@@ -901,8 +937,9 @@ const FinanceEngine = {
     val.textContent = FinanceEngine.formatINR(total);
     textGroup.appendChild(val);
 
-    svg.appendChild(textGroup);
-    container.appendChild(svg);
+      svg.appendChild(textGroup);
+      container.appendChild(svg);
+    });
   },
 
   // 7. CSV/JSON Export Utilities

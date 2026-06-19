@@ -294,8 +294,6 @@
           const currentSIP = startSIP * Math.pow(1 + stepUp / 100, y - 1);
           
           if (compoundingFreq === 'monthly') {
-            const compoundingFreq = state['compounding-freq'] || 'monthly';
-          if (compoundingFreq === 'monthly') {
             for (let m = 1; m <= 12; m++) {
               cumulativeInvested += currentSIP;
               runningBalance = (runningBalance + currentSIP) * (1 + i);
@@ -304,14 +302,6 @@
             const rate = annualRate / 100;
             const interestOnStart = runningBalance * rate;
             const interestOnDeposits = currentSIP * rate * 6.5;
-            cumulativeInvested += currentSIP * 12;
-            runningBalance = runningBalance + (currentSIP * 12) + interestOnStart + interestOnDeposits;
-          }
-          } else {
-            const rate = annualRate / 100;
-            const interestOnStart = runningBalance * rate;
-            const interestOnDeposits = currentSIP * rate * 6.5;
-            
             cumulativeInvested += currentSIP * 12;
             runningBalance = runningBalance + (currentSIP * 12) + interestOnStart + interestOnDeposits;
           }

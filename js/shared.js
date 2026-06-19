@@ -17,9 +17,14 @@
         }
       }
       originalValueDescriptor.set.call(this, val);
+      // Trigger words update for number inputs changed programmatically
+      if (this.type === 'number' && typeof updateInputWords === 'function') {
+        updateInputWords(this);
+      }
     }
   });
 })();
+
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize Theme
@@ -59,6 +64,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Setup Dynamic Inflation Injections
   injectInflationSetting();
+
+  // Setup Global Input Limits (max 100/35 years)
+  setupGlobalInputLimits();
+
+  // Setup Click to Copy results
+  setupMetricValueCopy();
+
+  // Load MathJax globally
+  loadMathJax();
 });
 
 // --- Theme Management ---
@@ -399,10 +413,21 @@ function setupDraggableLabels() {
 }
 
 function setupStepperButtons() {
-  document.body.addEventListener('click', (e) => {
-    const btn = e.target.closest('.step-btn');
-    if (!btn) return;
-    
+  let intervalId = null;
+  let timeoutId = null;
+
+  function stopStepping() {
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      timeoutId = null;
+    }
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  }
+
+  function stepValue(btn) {
     const wrapper = btn.closest('.input-wrapper');
     if (!wrapper) return;
     
@@ -426,9 +451,10 @@ function setupStepperButtons() {
     const max = input.hasAttribute('max') ? parseFloat(input.getAttribute('max')) : Infinity;
     
     let newVal = startVal;
-    if (btn.textContent.trim() === '+') {
+    const isPlus = btn.textContent.trim() === '+';
+    if (isPlus) {
       newVal += step;
-    } else if (btn.textContent.trim() === '-') {
+    } else {
       newVal -= step;
     }
     
@@ -442,6 +468,112 @@ function setupStepperButtons() {
     
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function startStepping(btn) {
+    stopStepping();
+    stepValue(btn);
+    // After 400ms, start stepping rapidly every 80ms
+    timeoutId = setTimeout(() => {
+      intervalId = setInterval(() => {
+        stepValue(btn);
+      }, 80);
+    }, 400);
+  }
+
+  document.body.addEventListener('mousedown', (e) => {
+    const btn = e.target.closest('.step-btn');
+    if (!btn || e.button !== 0) return;
+    if (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents) return;
+    startStepping(btn);
+  });
+
+  document.body.addEventListener('touchstart', (e) => {
+    const btn = e.target.closest('.step-btn');
+    if (!btn) return;
+    startStepping(btn);
+  }, { passive: true });
+
+  window.addEventListener('mouseup', stopStepping);
+  window.addEventListener('mouseleave', stopStepping);
+  window.addEventListener('touchend', stopStepping);
+  window.addEventListener('touchcancel', stopStepping);
+
+  document.body.addEventListener('click', (e) => {
+    const btn = e.target.closest('.step-btn');
+    if (btn) {
+      e.preventDefault();
+    }
+  });
+}
+
+function setupGlobalInputLimits() {
+  document.body.addEventListener('input', (e) => {
+    if (e.target.tagName === 'INPUT' && e.target.type === 'number') {
+      const id = e.target.id;
+      if (['years', 'duration', 'tenure', 'years_to_goal', 'years_to_fi', 'years_to_college', 'years_to_marriage'].includes(id)) {
+        let maxVal = 100;
+        if (id === 'tenure') {
+          maxVal = 35; // Cap loan tenure at 35 years
+        }
+        const val = parseFloat(e.target.value);
+        if (val > maxVal) {
+          e.target.value = maxVal;
+          e.target.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }
+    }
+  });
+}
+
+function setupMetricValueCopy() {
+  document.body.addEventListener('click', (e) => {
+    const valEl = e.target.closest('.metric-value');
+    if (!valEl) return;
+    
+    const textToCopy = valEl.textContent.trim();
+    if (!textToCopy || textToCopy === '-') return;
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+      let tooltip = valEl.querySelector('.copy-tooltip');
+      if (!tooltip) {
+        tooltip = document.createElement('span');
+        tooltip.className = 'copy-tooltip';
+        tooltip.textContent = 'Copied!';
+        tooltip.style.position = 'absolute';
+        tooltip.style.left = '50%';
+        tooltip.style.transform = 'translateX(-50%) translateY(-100%)';
+        tooltip.style.top = '-8px';
+        tooltip.style.background = 'var(--text-primary)';
+        tooltip.style.color = 'var(--bg-primary)';
+        tooltip.style.fontSize = '0.7rem';
+        tooltip.style.padding = '0.2rem 0.5rem';
+        tooltip.style.borderRadius = '4px';
+        tooltip.style.pointerEvents = 'none';
+        tooltip.style.zIndex = '100';
+        tooltip.style.opacity = '0';
+        tooltip.style.transition = 'opacity 0.2s, transform 0.2s';
+        
+        const computedStyle = window.getComputedStyle(valEl);
+        if (computedStyle.position === 'static') {
+          valEl.style.position = 'relative';
+        }
+        valEl.appendChild(tooltip);
+      }
+      
+      requestAnimationFrame(() => {
+        tooltip.style.opacity = '1';
+        tooltip.style.transform = 'translateX(-50%) translateY(-120%)';
+      });
+      
+      setTimeout(() => {
+        tooltip.style.opacity = '0';
+        tooltip.style.transform = 'translateX(-50%) translateY(-100%)';
+        setTimeout(() => tooltip.remove(), 200);
+      }, 1000);
+    }).catch(err => {
+      console.error('Could not copy text: ', err);
+    });
   });
 }
 
@@ -983,6 +1115,7 @@ function setupMetricWordsObserver() {
 
     if (tableChanged) {
       colorCodeTableCells();
+      setupTablePagination();
     }
     
     if (metricChanged) {
@@ -1002,6 +1135,7 @@ function setupMetricWordsObserver() {
     updateMetricColorCoding(el);
   });
   colorCodeTableCells();
+  setupTablePagination();
   adjustForInflation();
 
   // Input listeners
@@ -1141,12 +1275,34 @@ function triggerCalculatorRecalculate() {
   }
 }
 
+let scriptsLoaded = false;
+let scriptsLoading = false;
+let scriptLoadingCallbacks = [];
+
 function loadScreenshotScripts(callback) {
+  if (scriptsLoaded || (window.html2canvas && window.jspdf)) {
+    if (callback) callback();
+    return;
+  }
+
+  if (callback) {
+    scriptLoadingCallbacks.push(callback);
+  }
+
+  if (scriptsLoading) {
+    return;
+  }
+
+  scriptsLoading = true;
+
   let loadedCount = 0;
   function onScriptLoaded() {
     loadedCount++;
-    if (loadedCount === 2 && callback) {
-      callback();
+    if (loadedCount === 2) {
+      scriptsLoaded = true;
+      scriptsLoading = false;
+      scriptLoadingCallbacks.forEach(cb => cb());
+      scriptLoadingCallbacks = [];
     }
   }
 
@@ -1156,25 +1312,42 @@ function loadScreenshotScripts(callback) {
   if (window.html2canvas) {
     loadedCount++;
   } else {
-    const s1 = document.createElement('script');
-    s1.src = `${prefix}js/html2canvas.min.js`;
-    s1.onload = onScriptLoaded;
-    document.head.appendChild(s1);
+    let s1 = document.querySelector(`script[src*="html2canvas.min.js"]`);
+    if (!s1) {
+      s1 = document.createElement('script');
+      s1.src = `${prefix}js/html2canvas.min.js`;
+      s1.async = true;
+      s1.onload = onScriptLoaded;
+      document.head.appendChild(s1);
+    } else {
+      s1.addEventListener('load', onScriptLoaded);
+    }
   }
 
   if (window.jspdf) {
     loadedCount++;
   } else {
-    const s2 = document.createElement('script');
-    s2.src = `${prefix}js/jspdf.umd.min.js`;
-    s2.onload = onScriptLoaded;
-    document.head.appendChild(s2);
+    let s2 = document.querySelector(`script[src*="jspdf.umd.min.js"]`);
+    if (!s2) {
+      s2 = document.createElement('script');
+      s2.src = `${prefix}js/jspdf.umd.min.js`;
+      s2.async = true;
+      s2.onload = onScriptLoaded;
+      document.head.appendChild(s2);
+    } else {
+      s2.addEventListener('load', onScriptLoaded);
+    }
   }
 
-  if (loadedCount === 2 && callback) {
-    callback();
+  if (loadedCount === 2) {
+    scriptsLoaded = true;
+    scriptsLoading = false;
+    scriptLoadingCallbacks.forEach(cb => cb());
+    scriptLoadingCallbacks = [];
   }
 }
+
+let isGeneratingScreenshot = false;
 
 function injectScreenshotButton() {
   const isCalcPage = window.location.pathname.includes('/calculators/');
@@ -1260,6 +1433,9 @@ function injectScreenshotButton() {
         return;
       }
 
+      if (isGeneratingScreenshot) return;
+      isGeneratingScreenshot = true;
+
       btn.disabled = true;
       const originalText = btn.innerHTML;
       btn.innerHTML = shareType === 'pdf' ? 'Generating PDF...' : 'Generating PNG...';
@@ -1269,6 +1445,7 @@ function injectScreenshotButton() {
         if (!target) {
           btn.disabled = false;
           btn.innerHTML = originalText;
+          isGeneratingScreenshot = false;
           return;
         }
 
@@ -1352,9 +1529,36 @@ function injectScreenshotButton() {
         `;
         document.head.appendChild(style);
 
-        // Clone target
+        // --- Temporarily expand table to ALL rows before cloning ---
+        const originalTable = target.querySelector('#projections-table');
+        let savedPaginationState = null;
+        if (originalTable && originalTable.paginationState) {
+          // Save current state
+          savedPaginationState = { ...originalTable.paginationState };
+          // Force-show all rows
+          const tbody = originalTable.querySelector('tbody');
+          if (tbody) {
+            tbody.querySelectorAll('tr').forEach(row => { row.style.display = ''; });
+          }
+          // Hide pagination controls from live DOM temporarily
+          const liveControls = originalTable.closest('.table-card')?.querySelector('.table-pagination-controls');
+          if (liveControls) liveControls.style.visibility = 'hidden';
+        }
+
+        // Clone target (captures the expanded table)
         const clone = target.cloneNode(true);
         clone.classList.add('force-desktop-target');
+
+        // Restore original table pagination immediately after cloning
+        if (originalTable && savedPaginationState) {
+          originalTable.paginationState = savedPaginationState;
+          applyTablePagination(originalTable);
+          const liveControls = originalTable.closest('.table-card')?.querySelector('.table-pagination-controls');
+          if (liveControls) liveControls.style.visibility = '';
+        }
+
+        // Hide pagination controls in the clone (not needed in screenshot)
+        clone.querySelectorAll('.table-pagination-controls').forEach(el => el.style.display = 'none');
 
         // Create off-screen container styled at 1200px width
         const container = document.createElement('div');
@@ -1408,6 +1612,7 @@ function injectScreenshotButton() {
             // Restore original button
             btn.disabled = false;
             btn.innerHTML = originalText;
+            isGeneratingScreenshot = false;
 
             const baseFilename = `${document.title.split(' | ')[0].replace(/\s+/g, '_')}`;
 
@@ -1453,6 +1658,7 @@ function injectScreenshotButton() {
             document.head.removeChild(style);
             btn.disabled = false;
             btn.innerHTML = originalText;
+            isGeneratingScreenshot = false;
             console.error('Share generation failed:', err);
             FinanceEngine.showToast('Failed to share calculation');
           });
@@ -1541,3 +1747,146 @@ function triggerFileDownload(blob, filename) {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+// --- Table Pagination System ---
+
+function setupTablePagination() {
+  const table = document.getElementById('projections-table');
+  if (!table) return;
+
+  const card = table.closest('.table-card');
+  if (!card) return;
+
+  // Render controls placeholder if not present
+  let controls = card.querySelector('.table-pagination-controls');
+  if (!controls) {
+    controls = document.createElement('div');
+    controls.className = 'table-pagination-controls';
+    card.insertBefore(controls, table);
+  }
+
+  // Initialize state if not present
+  if (!table.paginationState) {
+    table.paginationState = {
+      currentPage: 1,
+      pageSize: 10
+    };
+  }
+
+  renderPaginationControls(table, controls);
+  applyTablePagination(table);
+}
+
+function renderPaginationControls(table, controlsEl) {
+  const state = table.paginationState;
+  const tbody = table.querySelector('tbody');
+  const totalRows = tbody ? tbody.querySelectorAll('tr').length : 0;
+  const pageSize = state.pageSize === 'all' ? totalRows : parseInt(state.pageSize, 10);
+  const totalPages = Math.ceil(totalRows / pageSize) || 1;
+
+  if (state.currentPage > totalPages) {
+    state.currentPage = totalPages;
+  }
+
+  controlsEl.innerHTML = `
+    <div class="pagination-left">
+      <span class="pagination-label">Rows per page:</span>
+      <div class="page-size-toggle">
+        <button class="size-btn ${state.pageSize === 10 ? 'active' : ''}" data-size="10">10</button>
+        <button class="size-btn ${state.pageSize === 50 ? 'active' : ''}" data-size="50">50</button>
+        <button class="size-btn ${state.pageSize === 'all' ? 'active' : ''}" data-size="all">All</button>
+      </div>
+    </div>
+    <div class="pagination-right">
+      <button class="page-nav-btn prev-btn" ${state.currentPage === 1 ? 'disabled' : ''} aria-label="Previous page">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+        </svg>
+      </button>
+      <span class="page-info">Page ${state.currentPage} of ${totalPages}</span>
+      <button class="page-nav-btn next-btn" ${state.currentPage === totalPages ? 'disabled' : ''} aria-label="Next page">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+        </svg>
+      </button>
+    </div>
+  `;
+
+  // Bind events
+  controlsEl.querySelectorAll('.size-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sizeAttr = btn.getAttribute('data-size');
+      state.pageSize = sizeAttr === 'all' ? 'all' : parseInt(sizeAttr, 10);
+      state.currentPage = 1;
+      applyTablePagination(table);
+      renderPaginationControls(table, controlsEl);
+    });
+  });
+
+  controlsEl.querySelector('.prev-btn').addEventListener('click', () => {
+    if (state.currentPage > 1) {
+      state.currentPage--;
+      applyTablePagination(table);
+      renderPaginationControls(table, controlsEl);
+    }
+  });
+
+  controlsEl.querySelector('.next-btn').addEventListener('click', () => {
+    if (state.currentPage < totalPages) {
+      state.currentPage++;
+      applyTablePagination(table);
+      renderPaginationControls(table, controlsEl);
+    }
+  });
+}
+
+function applyTablePagination(table) {
+  const state = table.paginationState;
+  if (!state) return;
+
+  const tbody = table.querySelector('tbody');
+  if (!tbody) return;
+
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  const totalRows = rows.length;
+  const pageSize = state.pageSize === 'all' ? totalRows : parseInt(state.pageSize, 10);
+
+  const startIdx = (state.currentPage - 1) * pageSize;
+  const endIdx = startIdx + pageSize;
+
+  rows.forEach((row, idx) => {
+    if (idx >= startIdx && idx < endIdx) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+}
+
+// --- Dynamic MathJax Loader ---
+
+function loadMathJax() {
+  if (window.MathJax) {
+    if (typeof window.MathJax.typeset === 'function') {
+      window.MathJax.typeset();
+    }
+    return;
+  }
+
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      displayMath: [['$$', '$$'], ['\\[', '\\]']],
+      processEscapes: true
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+  };
+
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+  script.async = true;
+  document.head.appendChild(script);
+}
+

@@ -626,6 +626,24 @@ input[type="text"]:focus, select:focus {
   font-weight: 700;
   letter-spacing: -0.02em;
   word-break: break-all;
+  cursor: pointer;
+  position: relative;
+  transition: opacity 0.15s ease;
+}
+
+.metric-value:hover {
+  opacity: 0.8;
+}
+
+.copy-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -4px;
+  border-width: 4px;
+  border-style: solid;
+  border-color: var(--text-primary) transparent transparent transparent;
 }
 
 .metric-sub {
@@ -1570,3 +1588,84 @@ input:checked + .slider-switch:before {
 .share-dropdown-item:hover svg {
   color: var(--accent-color);
 }
+
+/* Pagination Controls Styling */
+.table-pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.pagination-left, .pagination-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-size-toggle {
+  display: flex;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+  background-color: var(--card-bg);
+}
+
+.size-btn {
+  background: transparent;
+  border: none;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.size-btn + .size-btn {
+  border-left: 1px solid var(--border-color);
+}
+
+.size-btn:hover {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+}
+
+.size-btn.active {
+  background-color: var(--accent-color);
+  color: #ffffff;
+}
+
+.page-nav-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.page-nav-btn:hover:not(:disabled) {
+  background-color: var(--input-bg);
+  border-color: var(--text-secondary);
+}
+
+.page-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-weight: 500;
+  font-family: var(--font-sans);
+}
+

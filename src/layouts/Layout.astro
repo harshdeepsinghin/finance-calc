@@ -62,6 +62,16 @@ if (canonicalUrl.endsWith('/index.html')) {
   
   <link rel="canonical" href={canonicalUrl} />
   
+  <!-- Preconnect to external origins to optimize resource load times -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin />
+  {showAds && (
+    <>
+      <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin />
+      <link rel="preconnect" href="https://googleads.g.doubleclick.net" crossorigin />
+    </>
+  )}
+  
   <!-- Google AdSense -->
   {showAds && (
     <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`} crossorigin="anonymous"></script>

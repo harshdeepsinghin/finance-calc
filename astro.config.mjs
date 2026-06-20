@@ -6,7 +6,8 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://moneyinfuture.com',
   build: {
-    format: 'file'
+    format: 'file',
+    inlineStylesheets: 'always'
   },
   integrations: [sitemap()]
 });

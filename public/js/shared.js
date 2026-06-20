@@ -827,7 +827,7 @@ function initPreferences() {
               <span class="pref-desc">Display the amount in words (e.g. One Lakh) below numeric values</span>
             </div>
             <label class="switch">
-              <input type="checkbox" id="pref-show-words">
+              <input type="checkbox" id="pref-show-words" aria-label="Show Value in Words">
               <span class="slider-switch"></span>
             </label>
           </div>
@@ -838,7 +838,7 @@ function initPreferences() {
               <span class="pref-desc">Display the interactive drag sliders below each number input</span>
             </div>
             <label class="switch">
-              <input type="checkbox" id="pref-show-sliders">
+              <input type="checkbox" id="pref-show-sliders" aria-label="Show Input Range Sliders">
               <span class="slider-switch"></span>
             </label>
           </div>
@@ -849,7 +849,7 @@ function initPreferences() {
               <span class="pref-desc">Color-code digits by place value (Lakhs, Thousands, etc.) for readability</span>
             </div>
             <label class="switch">
-              <input type="checkbox" id="pref-color-coding">
+              <input type="checkbox" id="pref-color-coding" aria-label="Indian Number Color Coding">
               <span class="slider-switch"></span>
             </label>
           </div>
@@ -859,7 +859,7 @@ function initPreferences() {
               <span class="pref-title">Result Decimal Places</span>
               <span class="pref-desc">Number of decimal places to show in summary results (0, 1, or 2)</span>
             </div>
-            <select id="pref-decimal-places" style="width: auto; padding: 0.35rem 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-primary); font-size: 0.85rem; font-weight: 500; cursor: pointer; outline: none;">
+            <select id="pref-decimal-places" aria-label="Result Decimal Places" style="width: auto; padding: 0.35rem 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-primary); font-size: 0.85rem; font-weight: 500; cursor: pointer; outline: none;">
               <option value="0">0 (Integer)</option>
               <option value="1">1 Decimal Place</option>
               <option value="2">2 Decimal Places</option>
@@ -876,7 +876,7 @@ function initPreferences() {
               <span class="pref-desc">Render the interactive SVG projection charts</span>
             </div>
             <label class="switch">
-              <input type="checkbox" id="pref-show-graph">
+              <input type="checkbox" id="pref-show-graph" aria-label="Show Visual Projection Graph">
               <span class="slider-switch"></span>
             </label>
           </div>
@@ -887,7 +887,7 @@ function initPreferences() {
               <span class="pref-desc">Display the detailed yearly cash flow and tax breakdown tables</span>
             </div>
             <label class="switch">
-              <input type="checkbox" id="pref-show-table">
+              <input type="checkbox" id="pref-show-table" aria-label="Show Yearly Breakdown Table">
               <span class="slider-switch"></span>
             </label>
           </div>
@@ -898,7 +898,7 @@ function initPreferences() {
               <span class="pref-desc">Calculate and display inflation-adjusted real purchasing power</span>
             </div>
             <label class="switch">
-              <input type="checkbox" id="pref-show-inflation">
+              <input type="checkbox" id="pref-show-inflation" aria-label="Inflation Adjusted Values">
               <span class="slider-switch"></span>
             </label>
           </div>
@@ -909,7 +909,7 @@ function initPreferences() {
               <span class="pref-desc">Estimate LTCG, STCG, or slab rate taxes for gains</span>
             </div>
             <label class="switch">
-              <input type="checkbox" id="pref-show-taxation">
+              <input type="checkbox" id="pref-show-taxation" aria-label="Taxation Estimations">
               <span class="slider-switch"></span>
             </label>
           </div>
@@ -1258,7 +1258,7 @@ function injectInflationSetting() {
   item.innerHTML = `
     <span class="settings-bar-label">Inflation</span>
     <div class="input-wrapper" style="width:120px;">
-      <input type="number" id="inflation-rate" min="0" max="15" step="0.1" value="${prefRate}" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
+      <input type="number" id="inflation-rate" aria-label="Inflation rate percentage" min="0" max="15" step="0.1" value="${prefRate}" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
       <span class="input-suffix">%</span>
     </div>
   `;

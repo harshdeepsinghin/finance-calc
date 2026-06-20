@@ -294,7 +294,7 @@ const faqSchema = getFaqSchema(calc.seoContent);
         <div class="settings-bar-item">
           <span class="settings-bar-label">Inflation</span>
           <div class="input-wrapper" style="width:120px;">
-            <input type="number" id="inflation-rate" min="0" max="15" step="0.5" value="6" style="padding:0.4rem 0.5rem;font-size:0.9rem;" />
+            <input type="number" id="inflation-rate" aria-label="Inflation rate percentage" min="0" max="15" step="0.5" value="6" style="padding:0.4rem 0.5rem;font-size:0.9rem;" />
             <span class="input-suffix">%</span>
           </div>
         </div>
@@ -304,7 +304,7 @@ const faqSchema = getFaqSchema(calc.seoContent);
           <div class="settings-bar-item">
             <span class="settings-bar-label">Taxation</span>
             <div class="input-wrapper" style="width:260px;">
-              <select id="tax-type" style="font-size:0.85rem;padding:0.4rem 0.5rem;">
+              <select id="tax-type" aria-label="Taxation Type" style="font-size:0.85rem;padding:0.4rem 0.5rem;">
                 <option value="none">No Tax Estimation</option>
                 <option value="equity_ltcg" selected>Equity LTCG (12.5%, ₹1.25L exempt)</option>
                 <option value="equity_stcg">Equity STCG (20% flat)</option>
@@ -315,7 +315,7 @@ const faqSchema = getFaqSchema(calc.seoContent);
           <div class="settings-bar-item" id="custom-tax-group" style="display:none;">
             <span class="settings-bar-label">Slab Rate</span>
             <div class="input-wrapper" style="width:100px;">
-              <input type="number" id="custom-tax-rate" min="0" max="50" step="1" value="30" style="padding:0.4rem 0.5rem;font-size:0.9rem;" />
+              <input type="number" id="custom-tax-rate" aria-label="Slab Rate percentage" min="0" max="50" step="1" value="30" style="padding:0.4rem 0.5rem;font-size:0.9rem;" />
               <span class="input-suffix">%</span>
             </div>
           </div>

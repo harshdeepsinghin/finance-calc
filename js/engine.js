@@ -211,6 +211,10 @@ const FinanceEngine = {
       dec = decimals;
     } else if (includeSymbol) {
       dec = this.getDecimalPlacesPref();
+      // Auto-enforce 2 decimal places for small fractional values below 1000
+      if (Math.abs(value) < 1000 && value % 1 !== 0) {
+        dec = 2;
+      }
     }
     const formatted = new Intl.NumberFormat('en-IN', {
       minimumFractionDigits: dec,
@@ -231,6 +235,10 @@ const FinanceEngine = {
     let decimals = 0;
     if (includeSymbol) {
       decimals = this.getDecimalPlacesPref();
+      // Auto-enforce 2 decimal places for small fractional values below 1000
+      if (Math.abs(value) < 1000 && value % 1 !== 0) {
+        decimals = 2;
+      }
     } else {
       const rounded = Math.round(value * 100) / 100;
       decimals = (rounded % 1 !== 0) ? 2 : 0;

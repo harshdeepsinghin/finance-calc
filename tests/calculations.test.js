@@ -187,3 +187,27 @@ test('Taxation: verify config-driven tax calculations', () => {
   assert.equal(slabRes.tax, 30000);
   assert.equal(slabRes.taxableGains, 100000);
 });
+
+test('Formatting: auto-decimals for small fractional values below 1000', () => {
+  let mockPref = { decimalPlaces: 0 };
+  globalThis.localStorage = {
+    getItem(key) {
+      if (key === 'moneyinfuture_user_prefs') {
+        return JSON.stringify(mockPref);
+      }
+      return null;
+    }
+  };
+
+  // Enforces 2 decimals for value < 1000 with fraction even if pref is 0
+  assert.equal(FinanceEngine.formatINRSmart(12.7665, true), '₹12.77');
+  assert.equal(FinanceEngine.formatINR(12.7665, true), '₹12.77');
+
+  // Does not force decimals for whole numbers below 1000 under smart format
+  assert.equal(FinanceEngine.formatINRSmart(12.00, true), '₹12');
+
+  // Respects 0 decimal preference for values >= 1000
+  assert.equal(FinanceEngine.formatINRSmart(1234.56, true), '₹1,235');
+
+  delete globalThis.localStorage;
+});

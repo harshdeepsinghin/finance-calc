@@ -1383,8 +1383,8 @@ footer p {
 }
 
 .preferences-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   fill: currentColor;
   transition: transform 0.4s ease;
 }

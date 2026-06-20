@@ -3,26 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Step-Up SIP Calculator - India | FinPlan India</title>
+  <title>Step-Up SIP Calculator - India | MoneyInFuture</title>
   <meta name="description" content="Maximize compounding by stepping up your monthly SIP contributions annually. Model compound interest, target inflation rates, and capital gains tax on mutual funds.">
   <meta name="keywords" content="step-up sip calculator, mutual fund step up, annual step up sip, compounding planner">
-  <meta name="author" content="FinPlan India">
+  <meta name="author" content="MoneyInFuture">
   
   <!-- Open Graph -->
   <meta property="og:title" content="Step-Up SIP Calculator - Indian Mutual Fund & Personal Finance Planner">
   <meta property="og:description" content="Maximize compounding by stepping up your monthly SIP contributions annually. Model compound interest, target inflation rates, and capital gains tax on mutual funds.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://finplanindia.com/calculators/step-up-sip.html">
-  <meta property="og:site_name" content="FinPlan India">
+  <meta property="og:url" content="https://moneyinfuture.com/calculators/step-up-sip.html">
+  <meta property="og:site_name" content="MoneyInFuture">
   
-  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.3">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
   "@type": "FinancialCalculator",
   "name": "Step-Up SIP Calculator",
   "description": "Maximize compounding by stepping up your monthly SIP contributions annually. Model compound interest, target inflation rates, and capital gains tax on mutual funds.",
-  "url": "https://finplanindia.com/calculators/step-up-sip.html",
+  "url": "https://moneyinfuture.com/calculators/step-up-sip.html",
   "category": "Financial Tool"
 }
   </script>
@@ -259,16 +259,16 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js?v=1.0.4"></script>
-  <script src="../js/shared.js?v=1.0.4"></script>
+  <script src="../js/engine.js?v=1.0.3"></script>
+  <script src="../js/shared.js?v=1.0.3"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
       
-      const defaults = { starting_sip: 10000, step_up_pct: 10, return_rate: 12, years: 15, 'tax-type': 'equity_ltcg', 'custom-tax-rate': 12.5, 'inflation-rate': 6, 'compounding-freq': 'monthly' };
+      const defaults = { starting_sip: 10000, step_up_pct: 10, return_rate: 12, years: 15, 'tax-type': 'equity_ltcg', 'custom-tax-rate': 12.5, 'inflation-rate': 6 };
       let state = FinanceEngine.getUrlParams(defaults);
       
-      const elements = ['starting_sip', 'step_up_pct', 'return_rate', 'years', 'tax-type', 'custom-tax-rate', 'inflation-rate', 'compounding-freq'];
+      const elements = ['starting_sip', 'step_up_pct', 'return_rate', 'years', 'tax-type', 'custom-tax-rate', 'inflation-rate'];
       
       function syncUI() {
         elements.forEach(id => {
@@ -310,17 +310,26 @@
           const currentSIP = startSIP * Math.pow(1 + stepUp / 100, y - 1);
           
           if (compoundingFreq === 'monthly') {
+            const compoundingFreq = state['compounding-freq'] || 'monthly';
+          if (compoundingFreq === 'monthly') {
             for (let m = 1; m <= 12; m++) {
               cumulativeInvested += currentSIP;
               runningBalance = (runningBalance + currentSIP) * (1 + i);
             }
           } else {
-            // Annual compounding with mid-year approximation for monthly SIPs
-            const annualRateDecimal = annualRate / 100;
-            const interestOnPrior = runningBalance * annualRateDecimal;
-            const interestOnDeposits = currentSIP * 12 * annualRateDecimal * (6.5 / 12);
+            const rate = annualRate / 100;
+            const interestOnStart = runningBalance * rate;
+            const interestOnDeposits = currentSIP * rate * 6.5;
             cumulativeInvested += currentSIP * 12;
-            runningBalance = runningBalance + interestOnPrior + (currentSIP * 12) + interestOnDeposits;
+            runningBalance = runningBalance + (currentSIP * 12) + interestOnStart + interestOnDeposits;
+          }
+          } else {
+            const rate = annualRate / 100;
+            const interestOnStart = runningBalance * rate;
+            const interestOnDeposits = currentSIP * rate * 6.5;
+            
+            cumulativeInvested += currentSIP * 12;
+            runningBalance = runningBalance + (currentSIP * 12) + interestOnStart + interestOnDeposits;
           }
           
           const runningRealBalance = FinanceEngine.getRealValue(runningBalance, inflationRate, y);

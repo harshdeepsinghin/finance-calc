@@ -26,11 +26,11 @@ function getCalculatorHtml(calc) {
     let suffixHtml = '';
     const id = input.id.toLowerCase();
     const label = input.label.toLowerCase();
-    
+
     if (id.includes('sip') || id.includes('amount') || id.includes('principal') || id.includes('withdrawal') || id.includes('lump') || id.includes('corpus') || id.includes('worth') || id.includes('cost') || id.includes('payment') || id.includes('value') || id.includes('rent') || id.includes('salary') || id.includes('fee') || id.includes('income') || id.includes('expense') || id.includes('emi') || id.includes('loan') || id.includes('cap') || label.includes('₹') || label.includes('amount') || /\brs\b/.test(label) || label.includes('rupees') || label.includes('investment') || label.includes('value')) {
       prefixHtml = `<span class="input-prefix">₹</span>`;
     }
-    
+
     if (id.includes('rate') || id.includes('return') || id.includes('percent') || id.includes('inflation') || id.includes('tax') || id.includes('ratio') || id.includes('allocation') || id.includes('yield') || label.includes('%') || label.includes('rate') || label.includes('return')) {
       suffixHtml = `<span class="input-suffix">%</span>`;
     } else if (id.includes('year') || id.includes('duration') || id.includes('period') || id.includes('term') || id.includes('age') || label.includes('year') || label.includes('duration') || label.includes('period')) {
@@ -38,7 +38,7 @@ function getCalculatorHtml(calc) {
     } else if (id.includes('month') || label.includes('month')) {
       suffixHtml = `<span class="input-suffix">Mo</span>`;
     }
-    
+
     // Clean up label of any unit suffix to avoid redundancy
     let displayLabel = input.label.replace(/\s*\([\u20B9₹%]\)/g, '').trim();
     displayLabel = displayLabel.replace(/\s*\(years\)/gi, '').trim();
@@ -48,7 +48,7 @@ function getCalculatorHtml(calc) {
       const stepVal = input.step || 1;
       const minVal = input.min !== undefined ? input.min : 0;
       const maxVal = input.max !== undefined ? input.max : 1000000000;
-      
+
       inputsHtml += `
         <div class="input-group">
           <div class="input-label-row">
@@ -203,7 +203,7 @@ function getCalculatorHtml(calc) {
     "@type": "FinancialCalculator",
     "name": calc.title,
     "description": calc.metaDescription,
-    "url": `https://finplanindia.com/calculators/${calc.filename}`,
+    "url": `https://moneyinfuture.com/calculators/${calc.filename}`,
     "category": "Financial Tool"
   };
 
@@ -212,17 +212,17 @@ function getCalculatorHtml(calc) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${calc.title} - India | FinPlan India</title>
+  <title>${calc.title} - India | MoneyInFuture</title>
   <meta name="description" content="${calc.metaDescription}">
   <meta name="keywords" content="${calc.keywords}">
-  <meta name="author" content="FinPlan India">
+  <meta name="author" content="MoneyInFuture">
   
   <!-- Open Graph -->
   <meta property="og:title" content="${calc.title} - Indian Mutual Fund & Personal Finance Planner">
   <meta property="og:description" content="${calc.metaDescription}">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://finplanindia.com/calculators/${calc.filename}">
-  <meta property="og:site_name" content="FinPlan India">
+  <meta property="og:url" content="https://moneyinfuture.com/calculators/${calc.filename}">
+  <meta property="og:site_name" content="MoneyInFuture">
   
   <link rel="stylesheet" href="../css/style.css?v=1.0.3">
   <script type="application/ld+json">
@@ -1262,15 +1262,14 @@ const calculators = [
                 balance = 0;
                 continue;
               }
-              const interest = balance * i;
-              yInterest += interest;
-              balance = balance + interest;
-              
               if (!isWaiting) {
                 const actualWithdraw = Math.min(balance, withdrawal);
                 yWithdrawn += actualWithdraw;
                 balance -= actualWithdraw;
               }
+              const interest = balance * i;
+              yInterest += interest;
+              balance = balance + interest;
             }
           } else {
             // Yearly compounding
@@ -1462,29 +1461,31 @@ const calculators = [
         
         let reqCorpus = 0;
         if (compoundingFreq === 'monthly') {
+          // Annuity-due: withdrawal at beginning of each month
           reqCorpus = withdrawal * ((1 - Math.pow(1 + i, -months)) / i) * (1 + i);
         } else {
-          // Binary search for required corpus under yearly compounding
+          // Binary search for required corpus under yearly compounding.
+          // FIX: use forced-withdrawal — if balance drops below zero after a required
+          // withdrawal, the corpus is insufficient (ok = false). Previously Math.min()
+          // silently capped the withdrawal so balance never went negative, causing the
+          // binary search to converge near zero.
           let low = 0, high = withdrawal * months * 2;
           for (let iter = 0; iter < 100; iter++) {
             const mid = (low + high) / 2;
             let balance = mid;
             let ok = true;
             for (let y = 1; y <= years; y++) {
-              let yWithdrawn = 0;
+              const yearStart = balance;
               for (let m = 1; m <= 12; m++) {
-                const actualWithdraw = Math.min(balance, withdrawal);
-                balance -= actualWithdraw;
-                yWithdrawn += actualWithdraw;
+                balance -= withdrawal; // forced: must pay full withdrawal
+                if (balance < -0.01) { ok = false; break; }
               }
-              if (balance < 0) {
-                ok = false;
-                break;
-              }
-              const yInterest = Math.max(0, balance * (r / 100));
+              if (!ok) break;
+              // Yearly interest on starting balance minus mid-year approximation for withdrawals
+              const yInterest = Math.max(0, yearStart * (r / 100) - withdrawal * 12 * (r / 100) * (6.5 / 12));
               balance += yInterest;
             }
-            if (balance >= 0) high = mid;
+            if (ok) high = mid;
             else low = mid;
           }
           reqCorpus = high;
@@ -1504,18 +1505,30 @@ const calculators = [
           const beg = balance;
           let yInterest = 0;
           let yWithdrawn = 0;
-          for (let m = 1; m <= 12; m++) {
-            if (balance <= 0) continue;
-            
-            // Withdrawal at beginning of month
-            const actualWithdraw = Math.min(balance, withdrawal);
-            balance -= actualWithdraw;
-            yWithdrawn += actualWithdraw;
-            
-            const interest = balance * i;
-            balance += interest;
-            yInterest += interest;
+
+          if (compoundingFreq === 'monthly') {
+            for (let m = 1; m <= 12; m++) {
+              if (balance <= 0) continue;
+              // Withdrawal at beginning of month (annuity-due)
+              const actualWithdraw = Math.min(balance, withdrawal);
+              balance -= actualWithdraw;
+              yWithdrawn += actualWithdraw;
+              const interest = balance * i;
+              balance += interest;
+              yInterest += interest;
+            }
+          } else {
+            // Yearly compounding: forced monthly withdrawals, then one annual interest credit
+            for (let m = 1; m <= 12; m++) {
+              if (balance <= 0) continue;
+              const actualWithdraw = Math.min(balance, withdrawal);
+              balance -= actualWithdraw;
+              yWithdrawn += actualWithdraw;
+            }
+            yInterest = Math.max(0, beg * (r / 100) - withdrawal * 12 * (r / 100) * (6.5 / 12));
+            balance += yInterest;
           }
+
           tableRows.push([
             y,
             beg,
@@ -3817,7 +3830,7 @@ calculators.forEach(calc => {
     'swp.html', 'reverse-swp.html', 'step-up-swp.html', 'retirement.html', 'fire.html',
     'goal.html', 'child-corpus.html', 'house-down-payment.html', 'marriage-planner.html', 'education-planner.html'
   ];
-  
+
   if (compoundingFiles.includes(calc.filename)) {
     calc.supportCompounding = true;
     if (!calc.bindingScript.includes('compounding-freq')) {
@@ -4123,12 +4136,12 @@ calculators.forEach(calc => {
           }`
     );
   }
-  
+
   if (calc.supportTax) {
     calc.bindingScript = calc.bindingScript
       .replace(/'tax-type'\s*:\s*'equity'/g, "'tax-type': 'equity_ltcg'")
       .replace(/'custom-tax-rate'\s*:\s*20/g, "'custom-tax-rate': 12.5");
-      
+
     calc.bindingScript = calc.bindingScript.replace(
       /customTaxGroup\.style\.display\s*=\s*state\['tax-type'\]\s*===\s*'custom'\s*\?\s*'block'\s*:\s*'none';/g,
       "customTaxGroup.style.display = (state['tax-type'] === 'custom' || state['tax-type'] === 'slab') ? 'block' : 'none';"
@@ -4146,7 +4159,7 @@ calculators.forEach(calc => {
     .replace(/document\.getElementById\('btn-export-json'\)\.onclick\s*=\s*/g, "if (document.getElementById('btn-export-json')) document.getElementById('btn-export-json').onclick = ")
     .replace(/document\.getElementById\('btn-copy-table'\)\.onclick\s*=\s*/g, "if (document.getElementById('btn-copy-table')) document.getElementById('btn-copy-table').onclick = ")
     .replace(/document\.getElementById\('btn-copy-table'\)\.style\.display\s*=\s*/g, "if (document.getElementById('btn-copy-table')) document.getElementById('btn-copy-table').style.display = ");
-  
+
   const filePath = path.join(calcDir, calc.filename);
   const html = getCalculatorHtml(calc);
   fs.writeFileSync(filePath, html, 'utf8');
@@ -4245,24 +4258,24 @@ function getDashboardHtml() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FinPlan India - Blazing Fast Financial Calculators</title>
+  <title>MoneyInFuture - Blazing Fast Financial Calculators</title>
   <meta name="description" content="Blazing-fast, zero-tracker, offline-first personal finance and mutual fund calculators tailored for Indian retail investors. Model SIP, Step-Up SIP, SWP, CAGR, XIRR, EMI and tax.">
   <meta name="keywords" content="financial calculators india, mutual fund calculator, sip step up, tax calculator, retirement planner india, emergency fund cagr, loan prepayment">
-  <meta name="author" content="FinPlan India">
+  <meta name="author" content="MoneyInFuture">
   
   <!-- Open Graph -->
-  <meta property="og:title" content="FinPlan India - Blazing Fast Financial Calculators for Indian Investors">
+  <meta property="og:title" content="MoneyInFuture - Blazing Fast Financial Calculators for Indian Investors">
   <meta property="og:description" content="Contingency fund planners, mutual fund step ups, and retirement planning running entirely in-browser. Clean Vercel-like design with no tracking or cookies.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://finplanindia.com/">
+  <meta property="og:url" content="https://moneyinfuture.com/">
   
   <link rel="stylesheet" href="css/style.css?v=1.0.3">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "FinPlan India",
-      "url": "https://finplanindia.com/",
+      "name": "MoneyInFuture",
+      "url": "https://moneyinfuture.com/",
       "description": "Blazing-fast financial calculators for Indian retail investors"
     }
   </script>
@@ -4301,10 +4314,10 @@ console.log('Generated: index.html');
 
 function getSitemap() {
   const urls = [
-    'https://finplanindia.com/',
-    ...calculators.map(c => `https://finplanindia.com/calculators/${c.filename}`)
+    'https://moneyinfuture.com/',
+    ...calculators.map(c => `https://moneyinfuture.com/calculators/${c.filename}`)
   ];
-  
+
   let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
   xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
   urls.forEach(url => {
@@ -4312,7 +4325,7 @@ function getSitemap() {
     xml += `    <loc>${url}</loc>\n`;
     xml += '    <lastmod>2026-06-03</lastmod>\n';
     xml += '    <changefreq>monthly</changefreq>\n';
-    xml += '    <priority>' + (url === 'https://finplanindia.com/' ? '1.0' : '0.8') + '</priority>\n';
+    xml += '    <priority>' + (url === 'https://moneyinfuture.com/' ? '1.0' : '0.8') + '</priority>\n';
     xml += '  </url>\n';
   });
   xml += '</urlset>';
@@ -4325,7 +4338,7 @@ console.log('Generated: sitemap.xml');
 const robotsTxt = `User-agent: *
 Allow: /
 
-Sitemap: https://finplanindia.com/sitemap.xml
+Sitemap: https://moneyinfuture.com/sitemap.xml
 `;
 fs.writeFileSync(path.join(__dirname, 'robots.txt'), robotsTxt, 'utf8');
 console.log('Generated: robots.txt');

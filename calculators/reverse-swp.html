@@ -3,26 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Reverse SWP Calculator - India | FinPlan India</title>
+  <title>Reverse SWP Calculator - India | MoneyInFuture</title>
   <meta name="description" content="Find the required initial corpus to generate a specific monthly withdrawal income for retirement without running out of money.">
   <meta name="keywords" content="reverse swp, required retirement corpus, target swp calculator, retirement income planning">
-  <meta name="author" content="FinPlan India">
+  <meta name="author" content="MoneyInFuture">
   
   <!-- Open Graph -->
   <meta property="og:title" content="Reverse SWP Calculator - Indian Mutual Fund & Personal Finance Planner">
   <meta property="og:description" content="Find the required initial corpus to generate a specific monthly withdrawal income for retirement without running out of money.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://finplanindia.com/calculators/reverse-swp.html">
-  <meta property="og:site_name" content="FinPlan India">
+  <meta property="og:url" content="https://moneyinfuture.com/calculators/reverse-swp.html">
+  <meta property="og:site_name" content="MoneyInFuture">
   
-  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.3">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
   "@type": "FinancialCalculator",
   "name": "Reverse SWP Calculator",
   "description": "Find the required initial corpus to generate a specific monthly withdrawal income for retirement without running out of money.",
-  "url": "https://finplanindia.com/calculators/reverse-swp.html",
+  "url": "https://moneyinfuture.com/calculators/reverse-swp.html",
   "category": "Financial Tool"
 }
   </script>
@@ -201,16 +201,15 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js?v=1.0.4"></script>
-  <script src="../js/shared.js?v=1.0.4"></script>
+  <script src="../js/engine.js?v=1.0.3"></script>
+  <script src="../js/shared.js?v=1.0.3"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
       
-      const defaults = { desired_withdrawal: 50000, return_rate: 8, years: 20, 'compounding-freq': 'monthly' };
+      const defaults = { desired_withdrawal: 50000, return_rate: 8, years: 20 };
       let state = FinanceEngine.getUrlParams(defaults);
-      
-      const elements = ['desired_withdrawal', 'return_rate', 'years', 'compounding-freq'];
+      const elements = ['desired_withdrawal', 'return_rate', 'years'];
       
       function syncUI() {
         elements.forEach(id => {
@@ -235,29 +234,31 @@
         
         let reqCorpus = 0;
         if (compoundingFreq === 'monthly') {
+          // Annuity-due: withdrawal at beginning of each month
           reqCorpus = withdrawal * ((1 - Math.pow(1 + i, -months)) / i) * (1 + i);
         } else {
-          // Binary search for required corpus under yearly compounding
+          // Binary search for required corpus under yearly compounding.
+          // FIX: use forced-withdrawal — if balance drops below zero after a required
+          // withdrawal, the corpus is insufficient (ok = false). Previously Math.min()
+          // silently capped the withdrawal so balance never went negative, causing the
+          // binary search to converge near zero.
           let low = 0, high = withdrawal * months * 2;
           for (let iter = 0; iter < 100; iter++) {
             const mid = (low + high) / 2;
             let balance = mid;
             let ok = true;
             for (let y = 1; y <= years; y++) {
-              let yWithdrawn = 0;
+              const yearStart = balance;
               for (let m = 1; m <= 12; m++) {
-                const actualWithdraw = Math.min(balance, withdrawal);
-                balance -= actualWithdraw;
-                yWithdrawn += actualWithdraw;
+                balance -= withdrawal; // forced: must pay full withdrawal
+                if (balance < -0.01) { ok = false; break; }
               }
-              if (balance < 0) {
-                ok = false;
-                break;
-              }
-              const yInterest = Math.max(0, balance * (r / 100));
+              if (!ok) break;
+              // Yearly interest on starting balance minus mid-year approximation for withdrawals
+              const yInterest = Math.max(0, yearStart * (r / 100) - withdrawal * 12 * (r / 100) * (6.5 / 12));
               balance += yInterest;
             }
-            if (balance >= 0) high = mid;
+            if (ok) high = mid;
             else low = mid;
           }
           reqCorpus = high;
@@ -277,18 +278,30 @@
           const beg = balance;
           let yInterest = 0;
           let yWithdrawn = 0;
-          for (let m = 1; m <= 12; m++) {
-            if (balance <= 0) continue;
-            
-            // Withdrawal at beginning of month
-            const actualWithdraw = Math.min(balance, withdrawal);
-            balance -= actualWithdraw;
-            yWithdrawn += actualWithdraw;
-            
-            const interest = balance * i;
-            balance += interest;
-            yInterest += interest;
+
+          if (compoundingFreq === 'monthly') {
+            for (let m = 1; m <= 12; m++) {
+              if (balance <= 0) continue;
+              // Withdrawal at beginning of month (annuity-due)
+              const actualWithdraw = Math.min(balance, withdrawal);
+              balance -= actualWithdraw;
+              yWithdrawn += actualWithdraw;
+              const interest = balance * i;
+              balance += interest;
+              yInterest += interest;
+            }
+          } else {
+            // Yearly compounding: forced monthly withdrawals, then one annual interest credit
+            for (let m = 1; m <= 12; m++) {
+              if (balance <= 0) continue;
+              const actualWithdraw = Math.min(balance, withdrawal);
+              balance -= actualWithdraw;
+              yWithdrawn += actualWithdraw;
+            }
+            yInterest = Math.max(0, beg * (r / 100) - withdrawal * 12 * (r / 100) * (6.5 / 12));
+            balance += yInterest;
           }
+
           tableRows.push([
             y,
             beg,

@@ -3,26 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lump Sum Calculator - India | FinPlan India</title>
+  <title>Lump Sum Calculator - India | MoneyInFuture</title>
   <meta name="description" content="Calculate compound returns on lump sum investments. Estimate mutual fund or equity growth using standard annual CAGR rates, taxes, and inflation.">
   <meta name="keywords" content="lump sum calculator, mutual fund lump sum, compound interest, standard cagr">
-  <meta name="author" content="FinPlan India">
+  <meta name="author" content="MoneyInFuture">
   
   <!-- Open Graph -->
   <meta property="og:title" content="Lump Sum Calculator - Indian Mutual Fund & Personal Finance Planner">
   <meta property="og:description" content="Calculate compound returns on lump sum investments. Estimate mutual fund or equity growth using standard annual CAGR rates, taxes, and inflation.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://finplanindia.com/calculators/lump-sum.html">
-  <meta property="og:site_name" content="FinPlan India">
+  <meta property="og:url" content="https://moneyinfuture.com/calculators/lump-sum.html">
+  <meta property="og:site_name" content="MoneyInFuture">
   
-  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.3">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
   "@type": "FinancialCalculator",
   "name": "Lump Sum Calculator",
   "description": "Calculate compound returns on lump sum investments. Estimate mutual fund or equity growth using standard annual CAGR rates, taxes, and inflation.",
-  "url": "https://finplanindia.com/calculators/lump-sum.html",
+  "url": "https://moneyinfuture.com/calculators/lump-sum.html",
   "category": "Financial Tool"
 }
   </script>
@@ -238,16 +238,16 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js?v=1.0.4"></script>
-  <script src="../js/shared.js?v=1.0.4"></script>
+  <script src="../js/engine.js?v=1.0.3"></script>
+  <script src="../js/shared.js?v=1.0.3"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
       
-      const defaults = { principal: 100000, return_rate: 12, years: 10, 'tax-type': 'equity_ltcg', 'custom-tax-rate': 12.5, 'inflation-rate': 6, 'compounding-freq': 'monthly' };
+      const defaults = { principal: 100000, return_rate: 12, years: 10, 'tax-type': 'equity_ltcg', 'custom-tax-rate': 12.5, 'inflation-rate': 6 };
       let state = FinanceEngine.getUrlParams(defaults);
       
-      const elements = ['principal', 'return_rate', 'years', 'tax-type', 'custom-tax-rate', 'inflation-rate', 'compounding-freq'];
+      const elements = ['principal', 'return_rate', 'years', 'tax-type', 'custom-tax-rate', 'inflation-rate'];
       
       function syncUI() {
         elements.forEach(id => {

@@ -1,0 +1,12 @@
+{
+  "name": "money-in-future-calculators",
+  "version": "1.0.0",
+  "description": "Calculations verification test suite for MoneyInFuture financial calculators",
+  "main": "js/engine.js",
+  "scripts": {
+    "test": "node --test tests/calculations.test.js"
+  },
+  "type": "commonjs",
+  "author": "MoneyInFuture",
+  "license": "ISC"
+}

@@ -1,4 +1,4 @@
-# FinPlan India - Premium static financial calculators
+# MoneyInFuture - Premium static financial calculators
 
 A blazing-fast, lightweight, offline-first personal finance planner and calculators suite tailored for Indian retail investors. Built with a minimal, premium aesthetic inspired by Apple, Vercel, and Linear, using **zero external dependencies, zero frameworks, and zero tracking**.
 

@@ -1,55 +1,32 @@
-// Intercept value updates on active number inputs to allow decimal typing without resetting values or moving cursors
-(function() {
-  const originalValueDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
-  Object.defineProperty(HTMLInputElement.prototype, 'value', {
-    get() {
-      return originalValueDescriptor.get.call(this);
-    },
-    set(val) {
-      if (document.activeElement === this && this.type === 'number') {
-        if (typeof val === 'number' && isNaN(val)) {
-          return;
-        }
-        const currentNum = parseFloat(this.value);
-        const newNum = parseFloat(val);
-        if (!isNaN(currentNum) && !isNaN(newNum) && currentNum === newNum) {
-          return;
-        }
-      }
-      originalValueDescriptor.set.call(this, val);
-      // Trigger words update for number inputs changed programmatically
-      if (this.type === 'number' && typeof updateInputWords === 'function') {
-        updateInputWords(this);
-      }
-    }
-  });
-})();
+// Note: The previous HTMLInputElement.prototype.value monkey-patch has been removed.
+// It caused unexpected side effects and performance overhead across all inputs.
+// Decimal typing is handled by comparing parsed values in syncUI() instead.
 
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize Theme
   initTheme();
-  
+
   // Inject Global Components
   injectHeader();
   injectSidebar();
   injectFooter();
-  
+
   // Setup Settings Collapsible Toggles
   setupSettingsToggles();
-  
+
   // Highlight Active Link in Sidebar
   highlightActiveLink();
-  
+
   // Setup Sidebar Collapsible
   setupSidebarToggle();
-  
+
   // Setup Draggable Labels (Infinite Rollers)
   setupDraggableLabels();
-  
+
   // Setup Step Increment/Decrement Buttons
   setupStepperButtons();
-  
+
   // Setup Search Modal
   setupSearch();
 
@@ -71,8 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Setup Click to Copy results
   setupMetricValueCopy();
 
-  // Load MathJax globally
-  loadMathJax();
+  // Load MathJax only on pages that actually contain TeX math delimiters
+  maybeLoadMathJax();
 
   // Setup range sliders
   setupGlobalSliders();
@@ -83,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function initTheme() {
   const savedTheme = localStorage.getItem('theme');
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  
+
   if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
     document.documentElement.setAttribute('data-theme', 'dark');
   } else {
@@ -94,10 +71,10 @@ function initTheme() {
 function toggleTheme() {
   const currentTheme = document.documentElement.getAttribute('data-theme');
   const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-  
+
   document.documentElement.setAttribute('data-theme', newTheme);
   localStorage.setItem('theme', newTheme);
-  
+
   // Update button icons
   updateThemeIcon();
 }
@@ -105,10 +82,10 @@ function toggleTheme() {
 function updateThemeIcon() {
   const currentTheme = document.documentElement.getAttribute('data-theme');
   const btns = document.querySelectorAll('.theme-toggle-btn');
-  
+
   const sunIcon = `<svg viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-12.37c-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06c.39-.39.39-1.03 0-1.41zm-12.37 12.37c-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06c.39-.39.39-1.03 0-1.41z"/></svg>`;
   const moonIcon = `<svg viewBox="0 0 24 24"><path d="M9.37 5.51c-.18-.64-.93-.86-1.43-.44-1.97 1.67-3.22 4.14-3.22 6.93 0 4.97 4.03 9 9 9 2.79 0 5.26-1.25 6.93-3.22.42-.5.2-1.25-.44-1.43-4.9-.73-8.87-4.7-9.6-9.6z"/></svg>`;
-  
+
   btns.forEach(btn => {
     btn.innerHTML = currentTheme === 'dark' ? sunIcon : moonIcon;
   });
@@ -119,10 +96,10 @@ function updateThemeIcon() {
 function injectHeader() {
   const headerContainer = document.getElementById('global-header');
   if (!headerContainer) return;
-  
+
   const isCalcPage = window.location.pathname.includes('/calculators/');
   const homePath = isCalcPage ? '../index.html' : 'index.html';
-  
+
   headerContainer.innerHTML = `
     <div class="logo-section" style="display: flex; align-items: center; gap: 0.75rem;">
     <button class="sidebar-toggle-btn" id="sidebar-toggle" aria-label="Toggle sidebar" style="margin-right: 0.25rem;">
@@ -136,7 +113,7 @@ function injectHeader() {
         <svg class="logo-icon" viewBox="0 0 24 24">
           <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
         </svg>
-        <span class="logo-text">FinPlan India</span>
+        <span class="logo-text">MoneyInFuture</span>
       </a>
     </div>
     <div class="header-actions" style="display: flex; align-items: center; gap: 0.5rem;">
@@ -153,9 +130,9 @@ function injectHeader() {
       <button class="theme-toggle-btn" aria-label="Toggle theme"></button>
     </div>
   `;
-  
+
   updateThemeIcon();
-  
+
   const toggleBtn = headerContainer.querySelector('.theme-toggle-btn');
   if (toggleBtn) {
     toggleBtn.addEventListener('click', toggleTheme);
@@ -171,10 +148,10 @@ function injectHeader() {
 function injectSidebar() {
   const sidebarContainer = document.getElementById('global-sidebar');
   if (!sidebarContainer) return;
-  
+
   const isCalcPage = window.location.pathname.includes('/calculators/');
   const pathPrefix = isCalcPage ? '' : 'calculators/';
-  
+
   const categories = [
     {
       title: 'SIP & Mutual Funds',
@@ -227,7 +204,7 @@ function injectSidebar() {
       ]
     }
   ];
-  
+
   let sidebarHtml = '';
   categories.forEach(cat => {
     sidebarHtml += `
@@ -243,18 +220,28 @@ function injectSidebar() {
     });
     sidebarHtml += `</ul>`;
   });
-  
+
   sidebarContainer.innerHTML = sidebarHtml;
 }
 
 function injectFooter() {
   const footerContainer = document.getElementById('global-footer');
   if (!footerContainer) return;
-  
+
+  const isCalcPage = window.location.pathname.includes('/calculators/');
+  const rootPath = isCalcPage ? '../' : '';
+
   footerContainer.innerHTML = `
-    <p>&copy; ${new Date().getFullYear()} FinPlan India. Made for Indian Investors. Blazing fast, lightweight, and offline-first.</p>
+    <div class="footer-links" style="display:flex;flex-wrap:wrap;gap:0.5rem 1.5rem;margin-bottom:0.75rem;font-size:0.82rem;">
+      <a href="${rootPath}about.html" style="color:var(--text-secondary);text-decoration:none;">About</a>
+      <a href="${rootPath}privacy-policy.html" style="color:var(--text-secondary);text-decoration:none;">Privacy Policy</a>
+      <a href="${rootPath}terms.html" style="color:var(--text-secondary);text-decoration:none;">Terms of Use</a>
+      <a href="${rootPath}disclaimer.html" style="color:var(--text-secondary);text-decoration:none;">Disclaimer</a>
+      <a href="${rootPath}contact.html" style="color:var(--text-secondary);text-decoration:none;">Contact</a>
+    </div>
+    <p>&copy; ${new Date().getFullYear()} MoneyInFuture. Made for Indian Investors. Blazing fast, lightweight, and offline-first.</p>
     <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
-      Calculations are for illustrative purposes and based on CAGR returns. All calculators run completely in your browser. No data leaves your device.
+      Calculations are for illustrative purposes only and based on assumed CAGR returns. <strong>This is not financial, tax, or investment advice.</strong> All calculators run completely in your browser — no data leaves your device.
     </p>
   `;
 }
@@ -266,7 +253,7 @@ function setupSettingsToggles() {
   const monthlyBtn = document.getElementById('freq-monthly-btn');
   const yearlyBtn = document.getElementById('freq-yearly-btn');
   const freqInput = document.getElementById('compounding-freq');
-  
+
   if (monthlyBtn && yearlyBtn) {
     const updateButtons = (freq) => {
       monthlyBtn.classList.toggle('toggle-btn-active', freq === 'monthly');
@@ -300,7 +287,7 @@ function setupSettingsToggles() {
     // Synchronize initial visual button state from compounding-freq input value on load
     if (freqInput) {
       updateButtons(freqInput.value || 'monthly');
-      
+
       // Listen to inputs/change on the compounding-freq element to keep UI buttons in sync
       freqInput.addEventListener('input', (e) => updateButtons(e.target.value));
       freqInput.addEventListener('change', (e) => updateButtons(e.target.value));
@@ -323,7 +310,7 @@ function highlightActiveLink() {
   const path = window.location.pathname;
   const filename = path.split('/').pop();
   if (!filename) return;
-  
+
   const links = document.querySelectorAll('.nav-link');
   links.forEach(link => {
     if (link.getAttribute('data-filename') === filename) {
@@ -335,7 +322,7 @@ function highlightActiveLink() {
 function setupSidebarToggle() {
   const appContainer = document.querySelector('.app-container');
   if (!appContainer) return;
-  
+
   // Create backdrop if not already there
   let backdrop = document.querySelector('.sidebar-backdrop');
   if (!backdrop) {
@@ -343,13 +330,13 @@ function setupSidebarToggle() {
     backdrop.className = 'sidebar-backdrop';
     appContainer.appendChild(backdrop);
   }
-  
+
   // Retrieve saved sidebar state for desktop
   const savedState = localStorage.getItem('sidebar-collapsed');
   if (savedState === 'true' && window.innerWidth > 1100) {
     appContainer.classList.add('sidebar-collapsed');
   }
-  
+
   const toggleBtn = document.getElementById('sidebar-toggle');
   if (toggleBtn) {
     toggleBtn.addEventListener('click', () => {
@@ -361,7 +348,7 @@ function setupSidebarToggle() {
       }
     });
   }
-  
+
   backdrop.addEventListener('click', () => {
     appContainer.classList.remove('sidebar-open');
   });
@@ -386,7 +373,7 @@ function setupDraggableLabels() {
     const isTouch = e.type === 'touchstart';
     const startX = isTouch ? e.touches[0].clientX : e.clientX;
     const startVal = parseFloat(input.value) || 0;
-    
+
     // Determine dynamic step size based on value magnitude if not specified
     let step = 1;
     if (input.hasAttribute('step')) {
@@ -406,20 +393,20 @@ function setupDraggableLabels() {
     function onMove(moveEvent) {
       const currentX = isTouch ? moveEvent.touches[0].clientX : moveEvent.clientX;
       const deltaX = currentX - startX;
-      
+
       // Speed multiplier: drag 1px = 0.5 * step units
       let newVal = startVal + (deltaX * step * 0.5);
-      
+
       // Enforce bounds
       newVal = Math.max(min, newVal);
       if (max !== Infinity) {
         newVal = Math.min(max, newVal);
       }
-      
+
       // Round to precision matching step
       const stepDecimals = (step.toString().split('.')[1] || '').length;
       input.value = newVal.toFixed(stepDecimals);
-      
+
       input.dispatchEvent(new Event('input', { bubbles: true }));
       input.dispatchEvent(new Event('change', { bubbles: true }));
     }
@@ -462,10 +449,10 @@ function setupStepperButtons() {
   function stepValue(btn) {
     const wrapper = btn.closest('.input-wrapper');
     if (!wrapper) return;
-    
+
     const input = wrapper.querySelector('input[type="number"]');
     if (!input) return;
-    
+
     const startVal = parseFloat(input.value) || 0;
     let step = 1;
     if (input.hasAttribute('step')) {
@@ -478,10 +465,10 @@ function setupStepperButtons() {
       else if (startVal > 50) step = 1;
       else step = 0.1;
     }
-    
+
     const min = input.hasAttribute('min') ? parseFloat(input.getAttribute('min')) : 0;
     const max = input.hasAttribute('max') ? parseFloat(input.getAttribute('max')) : Infinity;
-    
+
     let newVal = startVal;
     const isPlus = btn.textContent.trim() === '+';
     if (isPlus) {
@@ -489,15 +476,15 @@ function setupStepperButtons() {
     } else {
       newVal -= step;
     }
-    
+
     newVal = Math.max(min, newVal);
     if (max !== Infinity) {
       newVal = Math.min(max, newVal);
     }
-    
+
     const stepDecimals = (step.toString().split('.')[1] || '').length;
     input.value = newVal.toFixed(stepDecimals);
-    
+
     input.dispatchEvent(new Event('input', { bubbles: true }));
     input.dispatchEvent(new Event('change', { bubbles: true }));
   }
@@ -562,10 +549,10 @@ function setupMetricValueCopy() {
   document.body.addEventListener('click', (e) => {
     const valEl = e.target.closest('.metric-value');
     if (!valEl) return;
-    
+
     const textToCopy = valEl.textContent.trim();
     if (!textToCopy || textToCopy === '-') return;
-    
+
     navigator.clipboard.writeText(textToCopy).then(() => {
       let tooltip = valEl.querySelector('.copy-tooltip');
       if (!tooltip) {
@@ -585,19 +572,19 @@ function setupMetricValueCopy() {
         tooltip.style.zIndex = '100';
         tooltip.style.opacity = '0';
         tooltip.style.transition = 'opacity 0.2s, transform 0.2s';
-        
+
         const computedStyle = window.getComputedStyle(valEl);
         if (computedStyle.position === 'static') {
           valEl.style.position = 'relative';
         }
         valEl.appendChild(tooltip);
       }
-      
+
       requestAnimationFrame(() => {
         tooltip.style.opacity = '1';
         tooltip.style.transform = 'translateX(-50%) translateY(-120%)';
       });
-      
+
       setTimeout(() => {
         tooltip.style.opacity = '0';
         tooltip.style.transform = 'translateX(-50%) translateY(-100%)';
@@ -705,8 +692,8 @@ function setupSearch() {
   function renderResults(query) {
     resultsList.innerHTML = '';
     const q = query.toLowerCase().trim();
-    const filtered = allCalcs.filter(c => 
-      c.name.toLowerCase().includes(q) || 
+    const filtered = allCalcs.filter(c =>
+      c.name.toLowerCase().includes(q) ||
       c.desc.toLowerCase().includes(q)
     );
 
@@ -781,7 +768,7 @@ const defaultPreferences = {
 
 function getPreference(key) {
   try {
-    const prefs = JSON.parse(localStorage.getItem('finplan_user_prefs')) || {};
+    const prefs = JSON.parse(localStorage.getItem('moneyinfuture_user_prefs')) || {};
     return prefs[key] !== undefined ? prefs[key] : defaultPreferences[key];
   } catch (e) {
     return defaultPreferences[key];
@@ -790,11 +777,11 @@ function getPreference(key) {
 
 function setPreference(key, value) {
   try {
-    const prefs = JSON.parse(localStorage.getItem('finplan_user_prefs')) || {};
+    const prefs = JSON.parse(localStorage.getItem('moneyinfuture_user_prefs')) || {};
     prefs[key] = value;
-    localStorage.setItem('finplan_user_prefs', JSON.stringify(prefs));
+    localStorage.setItem('moneyinfuture_user_prefs', JSON.stringify(prefs));
     applyPreferences();
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function applyPreferences() {
@@ -1078,7 +1065,7 @@ function updateMetricWords(el) {
     if (existing) existing.remove();
     return;
   }
-  
+
   const text = el.textContent.trim();
   if (!text || text === '-') {
     if (existing) existing.textContent = '';
@@ -1288,7 +1275,7 @@ function updateDynamicMetric(parentEl, label, valueText) {
   dynamicCard.style.display = getPreference('showInflation') ? '' : 'none';
   const valEl = dynamicCard.querySelector('.metric-value');
   valEl.textContent = valueText;
-  
+
   updateMetricWords(valEl);
   updateMetricColorCoding(valEl);
 }
@@ -1311,7 +1298,7 @@ function injectInflationSetting() {
       <span class="input-suffix">%</span>
     </div>
   `;
-  
+
   const taxItem = Array.from(settingsBar.children).find(el => el.textContent.toLowerCase().includes('tax'));
   if (taxItem) {
     settingsBar.insertBefore(item, taxItem);
@@ -1420,7 +1407,7 @@ function injectScreenshotButton() {
 
   const title = header.querySelector('h1');
   const desc = header.querySelector('p');
-  
+
   header.style.display = 'flex';
   header.style.justifyContent = 'space-between';
   header.style.alignItems = 'flex-start';
@@ -1429,7 +1416,7 @@ function injectScreenshotButton() {
   const textContainer = document.createElement('div');
   if (title) textContainer.appendChild(title.cloneNode(true));
   if (desc) textContainer.appendChild(desc.cloneNode(true));
-  
+
   header.innerHTML = '';
   header.appendChild(textContainer);
 
@@ -1487,7 +1474,7 @@ function injectScreenshotButton() {
       e.stopPropagation();
       dropdown.classList.remove('show');
       const shareType = item.getAttribute('data-type');
-      
+
       if (shareType === 'link') {
         handleLinkShare();
         return;
@@ -1628,7 +1615,7 @@ function injectScreenshotButton() {
         container.style.width = '1200px';
         container.style.background = getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim();
         container.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') || 'light');
-        
+
         container.appendChild(clone);
         document.body.appendChild(container);
 
@@ -1731,11 +1718,11 @@ function injectScreenshotButton() {
 function handleLinkShare() {
   const url = window.location.href;
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  
+
   if (isMobile && navigator.share) {
     navigator.share({
       title: document.title,
-      text: 'Check out my calculation on FinPlan India:',
+      text: 'Check out my calculation on MoneyInFuture:',
       url: url
     }).catch(err => {
       console.log('Share link cancelled or failed', err);
@@ -1783,7 +1770,7 @@ function handleFileShare(blob, filename, mimeType) {
       navigator.share({
         files: [file],
         title: 'Calculator Calculation',
-        text: 'Check out my calculation from FinPlan India'
+        text: 'Check out my calculation from MoneyInFuture'
       }).catch(err => {
         console.log('Share file cancelled', err);
         triggerFileDownload(blob, filename);
@@ -1819,7 +1806,7 @@ function setupTablePagination() {
 
   // Ensure the table-title is outside the scroll wrapper
   // Structure: .table-card > .table-title, .table-scroll-wrapper > table, .table-pagination-controls
-  
+
   // Dynamically wrap table inside a scroll wrapper
   let wrapper = table.parentElement;
   if (!wrapper.classList.contains('table-scroll-wrapper')) {
@@ -1937,6 +1924,23 @@ function applyTablePagination(table) {
 }
 
 // --- Dynamic MathJax Loader ---
+
+/**
+ * Only load MathJax when the page actually contains TeX math delimiters.
+ * This avoids loading a large CDN script on 24/25 calculator pages that
+ * have no math rendering needs.
+ */
+function maybeLoadMathJax() {
+  const body = document.body;
+  if (!body) return;
+  const text = body.textContent || '';
+  const hasTex = text.includes('$$') ||
+    text.includes('\\(') ||
+    text.includes('\\[') ||
+    body.innerHTML.includes('\\begin{');
+  if (!hasTex) return;
+  loadMathJax();
+}
 
 function loadMathJax() {
   if (window.MathJax) {

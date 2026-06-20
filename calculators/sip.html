@@ -3,26 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SIP Calculator - India | FinPlan India</title>
+  <title>SIP Calculator - India | MoneyInFuture</title>
   <meta name="description" content="Calculate your mutual fund SIP (Systematic Investment Plan) returns in real-time. Optimize for Indian mutual funds with inflation adjustment and capital gains taxation.">
   <meta name="keywords" content="sip calculator, mutual fund sip, sip interest, cagr compounding, ltcg tax equity">
-  <meta name="author" content="FinPlan India">
+  <meta name="author" content="MoneyInFuture">
   
   <!-- Open Graph -->
   <meta property="og:title" content="SIP Calculator - Indian Mutual Fund & Personal Finance Planner">
   <meta property="og:description" content="Calculate your mutual fund SIP (Systematic Investment Plan) returns in real-time. Optimize for Indian mutual funds with inflation adjustment and capital gains taxation.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://finplanindia.com/calculators/sip.html">
-  <meta property="og:site_name" content="FinPlan India">
+  <meta property="og:url" content="https://moneyinfuture.com/calculators/sip.html">
+  <meta property="og:site_name" content="MoneyInFuture">
   
-  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.3">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
   "@type": "FinancialCalculator",
   "name": "SIP Calculator",
   "description": "Calculate your mutual fund SIP (Systematic Investment Plan) returns in real-time. Optimize for Indian mutual funds with inflation adjustment and capital gains taxation.",
-  "url": "https://finplanindia.com/calculators/sip.html",
+  "url": "https://moneyinfuture.com/calculators/sip.html",
   "category": "Financial Tool"
 }
   </script>
@@ -233,12 +233,61 @@
       <h3>Formula & Mathematical Approach</h3>
       <p>Unlike standard simple calculators that divide the rate by 12, our system computes compounding returns based on the true <strong>monthly equivalent CAGR</strong> rate:</p>
       <div class="formula-box">
-        <p>Monthly equivalent rate from annual CAGR:</p>
-        $$i = (1 + r)^{1/12} - 1$$
-        <p style="margin-top:1rem;">Future Value of SIP (compounding monthly):</p>
-        $$FV = P \times \frac{(1 + i)^{m} - 1}{i} \times (1 + i)$$
+        <math display="block">
+          <mi>i</mi>
+          <mo>=</mo>
+          <msup>
+            <mrow>
+              <mo>(</mo>
+              <mn>1</mn>
+              <mo>+</mo>
+              <mfrac>
+                <mi>annualRate</mi>
+                <mn>100</mn>
+              </mfrac>
+              <mo>)</mo>
+            </mrow>
+            <mfrac>
+              <mn>1</mn>
+              <mn>12</mn>
+            </mfrac>
+          </msup>
+          <mo>−</mo>
+          <mn>1</mn>
+        </math>
+        <math display="block">
+          <mi>FV</mi>
+          <mo>=</mo>
+          <mi>P</mi>
+          <mo>×</mo>
+          <mfrac>
+            <mrow>
+              <msup>
+                <mrow>
+                  <mo>(</mo>
+                  <mn>1</mn>
+                  <mo>+</mo>
+                  <mi>i</mi>
+                  <mo>)</mo>
+                </mrow>
+                <mi>m</mi>
+              </msup>
+              <mo>−</mo>
+              <mn>1</mn>
+            </mrow>
+            <mi>i</mi>
+          </mfrac>
+          <mo>×</mo>
+          <mrow>
+            <mo>(</mo>
+            <mn>1</mn>
+            <mo>+</mo>
+            <mi>i</mi>
+            <mo>)</mo>
+          </mrow>
+        </math>
       </div>
-      <p>Where <em>P</em> is monthly SIP, <em>i</em> is monthly rate, <em>r</em> is annual rate (CAGR), and <em>m</em> is the total number of months.</p>
+      <p>Where <em>P</em> is monthly SIP, <em>i</em> is monthly rate, and <em>m</em> is the total number of months.</p>
       <h3>Frequently Asked Questions</h3>
       <div class="faq-list">
         <div class="faq-item">
@@ -258,16 +307,16 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js?v=1.0.4"></script>
-  <script src="../js/shared.js?v=1.0.4"></script>
+  <script src="../js/engine.js?v=1.0.3"></script>
+  <script src="../js/shared.js?v=1.0.3"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
       
-      const defaults = { monthly_sip: 10000, return_rate: 12, years: 15, 'tax-type': 'equity_ltcg', 'custom-tax-rate': 12.5, 'inflation-rate': 6, 'compounding-freq': 'monthly' };
+      const defaults = { monthly_sip: 10000, return_rate: 12, years: 15, 'tax-type': 'equity_ltcg', 'custom-tax-rate': 12.5, 'inflation-rate': 6 };
       let state = FinanceEngine.getUrlParams(defaults);
       
-      const elements = ['monthly_sip', 'return_rate', 'years', 'tax-type', 'custom-tax-rate', 'inflation-rate', 'compounding-freq'];
+      const elements = ['monthly_sip', 'return_rate', 'years', 'tax-type', 'custom-tax-rate', 'inflation-rate'];
       
       function syncUI() {
         elements.forEach(id => {
@@ -313,24 +362,18 @@
           const startMonth = (y - 1) * 12 + 1;
           const endMonth = y * 12;
           
+          const compoundingFreq = state['compounding-freq'] || 'monthly';
           if (compoundingFreq === 'monthly') {
-            // True monthly compounding: each SIP compounds monthly
             for (let m = startMonth; m <= endMonth; m++) {
               cumulativeInvested += P;
               runningBalance = (runningBalance + P) * (1 + i);
             }
           } else {
-            // Annual (Yearly) compounding: rate compounds once per year
-            // Treat the year's SIP contributions as happening at start of each month
-            // but interest credited once at year end (EAR = annualRate)
-            const annualRateDecimal = annualRate / 100;
-            // Interest on beginning-of-year balance
-            const interestOnPrior = runningBalance * annualRateDecimal;
-            // For monthly SIPs paid during the year, use mid-year approximation
-            // Average time in account = 6.5 months out of 12
-            const interestOnDeposits = P * 12 * annualRateDecimal * (6.5 / 12);
+            const rate = annualRate / 100;
+            const interestOnStart = runningBalance * rate;
+            const interestOnDeposits = P * rate * 6.5;
             cumulativeInvested += P * 12;
-            runningBalance = runningBalance + interestOnPrior + (P * 12) + interestOnDeposits;
+            runningBalance = runningBalance + (P * 12) + interestOnStart + interestOnDeposits;
           }
           
           const runningRealBalance = FinanceEngine.getRealValue(runningBalance, inflationRate, y);

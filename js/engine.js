@@ -131,7 +131,7 @@ const FinanceEngine = {
       let yWithdrawn = 0;
 
       if (compoundingFreq === 'monthly') {
-        // True CAGR monthly equivalent rate
+        // Beginning-of-month (annuity-due): withdrawal before interest — consistent with all SWP pages
         const i = Math.pow(1 + rate, 1/12) - 1;
         for (let m = 1; m <= 12; m++) {
           const withdrawal = Math.min(balance, currentSWP);
@@ -325,11 +325,18 @@ const FinanceEngine = {
     const t = flows.map(f => (f.date - d0) / (365 * 24 * 60 * 60 * 1000));
     const values = flows.map(f => f.amount);
 
-    // Objective function: sum CF_i / (1 + r)^t_i
+    // Validate: must have at least one positive and one negative cashflow
+    const hasPositive = values.some(v => v > 0);
+    const hasNegative = values.some(v => v < 0);
+    if (!hasPositive || !hasNegative) return NaN;
+
+    // Objective function: NPV = sum CF_i / (1 + r)^t_i
     const f = (r) => {
       let sum = 0;
       for (let i = 0; i < values.length; i++) {
-        sum += values[i] / Math.pow(1 + r, t[i]);
+        const denom = Math.pow(1 + r, t[i]);
+        if (!isFinite(denom) || denom === 0) return NaN;
+        sum += values[i] / denom;
       }
       return sum;
     };
@@ -347,6 +354,7 @@ const FinanceEngine = {
     let r = 0.1; // initial guess: 10%
     const maxIterations = 100;
     const precision = 1e-7;
+    let converged = false;
 
     for (let k = 0; k < maxIterations; k++) {
       const val = f(r);
@@ -355,13 +363,45 @@ const FinanceEngine = {
       if (Math.abs(deriv) < 1e-12) break; // prevent division by zero
       
       const nextR = r - val / deriv;
+
+      // Sanity-check: if Newton diverges, break and fall back to bisection
+      if (!isFinite(nextR) || nextR < -0.999 || nextR > 100) break;
+      
       if (Math.abs(nextR - r) < precision) {
-        return nextR * 100; // return as percentage
+        r = nextR;
+        converged = true;
+        break;
       }
       r = nextR;
     }
     
-    return r * 100;
+    if (converged) return r * 100; // return as percentage
+
+    // Bisection fallback: bracket between -99% and +1000%
+    let lo = -0.999, hi = 10.0;
+    const fLo = f(lo);
+    const fHi = f(hi);
+
+    // If f doesn't change sign in this bracket, try wider hi
+    if (isFinite(fLo) && isFinite(fHi) && fLo * fHi > 0) {
+      return r * 100; // return best Newton guess
+    }
+
+    let bLo = lo, bHi = hi;
+    for (let k = 0; k < 200; k++) {
+      const mid = (bLo + bHi) / 2;
+      const fMid = f(mid);
+      if (!isFinite(fMid)) break;
+      if (Math.abs(bHi - bLo) < precision) {
+        return mid * 100;
+      }
+      if (fMid * f(bLo) <= 0) {
+        bHi = mid;
+      } else {
+        bLo = mid;
+      }
+    }
+    return ((bLo + bHi) / 2) * 100;
   },
 
   // 4. State URL Synchronization
@@ -376,7 +416,7 @@ const FinanceEngine = {
     // Load from cache first
     let cachedPrefs = {};
     try {
-      const stored = localStorage.getItem('finplan_shared_prefs');
+      const stored = localStorage.getItem('moneyinfuture_shared_prefs');
       if (stored) {
         cachedPrefs = JSON.parse(stored);
       }
@@ -465,7 +505,7 @@ const FinanceEngine = {
     // Read current cache
     let cachedPrefs = {};
     try {
-      const stored = localStorage.getItem('finplan_shared_prefs');
+      const stored = localStorage.getItem('moneyinfuture_shared_prefs');
       if (stored) {
         cachedPrefs = JSON.parse(stored);
       }
@@ -510,7 +550,7 @@ const FinanceEngine = {
 
     if (cacheChanged) {
       try {
-        localStorage.setItem('finplan_shared_prefs', JSON.stringify(cachedPrefs));
+        localStorage.setItem('moneyinfuture_shared_prefs', JSON.stringify(cachedPrefs));
       } catch (e) {}
     }
 
@@ -1106,3 +1146,7 @@ const FinanceEngine = {
     }, 2500);
   }
 };
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = FinanceEngine;
+}

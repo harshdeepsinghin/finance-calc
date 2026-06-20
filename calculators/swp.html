@@ -3,26 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SWP Calculator - India | FinPlan India</title>
+  <title>SWP Calculator - India | MoneyInFuture</title>
   <meta name="description" content="Plan your regular withdrawals from mutual funds using a Systematic Withdrawal Plan (SWP) calculator. Calculate capital preservation and corpus lifespan.">
   <meta name="keywords" content="swp calculator, systematic withdrawal plan, retirement monthly income, capital preservation">
-  <meta name="author" content="FinPlan India">
+  <meta name="author" content="MoneyInFuture">
   
   <!-- Open Graph -->
   <meta property="og:title" content="SWP Calculator - Indian Mutual Fund & Personal Finance Planner">
   <meta property="og:description" content="Plan your regular withdrawals from mutual funds using a Systematic Withdrawal Plan (SWP) calculator. Calculate capital preservation and corpus lifespan.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://finplanindia.com/calculators/swp.html">
-  <meta property="og:site_name" content="FinPlan India">
+  <meta property="og:url" content="https://moneyinfuture.com/calculators/swp.html">
+  <meta property="og:site_name" content="MoneyInFuture">
   
-  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.3">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
   "@type": "FinancialCalculator",
   "name": "SWP Calculator",
   "description": "Plan your regular withdrawals from mutual funds using a Systematic Withdrawal Plan (SWP) calculator. Calculate capital preservation and corpus lifespan.",
-  "url": "https://finplanindia.com/calculators/swp.html",
+  "url": "https://moneyinfuture.com/calculators/swp.html",
   "category": "Financial Tool"
 }
   </script>
@@ -245,8 +245,8 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js?v=1.0.4"></script>
-  <script src="../js/shared.js?v=1.0.4"></script>
+  <script src="../js/engine.js?v=1.0.3"></script>
+  <script src="../js/shared.js?v=1.0.3"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
@@ -299,15 +299,14 @@
                 balance = 0;
                 continue;
               }
-              const interest = balance * i;
-              yInterest += interest;
-              balance = balance + interest;
-              
               if (!isWaiting) {
                 const actualWithdraw = Math.min(balance, withdrawal);
                 yWithdrawn += actualWithdraw;
                 balance -= actualWithdraw;
               }
+              const interest = balance * i;
+              yInterest += interest;
+              balance = balance + interest;
             }
           } else {
             // Yearly compounding

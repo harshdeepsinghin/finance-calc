@@ -380,8 +380,8 @@ header {
   color: #fff !important;
 }
 
-/* Force active state to show immediately on mobile touch */
-.toggle-btn:active {
+/* Force active state to show immediately on mobile touch — but only on inactive buttons */
+.toggle-btn:active:not(.toggle-btn-active) {
   background: var(--border-color);
 }
 

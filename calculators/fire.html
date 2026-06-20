@@ -167,6 +167,12 @@
         
       </div>
     
+      <div class="metric-card" >
+        <span class="metric-label">Years to FIRE</span>
+        <span class="metric-value" id="years-to-fire">-</span>
+        
+      </div>
+    
             </div>
           </div>
         </div>
@@ -305,6 +311,14 @@
         document.getElementById('lean-fire').textContent = FinanceEngine.formatINR(leanFire);
         document.getElementById('fat-fire').textContent = FinanceEngine.formatINR(fatFire);
         
+        let fireReached = false;
+        let yearsToFire = 0;
+        
+        if (savings >= fireNo) {
+          fireReached = true;
+          yearsToFire = 0;
+        }
+        
         const headers = ['Year', 'Annual Expenses (Inflated)', 'Net Worth', 'FIRE Target'];
         let tableRows = [];
         let nw = savings;
@@ -326,6 +340,11 @@
             nw = nw + (monthlyS * 12) + interestOnStart + interestOnDeposits;
           }
           
+          if (nw >= yTarget && !fireReached) {
+            fireReached = true;
+            yearsToFire = y;
+          }
+          
           tableRows.push([
             y,
             Math.round(infExpenses),
@@ -333,6 +352,8 @@
             Math.round(yTarget)
           ]);
         }
+        
+        document.getElementById('years-to-fire').textContent = fireReached ? (yearsToFire === 0 ? '0 years (Already Achieved!)' : yearsToFire + ' years') : 'Out of scope (>35 yrs)';
         
         const tableBody = document.getElementById('table-body');
         const headersRow = document.getElementById('table-headers-row');

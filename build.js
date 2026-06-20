@@ -2221,7 +2221,8 @@ const calculators = [
     results: [
       { id: 'fire-number', label: 'Standard FIRE Number' },
       { id: 'lean-fire', label: 'Lean FIRE' },
-      { id: 'fat-fire', label: 'Fat FIRE' }
+      { id: 'fat-fire', label: 'Fat FIRE' },
+      { id: 'years-to-fire', label: 'Years to FIRE' }
     ],
     supportTax: false,
     supportInflation: true,
@@ -2264,6 +2265,14 @@ const calculators = [
         document.getElementById('lean-fire').textContent = FinanceEngine.formatINR(leanFire);
         document.getElementById('fat-fire').textContent = FinanceEngine.formatINR(fatFire);
         
+        let fireReached = false;
+        let yearsToFire = 0;
+        
+        if (savings >= fireNo) {
+          fireReached = true;
+          yearsToFire = 0;
+        }
+        
         const headers = ['Year', 'Annual Expenses (Inflated)', 'Net Worth', 'FIRE Target'];
         let tableRows = [];
         let nw = savings;
@@ -2277,6 +2286,11 @@ const calculators = [
             nw = (nw + monthlyS) * (1 + i);
           }
           
+          if (nw >= yTarget && !fireReached) {
+            fireReached = true;
+            yearsToFire = y;
+          }
+          
           tableRows.push([
             y,
             Math.round(infExpenses),
@@ -2284,6 +2298,8 @@ const calculators = [
             Math.round(yTarget)
           ]);
         }
+        
+        document.getElementById('years-to-fire').textContent = fireReached ? (yearsToFire === 0 ? '0 years (Already Achieved!)' : yearsToFire + ' years') : 'Out of scope (>35 yrs)';
         
         const tableBody = document.getElementById('table-body');
         const headersRow = document.getElementById('table-headers-row');
@@ -4008,8 +4024,9 @@ const calculators = [
     inputs: [
       { id: 'current_age', label: 'Current Age (Years)', min: 18, max: 60, step: 1, value: 28, type: 'slider', displayValue: '28' },
       { id: 'net_worth', label: 'Current Net Worth (₹)', min: 0, max: 50000000, step: 100000, value: 1500000, type: 'slider', displayValue: '₹15,00,000' },
-      { id: 'monthly_savings', label: 'Monthly Savings additions (₹)', min: 1000, max: 500000, step: 1000, value: 50000, type: 'slider', displayValue: '₹50,00,000' },
+      { id: 'monthly_savings', label: 'Monthly Savings additions (₹)', min: 1000, max: 500000, step: 1000, value: 50000, type: 'slider', displayValue: '₹50,000' },
       { id: 'monthly_expenses', label: 'Monthly Living Expenses (₹)', min: 5000, max: 500000, step: 1000, value: 40000, type: 'slider', displayValue: '₹40,000' },
+      { id: 'swr', label: 'Safe Withdrawal Rate (SWR %)', min: 2, max: 6, step: 0.1, value: 4.0, type: 'slider', displayValue: '4.0%' },
       { id: 'return_rate', label: 'Return CAGR (%)', min: 4, max: 20, step: 0.5, value: 12, type: 'slider', displayValue: '12%' }
     ],
     results: [
@@ -4021,12 +4038,12 @@ const calculators = [
     supportInflation: true,
     seoContent: `
       <h2>The Financial Independence Timeline</h2>
-      <p>Financial Independence is reached when 4% of your investment corpus exceeds your annual living expenses adjusted for inflation.</p>
+      <p>Financial Independence is reached when your safe withdrawal rate (SWR) exceeds your annual living expenses adjusted for inflation.</p>
     `,
     bindingScript: `
-      const defaults = { current_age: 28, net_worth: 1500000, monthly_savings: 50000, monthly_expenses: 40000, return_rate: 12, 'inflation-rate': 6 };
+      const defaults = { current_age: 28, net_worth: 1500000, monthly_savings: 50000, monthly_expenses: 40000, swr: 4.0, return_rate: 12, 'inflation-rate': 6 };
       let state = FinanceEngine.getUrlParams(defaults);
-      const elements = ['current_age', 'net_worth', 'monthly_savings', 'monthly_expenses', 'return_rate', 'inflation-rate'];
+      const elements = ['current_age', 'net_worth', 'monthly_savings', 'monthly_expenses', 'swr', 'return_rate', 'inflation-rate'];
       
       function syncUI() {
         elements.forEach(id => {
@@ -4034,7 +4051,7 @@ const calculators = [
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'current_age' || id === 'inflation-rate') valDisplay.textContent = state[id];
-            else if (id === 'return_rate') valDisplay.textContent = state[id] + '%';
+            else if (id === 'return_rate' || id === 'swr') valDisplay.textContent = state[id] + '%';
             else valDisplay.textContent = FinanceEngine.formatINR(state[id]);
           }
         });
@@ -4045,6 +4062,7 @@ const calculators = [
         const nw = state.net_worth;
         const savings = state.monthly_savings;
         const expenses = state.monthly_expenses;
+        const swr = state.swr;
         const r = state.return_rate;
         const inf = state['inflation-rate'];
         
@@ -4056,12 +4074,21 @@ const calculators = [
         let fiCorpus = 0;
         let yearsRun = 0;
         
+        const todayExpenses = expenses * 12;
+        const todayTarget = todayExpenses / (swr / 100);
+        if (nw >= todayTarget) {
+          fiReached = true;
+          fiAge = curAge + ' (Already Achieved!)';
+          fiCorpus = nw;
+          yearsRun = 0;
+        }
+        
         const headers = ['Year', 'Age', 'Living Expenses (Inflated)', 'Net Worth', 'FI Target'];
         let tableRows = [];
         
         for (let y = 1; y <= 40; y++) {
           const infExpenses = expenses * 12 * Math.pow(1 + inf/100, y);
-          const fiTarget = infExpenses / 0.04; // 4% SWR
+          const fiTarget = infExpenses / (swr / 100);
           
           for (let m = 1; m <= 12; m++) {
             runningNW = (runningNW + savings) * (1 + i);
@@ -4085,7 +4112,7 @@ const calculators = [
         
         document.getElementById('fi-age').textContent = fiAge;
         document.getElementById('fi-corpus').textContent = FinanceEngine.formatINR(fiCorpus);
-        document.getElementById('years-to-fi').textContent = fiReached ? yearsRun + ' years' : 'Out of scope (>40 yrs)';
+        document.getElementById('years-to-fi').textContent = fiReached ? (yearsRun === 0 ? '0 (Already Achieved!)' : yearsRun + ' years') : 'Out of scope (>40 yrs)';
         
         const tableBody = document.getElementById('table-body');
         const headersRow = document.getElementById('table-headers-row');

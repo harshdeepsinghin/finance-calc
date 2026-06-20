@@ -124,6 +124,25 @@
       
         <div class="input-group">
           <div class="input-label-row">
+            <label for="swr" class="draggable-label">Safe Withdrawal Rate (SWR %)</label>
+          </div>
+          <div class="input-wrapper">
+            
+            <input type="number" id="swr" min="2" max="6" step="0.1" value="4" aria-label="Safe Withdrawal Rate (SWR %)">
+            <span class="input-suffix">%</span>
+            <div class="input-steppers">
+              <button class="step-btn" type="button" tabindex="-1">-</button>
+              <button class="step-btn" type="button" tabindex="-1">+</button>
+            </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="swr-slider" min="2" max="6" step="0.1" value="4" class="range-slider" aria-label="Safe Withdrawal Rate (SWR %) Slider">
+          </div>
+        </div>
+      
+        <div class="input-group">
+          <div class="input-label-row">
             <label for="return_rate" class="draggable-label">Return CAGR</label>
           </div>
           <div class="input-wrapper">
@@ -230,7 +249,7 @@
         <section class="seo-content">
           
       <h2>The Financial Independence Timeline</h2>
-      <p>Financial Independence is reached when 4% of your investment corpus exceeds your annual living expenses adjusted for inflation.</p>
+      <p>Financial Independence is reached when your safe withdrawal rate (SWR) exceeds your annual living expenses adjusted for inflation.</p>
     
           
     <div class="formula-assumptions-container" style="margin-top: 2.5rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
@@ -264,9 +283,9 @@ Projects when net worth compounds to reach this target.</pre>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
       
-      const defaults = { current_age: 28, net_worth: 1500000, monthly_savings: 50000, monthly_expenses: 40000, return_rate: 12, 'inflation-rate': 6 };
+      const defaults = { current_age: 28, net_worth: 1500000, monthly_savings: 50000, monthly_expenses: 40000, swr: 4.0, return_rate: 12, 'inflation-rate': 6 };
       let state = FinanceEngine.getUrlParams(defaults);
-      const elements = ['current_age', 'net_worth', 'monthly_savings', 'monthly_expenses', 'return_rate', 'inflation-rate'];
+      const elements = ['current_age', 'net_worth', 'monthly_savings', 'monthly_expenses', 'swr', 'return_rate', 'inflation-rate'];
       
       function syncUI() {
         elements.forEach(id => {
@@ -274,7 +293,7 @@ Projects when net worth compounds to reach this target.</pre>
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'current_age' || id === 'inflation-rate') valDisplay.textContent = state[id];
-            else if (id === 'return_rate') valDisplay.textContent = state[id] + '%';
+            else if (id === 'return_rate' || id === 'swr') valDisplay.textContent = state[id] + '%';
             else valDisplay.textContent = FinanceEngine.formatINR(state[id]);
           }
         });
@@ -285,6 +304,7 @@ Projects when net worth compounds to reach this target.</pre>
         const nw = state.net_worth;
         const savings = state.monthly_savings;
         const expenses = state.monthly_expenses;
+        const swr = state.swr;
         const r = state.return_rate;
         const inf = state['inflation-rate'];
         
@@ -296,12 +316,21 @@ Projects when net worth compounds to reach this target.</pre>
         let fiCorpus = 0;
         let yearsRun = 0;
         
+        const todayExpenses = expenses * 12;
+        const todayTarget = todayExpenses / (swr / 100);
+        if (nw >= todayTarget) {
+          fiReached = true;
+          fiAge = curAge + ' (Already Achieved!)';
+          fiCorpus = nw;
+          yearsRun = 0;
+        }
+        
         const headers = ['Year', 'Age', 'Living Expenses (Inflated)', 'Net Worth', 'FI Target'];
         let tableRows = [];
         
         for (let y = 1; y <= 40; y++) {
           const infExpenses = expenses * 12 * Math.pow(1 + inf/100, y);
-          const fiTarget = infExpenses / 0.04; // 4% SWR
+          const fiTarget = infExpenses / (swr / 100);
           
           for (let m = 1; m <= 12; m++) {
             runningNW = (runningNW + savings) * (1 + i);
@@ -325,7 +354,7 @@ Projects when net worth compounds to reach this target.</pre>
         
         document.getElementById('fi-age').textContent = fiAge;
         document.getElementById('fi-corpus').textContent = FinanceEngine.formatINR(fiCorpus);
-        document.getElementById('years-to-fi').textContent = fiReached ? yearsRun + ' years' : 'Out of scope (>40 yrs)';
+        document.getElementById('years-to-fi').textContent = fiReached ? (yearsRun === 0 ? '0 (Already Achieved!)' : yearsRun + ' years') : 'Out of scope (>40 yrs)';
         
         const tableBody = document.getElementById('table-body');
         const headersRow = document.getElementById('table-headers-row');

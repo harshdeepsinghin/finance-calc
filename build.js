@@ -3073,6 +3073,17 @@ const calculators = [
       { id: 'total-portfolio', label: 'Total Portfolio Value' },
       { id: 'rebalance-action', label: 'Rebalance Status', subLabel: 'Requires adjustments' }
     ],
+    customInputsHtml: `
+      <div class="input-group">
+        <div class="input-label-row">
+          <label>Target Cash (%)</label>
+          <span id="target_cash-val" style="font-weight:600; color:var(--accent-color);">10%</span>
+        </div>
+        <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.25rem; line-height:1.4;">
+          Calculated automatically (100% - Target Equity - Target Debt - Target Gold)
+        </div>
+      </div>
+    `,
     supportTax: false,
     supportInflation: false,
     noChart: false,
@@ -3121,6 +3132,11 @@ const calculators = [
           tEq = Math.round((tEq / sum) * 100);
           tDt = Math.round((tDt / sum) * 100);
           tGd = 100 - (tEq + tDt);
+        }
+        
+        const targetCashVal = document.getElementById('target_cash-val');
+        if (targetCashVal) {
+          targetCashVal.textContent = tCs + '%';
         }
         
         const currentAlloc = {

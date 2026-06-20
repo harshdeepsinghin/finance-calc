@@ -558,18 +558,18 @@ const calculators = [
           
           tableRows.push([
             y,
-            Math.round(cumulativeInvested),
-            Math.round(yGains),
-            Math.round(runningBalance),
-            Math.round(runningRealBalance),
-            Math.round(yTaxResults.taxableGains),
-            Math.round(yTaxResults.tax),
-            Math.round(yPostTaxCorpus)
+            cumulativeInvested,
+            yGains,
+            runningBalance,
+            runningRealBalance,
+            yTaxResults.taxableGains,
+            yTaxResults.tax,
+            yPostTaxCorpus
           ]);
         }
         
         tableBody.innerHTML = tableRows.map(row => 
-          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINRSmart(v, false)) + '</td>').join('') + '</tr>'
         ).join('');
         
         // Update Chart
@@ -649,7 +649,7 @@ const calculators = [
       <h2>Why Step-Up SIP Accelerates Wealth Creation</h2>
       <p>By increasing your monthly SIP amount in proportion to your salary hikes (e.g. 10% step-up each year), your final corpus grows exponentially larger than a standard flat SIP.</p>
       <h3>Compound Algorithm</h3>
-      <p>For each year $y$ in the duration, the monthly SIP becomes $P_y = P \times (1 + s)^{y-1}$, where $s$ is the annual step-up percentage. The monthly growth compounds dynamically month-on-month using CAGR rate equivalent $i = (1+r)^{1/12} - 1$.</p>
+      <p>For each year $y$ in the duration, the monthly SIP becomes $P_y = P \\times (1 + s)^{y-1}$, where $s$ is the annual step-up percentage. The monthly growth compounds dynamically month-on-month using CAGR rate equivalent $i = (1+r)^{1/12} - 1$.</p>
     `,
     bindingScript: `
       const defaults = { starting_sip: 10000, step_up_pct: 10, return_rate: 12, years: 15, 'tax-type': 'equity', 'custom-tax-rate': 20, 'inflation-rate': 6 };
@@ -718,14 +718,14 @@ const calculators = [
           
           tableRows.push([
             y,
-            Math.round(currentSIP),
-            Math.round(cumulativeInvested),
-            Math.round(yGains),
-            Math.round(runningBalance),
-            Math.round(runningRealBalance),
-            Math.round(yTaxResults.taxableGains),
-            Math.round(yTaxResults.tax),
-            Math.round(yPostTaxCorpus)
+            currentSIP,
+            cumulativeInvested,
+            yGains,
+            runningBalance,
+            runningRealBalance,
+            yTaxResults.taxableGains,
+            yTaxResults.tax,
+            yPostTaxCorpus
           ]);
         }
         
@@ -757,7 +757,7 @@ const calculators = [
         headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
         
         tableBody.innerHTML = tableRows.map(row => 
-          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINRSmart(v, false)) + '</td>').join('') + '</tr>'
         ).join('');
         
         const chartData = tableRows.map(row => ({

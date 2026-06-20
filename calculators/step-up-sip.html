@@ -81,7 +81,7 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="return_rate" min="1" step="0.1" value="12" aria-label="Expected Return">
+            <input type="number" id="return_rate" min="1" step="0.5" value="12" aria-label="Expected Return">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
@@ -163,7 +163,7 @@
           <div class="settings-bar-item">
             <span class="settings-bar-label">Inflation</span>
             <div class="input-wrapper" style="width:120px;">
-              <input type="number" id="inflation-rate" min="0" max="15" step="0.1" value="6" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
+              <input type="number" id="inflation-rate" min="0" max="15" step="0.5" value="6" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
               <span class="input-suffix">%</span>
             </div>
           </div>
@@ -182,7 +182,7 @@
           <div class="settings-bar-item" id="custom-tax-group" style="display:none;">
             <span class="settings-bar-label">Slab Rate</span>
             <div class="input-wrapper" style="width:100px;">
-              <input type="number" id="custom-tax-rate" min="0" max="50" step="0.1" value="30" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
+              <input type="number" id="custom-tax-rate" min="0" max="50" step="1" value="30" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
               <span class="input-suffix">%</span>
             </div>
           </div>
@@ -234,7 +234,7 @@
       <h2>Why Step-Up SIP Accelerates Wealth Creation</h2>
       <p>By increasing your monthly SIP amount in proportion to your salary hikes (e.g. 10% step-up each year), your final corpus grows exponentially larger than a standard flat SIP.</p>
       <h3>Compound Algorithm</h3>
-      <p>For each year $y$ in the duration, the monthly SIP becomes $P_y = P 	imes (1 + s)^{y-1}$, where $s$ is the annual step-up percentage. The monthly growth compounds dynamically month-on-month using CAGR rate equivalent $i = (1+r)^{1/12} - 1$.</p>
+      <p>For each year $y$ in the duration, the monthly SIP becomes $P_y = P \times (1 + s)^{y-1}$, where $s$ is the annual step-up percentage. The monthly growth compounds dynamically month-on-month using CAGR rate equivalent $i = (1+r)^{1/12} - 1$.</p>
     
         </section>
       </main>
@@ -294,6 +294,8 @@
           const currentSIP = startSIP * Math.pow(1 + stepUp / 100, y - 1);
           
           if (compoundingFreq === 'monthly') {
+            const compoundingFreq = state['compounding-freq'] || 'monthly';
+          if (compoundingFreq === 'monthly') {
             for (let m = 1; m <= 12; m++) {
               cumulativeInvested += currentSIP;
               runningBalance = (runningBalance + currentSIP) * (1 + i);
@@ -302,6 +304,14 @@
             const rate = annualRate / 100;
             const interestOnStart = runningBalance * rate;
             const interestOnDeposits = currentSIP * rate * 6.5;
+            cumulativeInvested += currentSIP * 12;
+            runningBalance = runningBalance + (currentSIP * 12) + interestOnStart + interestOnDeposits;
+          }
+          } else {
+            const rate = annualRate / 100;
+            const interestOnStart = runningBalance * rate;
+            const interestOnDeposits = currentSIP * rate * 6.5;
+            
             cumulativeInvested += currentSIP * 12;
             runningBalance = runningBalance + (currentSIP * 12) + interestOnStart + interestOnDeposits;
           }
@@ -314,14 +324,14 @@
           
           tableRows.push([
             y,
-            Math.round(currentSIP),
-            Math.round(cumulativeInvested),
-            Math.round(yGains),
-            Math.round(runningBalance),
-            Math.round(runningRealBalance),
-            Math.round(yTaxResults.taxableGains),
-            Math.round(yTaxResults.tax),
-            Math.round(yPostTaxCorpus)
+            currentSIP,
+            cumulativeInvested,
+            yGains,
+            runningBalance,
+            runningRealBalance,
+            yTaxResults.taxableGains,
+            yTaxResults.tax,
+            yPostTaxCorpus
           ]);
         }
         
@@ -353,7 +363,7 @@
         headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
         
         tableBody.innerHTML = tableRows.map(row => 
-          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINRSmart(v, false)) + '</td>').join('') + '</tr>'
         ).join('');
         
         const chartData = tableRows.map(row => ({

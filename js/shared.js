@@ -260,19 +260,34 @@ function setupSettingsToggles() {
   // Handle horizontal settings bar compounding toggle buttons
   const monthlyBtn = document.getElementById('freq-monthly-btn');
   const yearlyBtn = document.getElementById('freq-yearly-btn');
+  const freqInput = document.getElementById('compounding-freq');
+  
   if (monthlyBtn && yearlyBtn) {
-    const syncFreqButtons = (freq) => {
+    const updateButtons = (freq) => {
       monthlyBtn.classList.toggle('toggle-btn-active', freq === 'monthly');
       yearlyBtn.classList.toggle('toggle-btn-active', freq === 'yearly');
-      const freqInput = document.getElementById('compounding-freq');
+    };
+
+    const syncFreqButtons = (freq) => {
+      updateButtons(freq);
       if (freqInput) {
         freqInput.value = freq;
         freqInput.dispatchEvent(new Event('input', { bubbles: true }));
         freqInput.dispatchEvent(new Event('change', { bubbles: true }));
       }
     };
+
     monthlyBtn.addEventListener('click', () => syncFreqButtons('monthly'));
     yearlyBtn.addEventListener('click', () => syncFreqButtons('yearly'));
+
+    // Synchronize initial visual button state from compounding-freq input value on load
+    if (freqInput) {
+      updateButtons(freqInput.value || 'monthly');
+      
+      // Listen to inputs/change on the compounding-freq element to keep UI buttons in sync
+      freqInput.addEventListener('input', (e) => updateButtons(e.target.value));
+      freqInput.addEventListener('change', (e) => updateButtons(e.target.value));
+    }
   }
 
   // Keep old collapsible toggle handler for any remaining .settings-toggle elements
@@ -1757,12 +1772,21 @@ function setupTablePagination() {
   const card = table.closest('.table-card');
   if (!card) return;
 
-  // Render controls placeholder if not present
+  // Dynamically wrap table inside a scroll wrapper
+  let wrapper = table.parentElement;
+  if (!wrapper.classList.contains('table-scroll-wrapper')) {
+    wrapper = document.createElement('div');
+    wrapper.className = 'table-scroll-wrapper';
+    table.parentNode.insertBefore(wrapper, table);
+    wrapper.appendChild(table);
+  }
+
+  // Render controls placeholder if not present, and place it AFTER the wrapper
   let controls = card.querySelector('.table-pagination-controls');
   if (!controls) {
     controls = document.createElement('div');
     controls.className = 'table-pagination-controls';
-    card.insertBefore(controls, table);
+    wrapper.insertAdjacentElement('afterend', controls);
   }
 
   // Initialize state if not present
@@ -1887,6 +1911,11 @@ function loadMathJax() {
   const script = document.createElement('script');
   script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
   script.async = true;
+  script.onload = () => {
+    if (window.MathJax && typeof window.MathJax.typeset === 'function') {
+      window.MathJax.typeset();
+    }
+  };
   document.head.appendChild(script);
 }
 

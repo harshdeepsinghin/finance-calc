@@ -117,7 +117,9 @@ header {
 }
 
 .theme-toggle-btn,
-.search-toggle-btn {
+.search-toggle-btn,
+.sidebar-toggle-btn,
+.preferences-btn {
   background: none;
   border: 1px solid var(--border-color);
   color: var(--text-primary);
@@ -131,13 +133,17 @@ header {
 }
 
 .theme-toggle-btn:hover,
-.search-toggle-btn:hover {
+.search-toggle-btn:hover,
+.sidebar-toggle-btn:hover,
+.preferences-btn:hover {
   background-color: var(--input-bg);
   border-color: var(--text-secondary);
 }
 
 .theme-toggle-btn svg,
-.search-toggle-btn svg {
+.search-toggle-btn svg,
+.sidebar-toggle-btn svg,
+.preferences-btn svg {
   width: 16px;
   height: 16px;
   fill: currentColor;
@@ -344,8 +350,8 @@ header {
   color: var(--text-primary);
 }
 
-.toggle-btn-active {
-  background: var(--accent-color);
+.toggle-btn.toggle-btn-active {
+  background: var(--accent-color) !important;
   color: #fff !important;
 }
 
@@ -756,23 +762,29 @@ input[type="text"]:focus, select:focus {
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: var(--card-shadow);
-  overflow-x: auto;
+  overflow-x: visible;
 }
 
-.table-card::-webkit-scrollbar {
+.table-scroll-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+.table-scroll-wrapper::-webkit-scrollbar {
   height: 6px;
 }
 
-.table-card::-webkit-scrollbar-track {
+.table-scroll-wrapper::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.table-card::-webkit-scrollbar-thumb {
+.table-scroll-wrapper::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: 3px;
 }
 
-.table-card::-webkit-scrollbar-thumb:hover {
+.table-scroll-wrapper::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
 }
 

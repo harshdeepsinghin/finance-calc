@@ -81,22 +81,8 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="return_rate" min="1" step="0.1" value="9" aria-label="Expected Return">
+            <input type="number" id="return_rate" min="1" step="0.5" value="9" aria-label="Expected Return">
             <span class="input-suffix">%</span>
-            <div class="input-steppers">
-              <button class="step-btn" type="button" tabindex="-1">-</button>
-              <button class="step-btn" type="button" tabindex="-1">+</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="input-group">
-          <div class="input-label-row">
-            <label for="waiting_period" class="draggable-label">Waiting Period</label>
-          </div>
-          <div class="input-wrapper">
-            <input type="number" id="waiting_period" min="0" step="1" value="0" aria-label="Waiting Period">
-            <span class="input-suffix">Yrs</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
@@ -143,12 +129,6 @@
         <span class="metric-label">Earned Returns</span>
         <span class="metric-value" id="final-gains">-</span>
         
-      </div>
-
-      <div class="metric-card" >
-        <span class="metric-label">Corpus Lifespan</span>
-        <span class="metric-value" id="depletion-year">-</span>
-        <span class="metric-sub">Years until empty</span>
       </div>
     
             </div>
@@ -230,9 +210,9 @@
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
       
-      const defaults = { 'compounding-freq': 'monthly',  initial_corpus: 5000000, monthly_withdrawal: 30000, return_rate: 9, years: 15, waiting_period: 0 };
+      const defaults = { 'compounding-freq': 'monthly',  initial_corpus: 5000000, monthly_withdrawal: 30000, return_rate: 9, years: 15 };
       let state = FinanceEngine.getUrlParams(defaults);
-      const elements = [ 'compounding-freq', 'initial_corpus', 'monthly_withdrawal', 'return_rate', 'years', 'waiting_period'];
+      const elements = [ 'compounding-freq', 'initial_corpus', 'monthly_withdrawal', 'return_rate', 'years'];
       
       function syncUI() {
         elements.forEach(id => {
@@ -251,7 +231,6 @@
         const withdrawal = state.monthly_withdrawal;
         const r = state.return_rate;
         const years = state.years;
-        const waitingPeriod = state.waiting_period || 0;
         
         const i = FinanceEngine.getMonthlyRate(r);
         
@@ -268,39 +247,28 @@
           let yInterest = 0;
           
           const compoundingFreq = state['compounding-freq'] || 'monthly';
-          const isWaiting = y <= waitingPeriod;
-          
           if (compoundingFreq === 'monthly') {
             for (let m = 1; m <= 12; m++) {
-              if (balance <= 0 && !isWaiting) {
+              if (balance <= 0) {
                 balance = 0;
                 continue;
               }
               const interest = balance * i;
               yInterest += interest;
               balance = balance + interest;
-              
-              if (!isWaiting) {
-                const actualWithdraw = Math.min(balance, withdrawal);
-                yWithdrawn += actualWithdraw;
-                balance -= actualWithdraw;
-              }
+              const actualWithdraw = Math.min(balance, withdrawal);
+              yWithdrawn += actualWithdraw;
+              balance -= actualWithdraw;
             }
           } else {
-            // Yearly compounding
             const yearStart = balance;
-            if (!isWaiting) {
-              for (let m = 1; m <= 12; m++) {
-                const actualWithdraw = Math.min(balance, withdrawal);
-                yWithdrawn += actualWithdraw;
-                balance -= actualWithdraw;
-              }
-              yInterest = Math.max(0, yearStart * (r / 100) - yWithdrawn * (r / 100) * (6.5 / 12));
-              balance = balance + yInterest;
-            } else {
-              yInterest = yearStart * (r / 100);
-              balance = balance + yInterest;
+            for (let m = 1; m <= 12; m++) {
+              const actualWithdraw = Math.min(balance, withdrawal);
+              yWithdrawn += actualWithdraw;
+              balance -= actualWithdraw;
             }
+            yInterest = Math.max(0, yearStart * (r / 100) - withdrawal * (r / 100) * 6.5);
+            balance = balance + yInterest;
           }
           
           cumulativeWithdrawn += yWithdrawn;
@@ -319,73 +287,6 @@
         document.getElementById('total-withdrawn').textContent = FinanceEngine.formatINR(cumulativeWithdrawn);
         document.getElementById('final-gains').textContent = FinanceEngine.formatINR(cumulativeInterest);
         
-        // Calculate depletion year
-        let depletionYr = 'Perpetual';
-        let simBalance = corpus;
-        let foundDepletion = false;
-        
-        for (let y = 1; y <= 100; y++) {
-          const compoundingFreq = state['compounding-freq'] || 'monthly';
-          const isWaiting = y <= waitingPeriod;
-          let yWithdrawn = 0;
-          let yInterest = 0;
-          const yearStart = simBalance;
-          
-          if (compoundingFreq === 'monthly') {
-            for (let m = 1; m <= 12; m++) {
-              if (simBalance <= 0) {
-                depletionYr = 'Depletes in Year ' + (y - 1);
-                foundDepletion = true;
-                break;
-              }
-              
-              const interest = simBalance * i;
-              simBalance += interest;
-              
-              if (!isWaiting) {
-                const actualWithdraw = Math.min(simBalance, withdrawal);
-                simBalance -= actualWithdraw;
-              }
-              
-              if (simBalance <= 0 && !isWaiting) {
-                depletionYr = 'Depletes in Year ' + y;
-                foundDepletion = true;
-                break;
-              }
-            }
-          } else {
-            // Yearly compounding
-            if (!isWaiting) {
-              for (let m = 1; m <= 12; m++) {
-                if (simBalance <= 0) {
-                  depletionYr = 'Depletes in Year ' + (y - 1);
-                  foundDepletion = true;
-                  break;
-                }
-                const actualWithdraw = Math.min(simBalance, withdrawal);
-                simBalance -= actualWithdraw;
-                yWithdrawn += actualWithdraw;
-              }
-              if (simBalance <= 0) {
-                depletionYr = 'Depletes in Year ' + y;
-                foundDepletion = true;
-              } else {
-                yInterest = Math.max(0, yearStart * (r / 100) - withdrawal * (r / 100) * 6.5);
-                simBalance += yInterest;
-              }
-            } else {
-              yInterest = yearStart * (r / 100);
-              simBalance += yInterest;
-            }
-          }
-          if (foundDepletion) break;
-        }
-        if (!foundDepletion) {
-          depletionYr = 'Perpetual (100+ Yrs)';
-        }
-        
-        document.getElementById('depletion-year').textContent = depletionYr;
-        
         const tableBody = document.getElementById('table-body');
         const headersRow = document.getElementById('table-headers-row');
         headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
@@ -400,8 +301,8 @@
         FinanceEngine.renderLineChart('chart-container', chartData, ['nominal'], ['#0071e3']);
         
         const csvExporter = FinanceEngine.exportData('swp-calculator', 
-          { 'Initial Corpus': corpus, 'Monthly Withdrawal': withdrawal, 'CAGR %': r, 'Years': years, 'Waiting Period': waitingPeriod },
-          { 'Remaining Corpus': balance, 'Total Withdrawals': cumulativeWithdrawn, 'Interest Earned': cumulativeInterest, 'Lifespan': depletionYr },
+          { 'Initial Corpus': corpus, 'Monthly Withdrawal': withdrawal, 'CAGR %': r, 'Years': years },
+          { 'Remaining Corpus': balance, 'Total Withdrawals': cumulativeWithdrawn, 'Interest Earned': cumulativeInterest },
           headers,
           tableRows
         );

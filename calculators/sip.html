@@ -66,7 +66,7 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="return_rate" min="1" step="0.1" value="12" aria-label="Expected Annual Return">
+            <input type="number" id="return_rate" min="1" step="0.5" value="12" aria-label="Expected Annual Return">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
@@ -148,7 +148,7 @@
           <div class="settings-bar-item">
             <span class="settings-bar-label">Inflation</span>
             <div class="input-wrapper" style="width:120px;">
-              <input type="number" id="inflation-rate" min="0" max="15" step="0.1" value="6" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
+              <input type="number" id="inflation-rate" min="0" max="15" step="0.5" value="6" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
               <span class="input-suffix">%</span>
             </div>
           </div>
@@ -167,7 +167,7 @@
           <div class="settings-bar-item" id="custom-tax-group" style="display:none;">
             <span class="settings-bar-label">Slab Rate</span>
             <div class="input-wrapper" style="width:100px;">
-              <input type="number" id="custom-tax-rate" min="0" max="50" step="0.1" value="30" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
+              <input type="number" id="custom-tax-rate" min="0" max="50" step="1" value="30" style="padding:0.4rem 0.5rem;font-size:0.9rem;">
               <span class="input-suffix">%</span>
             </div>
           </div>
@@ -333,52 +333,13 @@
         const i = FinanceEngine.getMonthlyRate(annualRate);
         const months = years * 12;
         const compoundingFreq = state['compounding-freq'] || 'monthly';
-        const inflationRate = state['inflation-rate'];
         
-        let tableRows = [];
-        let runningBalance = 0;
-        let cumulativeInvested = 0;
-        
-        for (let y = 1; y <= years; y++) {
-          const startMonth = (y - 1) * 12 + 1;
-          const endMonth = y * 12;
-          
-          if (compoundingFreq === 'monthly') {
-            for (let m = startMonth; m <= endMonth; m++) {
-              cumulativeInvested += P;
-              runningBalance = (runningBalance + P) * (1 + i);
-            }
-          } else {
-            const rate = annualRate / 100;
-            const interestOnStart = runningBalance * rate;
-            const interestOnDeposits = P * rate * 6.5;
-            cumulativeInvested += P * 12;
-            runningBalance = runningBalance + (P * 12) + interestOnStart + interestOnDeposits;
-          }
-          
-          const runningRealBalance = FinanceEngine.getRealValue(runningBalance, inflationRate, y);
-          
-          const yGains = runningBalance - cumulativeInvested;
-          const yTaxResults = FinanceEngine.estimateTax(yGains, state['tax-type'], state['custom-tax-rate']);
-          const yPostTaxCorpus = runningBalance - yTaxResults.tax;
-          
-          tableRows.push([
-            y,
-            Math.round(cumulativeInvested),
-            Math.round(yGains),
-            Math.round(runningBalance),
-            Math.round(runningRealBalance),
-            Math.round(yTaxResults.taxableGains),
-            Math.round(yTaxResults.tax),
-            Math.round(yPostTaxCorpus)
-          ]);
-        }
-        
-        const totalInvested = cumulativeInvested;
-        const fv = runningBalance;
+        const totalInvested = P * months;
+        const fv = P * ((Math.pow(1 + i, months) - 1) / i) * (1 + i);
         const totalGains = fv - totalInvested;
         
         // Inflation adjustment
+        const inflationRate = state['inflation-rate'];
         const r_real = ((1 + annualRate / 100) / (1 + inflationRate / 100)) - 1;
         const realCorpus = FinanceEngine.getRealValue(fv, inflationRate, years);
         const realGains = realCorpus - totalInvested;
@@ -412,8 +373,57 @@
         const headers = ['Year', 'Invested', 'Returns', 'Corpus', 'Real Corpus', 'Taxable Gains', 'Estimated Tax', 'Post-Tax Corpus'];
         headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
         
+        let tableRows = [];
+        let runningBalance = 0;
+        let cumulativeInvested = 0;
+        
+        for (let y = 1; y <= years; y++) {
+          const startMonth = (y - 1) * 12 + 1;
+          const endMonth = y * 12;
+          
+          if (compoundingFreq === 'monthly') {
+            const compoundingFreq = state['compounding-freq'] || 'monthly';
+          if (compoundingFreq === 'monthly') {
+            for (let m = startMonth; m <= endMonth; m++) {
+              cumulativeInvested += P;
+              runningBalance = (runningBalance + P) * (1 + i);
+            }
+          } else {
+            const rate = annualRate / 100;
+            const interestOnStart = runningBalance * rate;
+            const interestOnDeposits = P * rate * 6.5;
+            cumulativeInvested += P * 12;
+            runningBalance = runningBalance + (P * 12) + interestOnStart + interestOnDeposits;
+          }
+          } else {
+            const rate = annualRate / 100;
+            const interestOnStart = runningBalance * rate;
+            const interestOnDeposits = P * rate * 6.5;
+            
+            cumulativeInvested += P * 12;
+            runningBalance = runningBalance + (P * 12) + interestOnStart + interestOnDeposits;
+          }
+          
+          const runningRealBalance = FinanceEngine.getRealValue(runningBalance, inflationRate, y);
+          
+          const yGains = runningBalance - cumulativeInvested;
+          const yTaxResults = FinanceEngine.estimateTax(yGains, state['tax-type'], state['custom-tax-rate']);
+          const yPostTaxCorpus = runningBalance - yTaxResults.tax;
+          
+          tableRows.push([
+            y,
+            cumulativeInvested,
+            yGains,
+            runningBalance,
+            runningRealBalance,
+            yTaxResults.taxableGains,
+            yTaxResults.tax,
+            yPostTaxCorpus
+          ]);
+        }
+        
         tableBody.innerHTML = tableRows.map(row => 
-          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINRSmart(v, false)) + '</td>').join('') + '</tr>'
         ).join('');
         
         // Update Chart

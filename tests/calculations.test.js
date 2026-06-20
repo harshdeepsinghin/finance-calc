@@ -135,3 +135,32 @@ test('EMI: verify reducing balance monthly EMI calculation', () => {
   // EMI should be 43391.14
   assert.ok(Math.abs(emi - 43391.14) < 0.1);
 });
+
+test('Formatting: respects decimalPlaces preference in summary output', () => {
+  let mockPref = { decimalPlaces: 2 };
+  
+  globalThis.localStorage = {
+    getItem(key) {
+      if (key === 'moneyinfuture_user_prefs') {
+        return JSON.stringify(mockPref);
+      }
+      return null;
+    }
+  };
+
+  // 2 decimal places: formatINRSmart with includeSymbol=true
+  assert.equal(FinanceEngine.formatINRSmart(12345.678, true), '₹12,345.68');
+  assert.equal(FinanceEngine.formatPercent(12.3456, null), '12.35%');
+
+  // Change mock preference to 0 decimal places
+  mockPref.decimalPlaces = 0;
+  assert.equal(FinanceEngine.formatINRSmart(12345.678, true), '₹12,346');
+  assert.equal(FinanceEngine.formatPercent(12.3456, null), '12%');
+
+  // Change mock preference to 1 decimal place
+  mockPref.decimalPlaces = 1;
+  assert.equal(FinanceEngine.formatINRSmart(12345.678, true), '₹12,345.7');
+  assert.equal(FinanceEngine.formatPercent(12.3456, null), '12.3%');
+
+  delete globalThis.localStorage;
+});

@@ -171,17 +171,39 @@ const FinanceEngine = {
   },
 
   // 2. Formatting Helpers
+
+  /**
+   * Helper to retrieve preferred decimal places setting from user preferences
+   */
+  getDecimalPlacesPref() {
+    try {
+      const stored = localStorage.getItem('moneyinfuture_user_prefs');
+      if (stored) {
+        const prefs = JSON.parse(stored);
+        if (prefs && prefs.decimalPlaces !== undefined) {
+          return parseInt(prefs.decimalPlaces);
+        }
+      }
+    } catch (e) {}
+    return 0; // Default to 0 decimal places
+  },
   
   /**
    * Format a number into Indian Rupee format (e.g. ₹12,34,567.89)
    */
-  formatINR(value, includeSymbol = true, decimals = 0) {
+  formatINR(value, includeSymbol = true, decimals = null) {
     if (value === null || value === undefined || isNaN(value)) {
       return includeSymbol ? '₹0' : '0';
     }
+    let dec = 0;
+    if (decimals !== null) {
+      dec = decimals;
+    } else if (includeSymbol) {
+      dec = this.getDecimalPlacesPref();
+    }
     const formatted = new Intl.NumberFormat('en-IN', {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals
+      minimumFractionDigits: dec,
+      maximumFractionDigits: dec
     }).format(value);
     return includeSymbol ? '₹' + formatted : formatted;
   },
@@ -195,21 +217,28 @@ const FinanceEngine = {
     if (value === null || value === undefined || isNaN(value)) {
       return includeSymbol ? '₹0' : '0';
     }
-    const rounded = Math.round(value * 100) / 100;
-    const decimals = (rounded % 1 !== 0) ? 2 : 0;
+    let decimals = 0;
+    if (includeSymbol) {
+      decimals = this.getDecimalPlacesPref();
+    } else {
+      const rounded = Math.round(value * 100) / 100;
+      decimals = (rounded % 1 !== 0) ? 2 : 0;
+    }
+    const roundedVal = Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals);
     const formatted = new Intl.NumberFormat('en-IN', {
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals
-    }).format(rounded);
+    }).format(roundedVal);
     return includeSymbol ? '₹' + formatted : formatted;
   },
 
   /**
    * Format a percentage
    */
-  formatPercent(value, decimals = 2) {
+  formatPercent(value, decimals = null) {
     if (isNaN(value)) return '0%';
-    return value.toFixed(decimals) + '%';
+    const dec = decimals !== null ? decimals : this.getDecimalPlacesPref();
+    return value.toFixed(dec) + '%';
   },
 
   /**

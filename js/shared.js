@@ -431,6 +431,63 @@ function setupDraggableLabels() {
   }
 }
 
+function showLimitTooltip(btn, isPlus, limit) {
+  const wrapper = btn.closest('.input-wrapper');
+  if (!wrapper) return;
+
+  let existing = wrapper.querySelector('.limit-tooltip');
+  if (existing) {
+    existing.remove();
+  }
+
+  const tooltip = document.createElement('span');
+  tooltip.className = 'limit-tooltip';
+  
+  let limitText = limit;
+  if (limit >= 1000) {
+    limitText = typeof FinanceEngine !== 'undefined' ? FinanceEngine.formatINRSmart(limit) : limit.toLocaleString('en-IN');
+  }
+  
+  tooltip.textContent = isPlus 
+    ? `Max safe limit of ${limitText} reached. Type manually to enter more.` 
+    : `Min safe limit of ${limitText} reached. Type manually to enter less.`;
+
+  tooltip.style.position = 'absolute';
+  tooltip.style.left = '50%';
+  tooltip.style.transform = 'translateX(-50%) translateY(-100%)';
+  tooltip.style.top = '-8px';
+  tooltip.style.background = 'var(--text-primary)';
+  tooltip.style.color = 'var(--bg-primary)';
+  tooltip.style.fontSize = '0.75rem';
+  tooltip.style.padding = '0.3rem 0.6rem';
+  tooltip.style.borderRadius = '4px';
+  tooltip.style.pointerEvents = 'none';
+  tooltip.style.zIndex = '100';
+  tooltip.style.whiteSpace = 'nowrap';
+  tooltip.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+  tooltip.style.opacity = '0';
+  tooltip.style.transition = 'opacity 0.2s, transform 0.2s';
+
+  const computedStyle = window.getComputedStyle(wrapper);
+  if (computedStyle.position === 'static') {
+    wrapper.style.position = 'relative';
+  }
+  wrapper.appendChild(tooltip);
+
+  requestAnimationFrame(() => {
+    tooltip.style.opacity = '1';
+    tooltip.style.transform = 'translateX(-50%) translateY(-110%)';
+  });
+
+  setTimeout(() => {
+    tooltip.style.opacity = '0';
+    tooltip.style.transform = 'translateX(-50%) translateY(-100%)';
+    setTimeout(() => {
+      if (tooltip.parentNode) tooltip.parentNode.removeChild(tooltip);
+    }, 200);
+  }, 3500);
+}
+
 function setupStepperButtons() {
   let intervalId = null;
   let timeoutId = null;
@@ -472,8 +529,18 @@ function setupStepperButtons() {
     let newVal = startVal;
     const isPlus = btn.textContent.trim() === '+';
     if (isPlus) {
+      if (startVal >= max) {
+        showLimitTooltip(btn, true, max);
+        stopStepping();
+        return;
+      }
       newVal += step;
     } else {
+      if (startVal <= min) {
+        showLimitTooltip(btn, false, min);
+        stopStepping();
+        return;
+      }
       newVal -= step;
     }
 
@@ -763,7 +830,8 @@ const defaultPreferences = {
   showSliders: true,
   showInflation: true,
   showTaxation: true,
-  globalInflationRate: 6.0
+  globalInflationRate: 6.0,
+  decimalPlaces: 0
 };
 
 function getPreference(key) {
@@ -859,6 +927,12 @@ function applyPreferences() {
   document.querySelectorAll('input[type="number"]').forEach(input => {
     updateInputWords(input);
   });
+
+  // Re-trigger calculation to update results formatting with preference decimal places
+  const firstInput = document.querySelector('.inputs-card input[type="number"], .inputs-card select');
+  if (firstInput) {
+    firstInput.dispatchEvent(new Event('input', { bubbles: true }));
+  }
 }
 
 function initPreferences() {
@@ -910,6 +984,18 @@ function initPreferences() {
               <input type="checkbox" id="pref-color-coding">
               <span class="slider-switch"></span>
             </label>
+          </div>
+
+          <div class="pref-item" style="align-items: center;">
+            <div class="pref-info">
+              <span class="pref-title">Result Decimal Places</span>
+              <span class="pref-desc">Number of decimal places to show in summary results (0, 1, or 2)</span>
+            </div>
+            <select id="pref-decimal-places" style="width: auto; padding: 0.35rem 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-primary); font-size: 0.85rem; font-weight: 500; cursor: pointer; outline: none;">
+              <option value="0">0 (Integer)</option>
+              <option value="1">1 Decimal Place</option>
+              <option value="2">2 Decimal Places</option>
+            </select>
           </div>
         </div>
 
@@ -1003,6 +1089,14 @@ function initPreferences() {
     }
   }
 
+  const decimalSelect = document.getElementById('pref-decimal-places');
+  if (decimalSelect) {
+    decimalSelect.value = getPreference('decimalPlaces');
+    decimalSelect.addEventListener('change', (e) => {
+      setPreference('decimalPlaces', parseInt(e.target.value) || 0);
+    });
+  }
+
   // Apply initial preferences
   applyPreferences();
 }
@@ -1023,6 +1117,8 @@ function openPreferences() {
       const checkbox = document.getElementById(id);
       if (checkbox) checkbox.checked = getPreference(toggleMapping[id]);
     }
+    const decimalSelect = document.getElementById('pref-decimal-places');
+    if (decimalSelect) decimalSelect.value = getPreference('decimalPlaces');
     modal.style.display = 'flex';
   }
 }

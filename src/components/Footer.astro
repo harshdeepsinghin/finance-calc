@@ -1,0 +1,17 @@
+---
+// src/components/Footer.astro
+const currentYear = new Date().getFullYear();
+---
+<footer id="global-footer">
+  <div class="footer-links" style="display:flex;flex-wrap:wrap;gap:0.5rem 1.5rem;margin-bottom:0.75rem;font-size:0.82rem;">
+    <a href="/about.html" style="color:var(--text-secondary);text-decoration:none;">About</a>
+    <a href="/privacy-policy.html" style="color:var(--text-secondary);text-decoration:none;">Privacy Policy</a>
+    <a href="/terms.html" style="color:var(--text-secondary);text-decoration:none;">Terms of Use</a>
+    <a href="/disclaimer.html" style="color:var(--text-secondary);text-decoration:none;">Disclaimer</a>
+    <a href="/contact.html" style="color:var(--text-secondary);text-decoration:none;">Contact</a>
+  </div>
+  <p>&copy; {currentYear} MoneyInFuture. Made for Indian Investors. Blazing fast, lightweight, and offline-first.</p>
+  <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
+    Calculations are for illustrative purposes only and based on assumed CAGR returns. <strong>This is not financial, tax, or investment advice.</strong> All calculators run completely in your browser — no data leaves your device.
+  </p>
+</footer>

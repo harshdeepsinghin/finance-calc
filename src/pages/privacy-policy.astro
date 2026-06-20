@@ -1,0 +1,59 @@
+---
+// src/pages/privacy-policy.astro
+import Layout from '../layouts/Layout.astro';
+---
+<Layout 
+  title="Privacy Policy - MoneyInFuture"
+  description="MoneyInFuture privacy policy: no data collection, no cookies, no analytics. All calculations run locally in your browser."
+>
+  <div class="calculator-header">
+    <h1>Privacy Policy</h1>
+    <p class="calculator-description">Last updated: June 2026</p>
+  </div>
+
+  <section class="seo-content" style="max-width: 760px;">
+    <h2>Overview</h2>
+    <p>MoneyInFuture is built around a simple principle: your financial data is yours. We do not collect, store,
+      or transmit any personal or financial information that you enter into our calculators.</p>
+
+    <h2 style="margin-top: 2rem;">Data We Do Not Collect</h2>
+    <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 2;">
+      <li>Investment amounts, income, or expense figures you enter</li>
+      <li>Calculator inputs or outputs</li>
+      <li>Personal identification information</li>
+      <li>Device identifiers or fingerprints</li>
+      <li>Browsing history on this site</li>
+    </ul>
+
+    <h2 style="margin-top: 2rem;">Cookies</h2>
+    <p>MoneyInFuture does not use tracking cookies. We store your display preferences (dark mode, show/hide
+      sliders, etc.) in your browser's <code>localStorage</code>. This data never leaves your device.</p>
+
+    <h2 style="margin-top: 2rem;">Analytics</h2>
+    <p>We do not use Google Analytics, Meta Pixel, or any third-party analytics service. There are no tracking
+      scripts on this website.</p>
+
+    <h2 style="margin-top: 2rem;">Third-Party Libraries</h2>
+    <p>Some pages may load MathJax (a mathematical formula renderer) from a CDN when TeX formulas are present.
+      This is the only external network request made by the site. MathJax does not collect personal data. All
+      other JavaScript (engine.js, shared.js, html2canvas, jsPDF) is served from the same domain.</p>
+
+    <h2 style="margin-top: 2rem;">Local Storage</h2>
+    <p>We store the following data in your browser's localStorage, purely for improving your experience:</p>
+    <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 2;">
+      <li><code>theme</code> — your preferred light/dark mode</li>
+      <li><code>moneyinfuture_user_prefs</code> — display preferences (sliders, words, color coding, etc.)</li>
+      <li><code>moneyinfuture_shared_prefs</code> — last-used return rate, years, and inflation rate</li>
+      <li><code>sidebar-collapsed</code> — sidebar layout preference</li>
+    </ul>
+    <p style="margin-top: 0.75rem;">You can clear this data at any time by clearing your browser's site data for
+      this domain.</p>
+
+    <h2 style="margin-top: 2rem;">Changes to This Policy</h2>
+    <p>We may update this policy as the site evolves. The "last updated" date at the top of this page reflects
+      when it was last revised.</p>
+
+    <h2 style="margin-top: 2rem;">Contact</h2>
+    <p>If you have questions about this privacy policy, please <a href="/contact.html">contact us</a>.</p>
+  </section>
+</Layout>

@@ -2,11 +2,18 @@
   "name": "money-in-future-calculators",
   "version": "1.0.0",
   "description": "Calculations verification test suite for MoneyInFuture financial calculators",
-  "main": "js/engine.js",
+  "main": "public/js/engine.js",
+  "type": "module",
   "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
     "test": "node --test tests/calculations.test.js"
   },
-  "type": "commonjs",
+  "dependencies": {
+    "astro": "^6.4.7"
+  },
   "author": "MoneyInFuture",
   "license": "ISC"
 }

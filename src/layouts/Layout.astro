@@ -1,0 +1,91 @@
+---
+// src/layouts/Layout.astro
+import Header from '../components/Header.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/style.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  keywords?: string;
+  loadEngine?: boolean;
+}
+
+const {
+  title = 'MoneyInFuture - Blazing Fast Financial Calculators',
+  description = 'Blazing-fast, zero-tracker, offline-first personal finance and mutual fund calculators tailored for Indian retail investors. Model SIP, Step-Up SIP, SWP, CAGR, XIRR, EMI and tax.',
+  keywords = 'financial calculators india, mutual fund calculator, sip step up, tax calculator, retirement planner india, emergency fund cagr, loan prepayment',
+  loadEngine = false
+} = Astro.props;
+
+const currentPath = Astro.url.pathname;
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <meta name="keywords" content={keywords} />
+  <meta name="author" content="MoneyInFuture" />
+  <meta name="generator" content={Astro.generator} />
+  
+  <!-- Favicons -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={Astro.url.href} />
+  
+  <link rel="canonical" href={Astro.url.href} />
+  
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+  <!-- Theme setup script to prevent light-flash (FOUC) -->
+  <script is:inline>
+    (() => {
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "MoneyInFuture",
+      "url": "https://moneyinfuture.com/",
+      "description": "Blazing-fast financial calculators for Indian retail investors"
+    }
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    <Header />
+    
+    <div class="main-content">
+      <Sidebar currentUrl={currentPath} />
+      
+      <main class="calculator-workspace">
+        <slot />
+      </main>
+    </div>
+    
+    <Footer />
+  </div>
+
+  {loadEngine && <script is:inline src="/js/engine.js"></script>}
+  <script is:inline src="/js/shared.js"></script>
+</body>
+</html>

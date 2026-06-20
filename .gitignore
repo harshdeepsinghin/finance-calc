@@ -16,3 +16,9 @@ Thumbs.db
 todo.txt
 antigravity-leftover.md
 misc/
+node_modules
+
+# Astro & build output
+.astro/
+dist/
+package-lock.json

@@ -1,0 +1,62 @@
+---
+// src/components/AdSlot.astro
+interface Props {
+  slot?: string;
+  type?: 'responsive' | 'banner' | 'sidebar' | 'square';
+  style?: string;
+}
+
+const { 
+  slot = 'default-slot-id', 
+  type = 'responsive', 
+  style = '' 
+} = Astro.props;
+
+// Determine sizing classes and inline styles to prevent layout shift (CLS)
+let minHeight = '90px';
+let width = '100%';
+
+if (type === 'banner') {
+  minHeight = '90px'; // typical leaderboard height
+} else if (type === 'sidebar') {
+  minHeight = '280px';
+  width = '100%';
+} else if (type === 'square') {
+  minHeight = '250px';
+  width = '250px';
+}
+---
+<div class={`ad-container-outer ad-type-${type}`} style={`width:${width}; margin:1.5rem auto; text-align:center; ${style}`}>
+  <div class="ad-label" style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.25rem; letter-spacing: 0.05em; user-select: none;">
+    Advertisement
+  </div>
+  <div 
+    class="ad-slot-wrapper" 
+    style={`min-height:${minHeight}; display:flex; align-items:center; justify-content:center; background-color:var(--bg-secondary); border:1px dashed var(--border-color); border-radius:8px; overflow:hidden; position:relative;`}
+  >
+    <!-- AdSense Tag -->
+    <!-- In production, the AdSense script loaded in Layout.astro will populate this -->
+    <ins class="adsbygoogle"
+         style={`display:block; width:100%; min-height:${minHeight};`}
+         data-ad-client="ca-pub-XXXXXXXXXXXXXX"
+         data-ad-slot={slot}
+         data-ad-format={type === 'responsive' ? 'auto' : undefined}
+         data-full-width-responsive={type === 'responsive' ? 'true' : undefined}>
+    </ins>
+    
+    <!-- Development/No-AdSense placeholder visual (hidden in production by CSS or if AdSense loads) -->
+    <div class="ad-placeholder-text" style="position:absolute; pointer-events:none; font-size:0.8rem; color:var(--text-secondary); display:flex; flex-direction:column; align-items:center; gap:0.25rem; z-index:1;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.6; display:block;">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+        <line x1="8" y1="21" x2="16" y2="21"/>
+        <line x1="12" y1="17" x2="12" y2="21"/>
+      </svg>
+      <span>Interactive Ad Position ({type})</span>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  // Push to AdSense queue if adsbygoogle is loaded
+  (adsbygoogle = window.adsbygoogle || []).push({});
+</script>

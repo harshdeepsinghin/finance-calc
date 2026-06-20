@@ -1,5 +1,8 @@
-const assert = require('node:assert/strict');
-const test = require('node:test');
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
 
 // Mock browser environment for engine.js loading
 globalThis.ResizeObserver = class {
@@ -30,12 +33,15 @@ globalThis.document = {
   }
 };
 
-globalThis.navigator = {
-  userAgent: 'node'
-};
+Object.defineProperty(globalThis, 'navigator', {
+  value: { userAgent: 'node' },
+  writable: true,
+  configurable: true
+});
 
 // Require FinanceEngine
-const FinanceEngine = require('../js/engine.js');
+require('../public/js/engine.js');
+const FinanceEngine = globalThis.FinanceEngine;
 
 test('lump sum monthly EAR equals yearly at whole years', () => {
   // CAGR lump sum: principal = 100000, deposit = 0, rate = 12%, 10 years

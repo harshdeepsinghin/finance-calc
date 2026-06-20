@@ -1,0 +1,299 @@
+---
+// src/pages/calculators/[slug].astro
+import Layout from '../../layouts/Layout.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import { calculators } from '../../data/calculators.js';
+import { formulas } from '../../data/formulas.js';
+
+export async function getStaticPaths() {
+  return calculators.map(calc => {
+    const slugWithoutHtml = calc.filename.replace('.html', '');
+    return {
+      params: { slug: slugWithoutHtml },
+      props: { calc }
+    };
+  });
+}
+
+const { calc } = Astro.props;
+const formulaData = formulas[calc.filename];
+
+// Helpers for rendering input prefix / suffix
+function getInputPrefix(id: string, label: string) {
+  const cleanId = id.toLowerCase();
+  const cleanLabel = label.toLowerCase();
+  if (cleanId.includes('sip') || cleanId.includes('amount') || cleanId.includes('principal') || cleanId.includes('withdrawal') || cleanId.includes('lump') || cleanId.includes('corpus') || cleanId.includes('worth') || cleanId.includes('cost') || cleanId.includes('payment') || cleanId.includes('value') || cleanId.includes('rent') || cleanId.includes('salary') || cleanId.includes('fee') || cleanId.includes('income') || cleanId.includes('expense') || cleanId.includes('emi') || cleanId.includes('loan') || cleanId.includes('cap') || cleanLabel.includes('₹') || cleanLabel.includes('amount') || /\brs\b/.test(cleanLabel) || cleanLabel.includes('rupees') || cleanLabel.includes('investment') || cleanLabel.includes('value')) {
+    return '₹';
+  }
+  return null;
+}
+
+function getInputSuffix(id: string, label: string) {
+  const cleanId = id.toLowerCase();
+  const cleanLabel = label.toLowerCase();
+  if (cleanId.includes('rate') || cleanId.includes('return') || cleanId.includes('percent') || cleanId.includes('inflation') || cleanId.includes('tax') || cleanId.includes('ratio') || cleanId.includes('allocation') || cleanId.includes('yield') || cleanLabel.includes('%') || cleanLabel.includes('rate') || cleanLabel.includes('return')) {
+    return '%';
+  } else if (cleanId.includes('year') || cleanId.includes('duration') || cleanId.includes('period') || cleanId.includes('term') || cleanId.includes('age') || cleanLabel.includes('year') || cleanLabel.includes('duration') || cleanLabel.includes('period')) {
+    return 'Yrs';
+  } else if (cleanId.includes('month') || cleanLabel.includes('month')) {
+    return 'Mo';
+  }
+  return null;
+}
+
+function getCleanLabel(label: string) {
+  return label
+    .replace(/\s*\([\u20B9₹%]\)/g, '')
+    .replace(/\s*\(years\)/gi, '')
+    .replace(/\s*\(cagr\s*%\)/gi, '')
+    .trim();
+}
+---
+<Layout 
+  title={`${calc.title} - India | MoneyInFuture`}
+  description={calc.metaDescription}
+  keywords={calc.keywords}
+  loadEngine={true}
+>
+  <div class="calculator-header">
+    <h1>{calc.title}</h1>
+    <p class="calculator-description">{calc.subtitle || calc.metaDescription}</p>
+  </div>
+  
+  <!-- Top Section: Parameters (Inputs) | Results (Summary Cards) -->
+  <div class="calculator-top-section">
+    <!-- Inputs Card -->
+    <div class="inputs-card">
+      {calc.inputs.map(input => {
+        const displayLabel = getCleanLabel(input.label);
+        const prefix = getInputPrefix(input.id, input.label);
+        const suffix = getInputSuffix(input.id, input.label);
+        
+        if (input.type === 'slider' || input.type === 'number') {
+          const stepVal = input.step || 1;
+          const minVal = input.min !== undefined ? input.min : 0;
+          const maxVal = input.max !== undefined ? input.max : 1000000000;
+          
+          return (
+            <div class="input-group">
+              <div class="input-label-row">
+                <label for={input.id} class="draggable-label">{displayLabel}</label>
+              </div>
+              <div class="input-wrapper">
+                {prefix && <span class="input-prefix" set:html={prefix} />}
+                <input 
+                  type="number" 
+                  id={input.id} 
+                  min={minVal} 
+                  max={maxVal} 
+                  step={stepVal} 
+                  value={input.value} 
+                  aria-label={displayLabel} 
+                />
+                {suffix && <span class="input-suffix" set:html={suffix} />}
+                <div class="input-steppers">
+                  <button class="step-btn" type="button" tabindex="-1">-</button>
+                  <button class="step-btn" type="button" tabindex="-1">+</button>
+                </div>
+              </div>
+              {input.type === 'slider' && (
+                <div class="slider-wrapper">
+                  <input 
+                    type="range" 
+                    id={`${input.id}-slider`} 
+                    min={minVal} 
+                    max={maxVal} 
+                    step={stepVal} 
+                    value={input.value} 
+                    class="range-slider" 
+                    aria-label={`${displayLabel} Slider`} 
+                  />
+                </div>
+              )}
+            </div>
+          );
+        } else if (input.type === 'select') {
+          return (
+            <div class="input-group">
+              <div class="input-label-row">
+                <label for={input.id}>{displayLabel}</label>
+              </div>
+              <div class="input-wrapper">
+                <select id={input.id} aria-label={displayLabel}>
+                  {input.options?.map(o => (
+                    <option value={o.value} selected={o.value === input.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          );
+        }
+      })}
+      {calc.customInputsHtml && <Fragment set:html={calc.customInputsHtml} />}
+    </div>
+    
+    <!-- Results Summary Card -->
+    <div class="results-summary-card">
+      <span class="results-title">Calculated Results</span>
+      <div class="summary-grid">
+        {calc.results.map(metric => {
+          let label = metric.label;
+          let subHtml = null;
+          
+          if (metric.id === 'adjusted-corpus') {
+            label = "Real Corpus (Today's Purchasing Power)";
+            subHtml = <span class="metric-sub" id="real-gain-loss">-</span>;
+          } else if (metric.subLabel) {
+            subHtml = <span class="metric-sub">{metric.subLabel}</span>;
+          }
+          
+          const isConditionalTax = metric.conditional === 'tax';
+          
+          return (
+            <div 
+              class={`metric-card${isConditionalTax ? ' metric-card-conditional' : ''}`}
+              data-conditional={isConditionalTax ? 'tax' : undefined}
+              style={isConditionalTax ? 'display:none;' : undefined}
+            >
+              <span class="metric-label">{label}</span>
+              <span class="metric-value" id={metric.id}>-</span>
+              {subHtml}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </div>
+  
+  <!-- Horizontal Settings Bar (Compounding / Inflation / Tax) -->
+  {(calc.supportCompounding || calc.supportInflation || calc.supportTax) && (
+    <div class="settings-bar">
+      {calc.supportCompounding && (
+        <div class="settings-bar-item">
+          <span class="settings-bar-label">Compounding</span>
+          <div class="settings-bar-toggle">
+            <button class="toggle-btn toggle-btn-active" id="freq-monthly-btn" type="button">Monthly</button>
+            <button class="toggle-btn" id="freq-yearly-btn" type="button">Yearly</button>
+          </div>
+          <input type="hidden" id="compounding-freq" value="monthly" />
+        </div>
+      )}
+      {calc.supportInflation && (
+        <div class="settings-bar-item">
+          <span class="settings-bar-label">Inflation</span>
+          <div class="input-wrapper" style="width:120px;">
+            <input type="number" id="inflation-rate" min="0" max="15" step="0.5" value="6" style="padding:0.4rem 0.5rem;font-size:0.9rem;" />
+            <span class="input-suffix">%</span>
+          </div>
+        </div>
+      )}
+      {calc.supportTax && (
+        <>
+          <div class="settings-bar-item">
+            <span class="settings-bar-label">Taxation</span>
+            <div class="input-wrapper" style="width:260px;">
+              <select id="tax-type" style="font-size:0.85rem;padding:0.4rem 0.5rem;">
+                <option value="none">No Tax Estimation</option>
+                <option value="equity_ltcg" selected>Equity LTCG (12.5%, ₹1.25L exempt)</option>
+                <option value="equity_stcg">Equity STCG (20% flat)</option>
+                <option value="slab">Income Tax Slab Rate</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-bar-item" id="custom-tax-group" style="display:none;">
+            <span class="settings-bar-label">Slab Rate</span>
+            <div class="input-wrapper" style="width:100px;">
+              <input type="number" id="custom-tax-rate" min="0" max="50" step="1" value="30" style="padding:0.4rem 0.5rem;font-size:0.9rem;" />
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )}
+
+  <!-- AdSense Top Slot -->
+  <AdSlot type="banner" slot="top-banner-ad" />
+  
+  <!-- Graph Section (Full Width) -->
+  {!calc.noChart && (
+    <div class="chart-card full-width-card">
+      <div class="chart-header">
+        <span class="chart-title">Visual Projection</span>
+        <div class="chart-legend" id="chart-legend-container">
+          {calc.chartLegend ? (
+            <Fragment set:html={calc.chartLegend} />
+          ) : (
+            <>
+              <div class="legend-item"><span class="legend-color" style="background-color: var(--text-secondary);"></span>Invested</div>
+              <div class="legend-item"><span class="legend-color" style="background-color: var(--accent-color);"></span>Corpus</div>
+              {calc.supportInflation && <div class="legend-item"><span class="legend-color" style="background-color: var(--success-color);"></span>Real Value</div>}
+            </>
+          )}
+        </div>
+      </div>
+      <div class="chart-svg-container" id="chart-container"></div>
+    </div>
+  )}
+
+  <!-- AdSense Mid Slot -->
+  <AdSlot type="responsive" slot="mid-content-ad" />
+  
+  <!-- Table Section (Full Width) -->
+  {!calc.noTable && (
+    <>
+      <div class="action-toolbar full-width-toolbar">
+        <button class="btn btn-secondary" id="btn-copy-table">Copy Table</button>
+        <button class="btn btn-secondary" id="btn-export-json">Export JSON</button>
+        <button class="btn btn-primary" id="btn-export-csv">Export CSV</button>
+      </div>
+      
+      <div class="table-card full-width-card">
+        <span class="table-title">Yearly Breakdowns</span>
+        <table id="projections-table">
+          <thead>
+            <tr id="table-headers-row">
+              <!-- Headers generated in JS -->
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Data generated in JS -->
+          </tbody>
+        </table>
+      </div>
+    </>
+  )}
+  
+  <!-- SEO Content -->
+  <section class="seo-content">
+    <Fragment set:html={calc.seoContent} />
+    
+    {formulaData && (
+      <div class="formula-assumptions-container" style="margin-top: 2.5rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+        <div class="formula-section">
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Formula & Mathematical Approach</h3>
+          <p style="font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 1rem;">
+            {formulaData.desc}
+          </p>
+          <pre class="formula-box" style="background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; margin: 1rem 0; overflow-x: auto; color: var(--text-primary); white-space: pre-wrap; word-break: break-all;">{formulaData.code}</pre>
+        </div>
+        
+        <div class="assumptions-section" style="margin-top: 2rem;">
+          <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Key Assumptions</h3>
+          <ul class="assumptions-list" style="padding-left: 1.25rem; color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem; margin-top: 0.5rem;">
+            {formulaData.assumptions.map(a => (
+              <li style="margin-bottom: 0.4rem;">{a}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    )}
+  </section>
+
+  <!-- Binding execution -->
+  <script is:inline set:html={`
+    document.addEventListener('DOMContentLoaded', () => {
+      ${calc.bindingScript}
+    });
+  `} />
+</Layout>

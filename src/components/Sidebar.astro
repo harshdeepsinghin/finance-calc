@@ -1,0 +1,82 @@
+---
+// src/components/Sidebar.astro
+const { currentUrl } = Astro.props;
+const pathname = currentUrl || Astro.url.pathname;
+const filename = pathname.split('/').pop() || '';
+
+const categories = [
+  {
+    title: 'SIP & Mutual Funds',
+    items: [
+      { name: 'SIP Calculator', url: 'sip.html' },
+      { name: 'Step-Up SIP', url: 'step-up-sip.html' },
+      { name: 'Reverse SIP', url: 'reverse-sip.html' },
+      { name: 'Lump Sum', url: 'lump-sum.html' },
+      { name: 'Reverse Lump Sum', url: 'reverse-lump-sum.html' }
+    ]
+  },
+  {
+    title: 'SWP & Retirement',
+    items: [
+      { name: 'SWP Calculator', url: 'swp.html' },
+      { name: 'Reverse SWP', url: 'reverse-swp.html' },
+      { name: 'Step-Up SWP', url: 'step-up-swp.html' },
+      { name: 'Retirement Planner', url: 'retirement.html' },
+      { name: 'FIRE Calculator', url: 'fire.html' }
+    ]
+  },
+  {
+    title: 'Planners & Goals',
+    items: [
+      { name: 'Goal Planner', url: 'goal.html' },
+      { name: 'Education Planner', url: 'education-planner.html' },
+      { name: 'Marriage Planner', url: 'marriage-planner.html' },
+      { name: 'House Down Payment', url: 'house-down-payment.html' },
+      { name: 'Child Corpus Planner', url: 'child-corpus.html' }
+    ]
+  },
+  {
+    title: 'Portfolio & Returns',
+    items: [
+      { name: 'Net Worth Projection', url: 'net-worth-projection.html' },
+      { name: 'Asset Allocation', url: 'asset-allocation.html' },
+      { name: 'CAGR Calculator', url: 'cagr.html' },
+      { name: 'XIRR Calculator', url: 'xirr.html' },
+      { name: 'Inflation Calculator', url: 'inflation.html' },
+      { name: 'Real Return Calculator', url: 'real-return.html' }
+    ]
+  },
+  {
+    title: 'Loans & Debt',
+    items: [
+      { name: 'EMI Calculator', url: 'emi.html' },
+      { name: 'Loan Prepayment', url: 'loan-prepayment.html' },
+      { name: 'Emergency Fund', url: 'emergency-fund.html' },
+      { name: 'FI Timeline', url: 'financial-independence.html' }
+    ]
+  }
+];
+---
+<aside class="sidebar" id="global-sidebar">
+  {categories.map(cat => (
+    <div>
+      <h3>{cat.title}</h3>
+      <ul class="nav-list">
+        {cat.items.map(item => {
+          const isActive = filename === item.url;
+          return (
+            <li class="nav-item">
+              <a 
+                href={`/calculators/${item.url}`} 
+                class={`nav-link ${isActive ? 'active' : ''}`}
+                data-filename={item.url}
+              >
+                {item.name}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  ))}
+</aside>

@@ -1,0 +1,100 @@
+---
+// src/pages/index.astro
+import Layout from '../layouts/Layout.astro';
+import AdSlot from '../components/AdSlot.astro';
+
+const categories = [
+  {
+    title: 'SIP & Mutual Funds',
+    desc: 'Grow your wealth with periodic mutual fund and stock investing.',
+    items: [
+      { name: 'SIP Calculator', url: 'sip.html', desc: 'Calculate standard CAGR returns on SIP investments.' },
+      { name: 'Step-Up SIP', url: 'step-up-sip.html', desc: 'Step up your SIP annually to boost compounding.' },
+      { name: 'Reverse SIP', url: 'reverse-sip.html', desc: 'Compute required SIP contributions to hit target wealth.' },
+      { name: 'Lump Sum', url: 'lump-sum.html', desc: 'Determine lump sum investment compounding returns.' },
+      { name: 'Reverse Lump Sum', url: 'reverse-lump-sum.html', desc: 'Find target principal requirements for goals.' }
+    ]
+  },
+  {
+    title: 'SWP & Retirement',
+    desc: 'Formulate safe withdrawal speeds and retirement nest egg sizing.',
+    items: [
+      { name: 'SWP Calculator', url: 'swp.html', desc: 'Calculate systemic withdrawal schedules.' },
+      { name: 'Reverse SWP', url: 'reverse-swp.html', desc: 'Compute necessary corpus to support retirement income.' },
+      { name: 'Step-Up SWP', url: 'step-up-swp.html', desc: 'Step up withdrawals over time to offset inflation.' },
+      { name: 'Retirement Planner', url: 'retirement.html', desc: 'Project expenses and nest eggs for retirement.' },
+      { name: 'FIRE Calculator', url: 'fire.html', desc: 'Plan Financial Independence and Early Retirement targets.' }
+    ]
+  },
+  {
+    title: 'Planners & Goals',
+    desc: 'Plan child education, marriages, and downpayments with target goals.',
+    items: [
+      { name: 'Goal Planner', url: 'goal.html', desc: 'Input specific targets and view required monthly additions.' },
+      { name: 'Education Planner', url: 'education-planner.html', desc: 'Calculate higher education cost parameters.' },
+      { name: 'Marriage Planner', url: 'marriage-planner.html', desc: 'Plan marriage expenses and savings.' },
+      { name: 'House Down Payment', url: 'house-down-payment.html', desc: 'Determine real estate saving requirements.' },
+      { name: 'Child Corpus Planner', url: 'child-corpus.html', desc: 'Save for key milestones in child developmental ages.' }
+    ]
+  },
+  {
+    title: 'Portfolio & Returns',
+    desc: 'Examine allocation deviations, net returns, and compound growth.',
+    items: [
+      { name: 'Net Worth Projection', url: 'net-worth-projection.html', desc: 'Model total assets minus liabilities over time.' },
+      { name: 'Asset Allocation', url: 'asset-allocation.html', desc: 'Determine rebalancing rules for equity and debt.' },
+      { name: 'CAGR Calculator', url: 'cagr.html', desc: 'Compute annualized CAGR return percentages.' },
+      { name: 'XIRR Calculator', url: 'xirr.html', desc: 'Compute internal rates of return on irregular cashflows.' },
+      { name: 'Inflation Calculator', url: 'inflation.html', desc: 'Measure real cash purchasing power erosion.' },
+      { name: 'Real Return Calculator', url: 'real-return.html', desc: 'Calculate post-tax inflation-adjusted returns.' }
+    ]
+  },
+  {
+    title: 'Loans & Debt',
+    desc: 'Verify payments and prepayment interest savings on mortgages.',
+    items: [
+      { name: 'EMI Calculator', url: 'emi.html', desc: 'Equated monthly installment schedules.' },
+      { name: 'Loan Prepayment', url: 'loan-prepayment.html', desc: 'Model tenure reductions and interest savings.' },
+      { name: 'Emergency Fund', url: 'emergency-fund.html', desc: 'Contingency fund sizing and asset allocations.' },
+      { name: 'FI Timeline', url: 'financial-independence.html', desc: 'Project exact year compound growth exceeds expenses.' }
+    ]
+  }
+];
+---
+<Layout 
+  title="MoneyInFuture - Blazing Fast Financial Calculators"
+  description="Blazing-fast, zero-tracker, offline-first personal finance and mutual fund calculators tailored for Indian retail investors. Model SIP, Step-Up SIP, SWP, CAGR, XIRR, EMI and tax."
+>
+  <div class="calculator-header">
+    <h1>Financial Planners & Calculators</h1>
+    <p class="calculator-description">Modern, secure, and fast tools for personal wealth management. 100% client-side with zero tracking, cookies, or backend servers.</p>
+  </div>
+
+  <AdSlot type="banner" slot="dashboard-top-ad" />
+
+  {categories.map((cat, idx) => (
+    <div>
+      <section class="category-section">
+        <h2 class="category-title">{cat.title}</h2>
+        <p style="color:var(--text-secondary); margin-bottom:1.5rem; margin-top:-0.75rem; font-size:0.95rem;">{cat.desc}</p>
+        <div class="dashboard-grid">
+          {cat.items.map(item => (
+            <a 
+              href={`/calculators/${item.url}`} 
+              class="calc-card" 
+              style="text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; height: 100%;"
+            >
+              <div>
+                <h4>{item.name}</h4>
+                <p>{item.desc}</p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </section>
+      
+      {/* Insert Ad after the 2nd category (SWP & Retirement) */}
+      {idx === 1 && <AdSlot type="responsive" slot="dashboard-mid-ad" />}
+    </div>
+  ))}
+</Layout>

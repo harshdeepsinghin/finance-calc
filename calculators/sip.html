@@ -15,7 +15,7 @@
   <meta property="og:url" content="https://finplanindia.com/calculators/sip.html">
   <meta property="og:site_name" content="FinPlan India">
   
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
@@ -51,12 +51,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="monthly_sip" min="500" step="500" value="10000" aria-label="Monthly SIP">
+            <input type="number" id="monthly_sip" min="500" max="200000" step="500" value="10000" aria-label="Monthly SIP">
             <span class="input-suffix">Mo</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="monthly_sip-slider" min="500" max="200000" step="500" value="10000" class="range-slider" aria-label="Monthly SIP Slider">
           </div>
         </div>
       
@@ -66,12 +70,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="return_rate" min="1" step="0.5" value="12" aria-label="Expected Annual Return">
+            <input type="number" id="return_rate" min="1" max="30" step="0.5" value="12" aria-label="Expected Annual Return">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="return_rate-slider" min="1" max="30" step="0.5" value="12" class="range-slider" aria-label="Expected Annual Return Slider">
           </div>
         </div>
       
@@ -81,12 +89,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="years" min="1" step="1" value="15" aria-label="Duration">
+            <input type="number" id="years" min="1" max="40" step="1" value="15" aria-label="Duration">
             <span class="input-suffix">Yrs</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="years-slider" min="1" max="40" step="1" value="15" class="range-slider" aria-label="Duration Slider">
           </div>
         </div>
       
@@ -221,61 +233,12 @@
       <h3>Formula & Mathematical Approach</h3>
       <p>Unlike standard simple calculators that divide the rate by 12, our system computes compounding returns based on the true <strong>monthly equivalent CAGR</strong> rate:</p>
       <div class="formula-box">
-        <math display="block">
-          <mi>i</mi>
-          <mo>=</mo>
-          <msup>
-            <mrow>
-              <mo>(</mo>
-              <mn>1</mn>
-              <mo>+</mo>
-              <mfrac>
-                <mi>annualRate</mi>
-                <mn>100</mn>
-              </mfrac>
-              <mo>)</mo>
-            </mrow>
-            <mfrac>
-              <mn>1</mn>
-              <mn>12</mn>
-            </mfrac>
-          </msup>
-          <mo>−</mo>
-          <mn>1</mn>
-        </math>
-        <math display="block">
-          <mi>FV</mi>
-          <mo>=</mo>
-          <mi>P</mi>
-          <mo>×</mo>
-          <mfrac>
-            <mrow>
-              <msup>
-                <mrow>
-                  <mo>(</mo>
-                  <mn>1</mn>
-                  <mo>+</mo>
-                  <mi>i</mi>
-                  <mo>)</mo>
-                </mrow>
-                <mi>m</mi>
-              </msup>
-              <mo>−</mo>
-              <mn>1</mn>
-            </mrow>
-            <mi>i</mi>
-          </mfrac>
-          <mo>×</mo>
-          <mrow>
-            <mo>(</mo>
-            <mn>1</mn>
-            <mo>+</mo>
-            <mi>i</mi>
-            <mo>)</mo>
-          </mrow>
-        </math>
+        <p>Monthly equivalent rate from annual CAGR:</p>
+        $$i = (1 + r)^{1/12} - 1$$
+        <p style="margin-top:1rem;">Future Value of SIP (compounding monthly):</p>
+        $$FV = P \times \frac{(1 + i)^{m} - 1}{i} \times (1 + i)$$
       </div>
-      <p>Where <em>P</em> is monthly SIP, <em>i</em> is monthly rate, and <em>m</em> is the total number of months.</p>
+      <p>Where <em>P</em> is monthly SIP, <em>i</em> is monthly rate, <em>r</em> is annual rate (CAGR), and <em>m</em> is the total number of months.</p>
       <h3>Frequently Asked Questions</h3>
       <div class="faq-list">
         <div class="faq-item">
@@ -295,22 +258,22 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js"></script>
-  <script src="../js/shared.js"></script>
+  <script src="../js/engine.js?v=1.0.4"></script>
+  <script src="../js/shared.js?v=1.0.4"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
       
-      const defaults = { 'compounding-freq': 'monthly',  monthly_sip: 10000, return_rate: 12, years: 15, 'tax-type': 'equity_ltcg', 'custom-tax-rate': 12.5, 'inflation-rate': 6 };
+      const defaults = { monthly_sip: 10000, return_rate: 12, years: 15, 'tax-type': 'equity_ltcg', 'custom-tax-rate': 12.5, 'inflation-rate': 6, 'compounding-freq': 'monthly' };
       let state = FinanceEngine.getUrlParams(defaults);
       
-      const elements = [ 'compounding-freq', 'monthly_sip', 'return_rate', 'years', 'tax-type', 'custom-tax-rate', 'inflation-rate'];
+      const elements = ['monthly_sip', 'return_rate', 'years', 'tax-type', 'custom-tax-rate', 'inflation-rate', 'compounding-freq'];
       
       function syncUI() {
         elements.forEach(id => {
           const el = document.getElementById(id);
           if (!el) return;
-          if (document.activeElement !== el) el.value = state[id];
+          if (document.activeElement !== el) el.value = state[id]; const slider = document.getElementById(id + '-slider'); if (slider) slider.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'monthly_sip') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -331,20 +294,69 @@
         const annualRate = isNaN(state.return_rate) ? 12 : state.return_rate;
         const years = isNaN(state.years) || state.years <= 0 ? 15 : state.years;
         const i = FinanceEngine.getMonthlyRate(annualRate);
-        const months = years * 12;
         const compoundingFreq = state['compounding-freq'] || 'monthly';
-        
-        const totalInvested = P * months;
-        const fv = P * ((Math.pow(1 + i, months) - 1) / i) * (1 + i);
-        const totalGains = fv - totalInvested;
-        
-        // Inflation adjustment
         const inflationRate = state['inflation-rate'];
         const r_real = ((1 + annualRate / 100) / (1 + inflationRate / 100)) - 1;
-        const realCorpus = FinanceEngine.getRealValue(fv, inflationRate, years);
+        
+        // Populate Table
+        const tableBody = document.getElementById('table-body');
+        const headersRow = document.getElementById('table-headers-row');
+        
+        const headers = ['Year', 'Invested', 'Returns', 'Corpus', 'Real Corpus', 'Taxable Gains', 'Estimated Tax', 'Post-Tax Corpus'];
+        headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
+        
+        let tableRows = [];
+        let runningBalance = 0;
+        let cumulativeInvested = 0;
+        
+        for (let y = 1; y <= years; y++) {
+          const startMonth = (y - 1) * 12 + 1;
+          const endMonth = y * 12;
+          
+          if (compoundingFreq === 'monthly') {
+            // True monthly compounding: each SIP compounds monthly
+            for (let m = startMonth; m <= endMonth; m++) {
+              cumulativeInvested += P;
+              runningBalance = (runningBalance + P) * (1 + i);
+            }
+          } else {
+            // Annual (Yearly) compounding: rate compounds once per year
+            // Treat the year's SIP contributions as happening at start of each month
+            // but interest credited once at year end (EAR = annualRate)
+            const annualRateDecimal = annualRate / 100;
+            // Interest on beginning-of-year balance
+            const interestOnPrior = runningBalance * annualRateDecimal;
+            // For monthly SIPs paid during the year, use mid-year approximation
+            // Average time in account = 6.5 months out of 12
+            const interestOnDeposits = P * 12 * annualRateDecimal * (6.5 / 12);
+            cumulativeInvested += P * 12;
+            runningBalance = runningBalance + interestOnPrior + (P * 12) + interestOnDeposits;
+          }
+          
+          const runningRealBalance = FinanceEngine.getRealValue(runningBalance, inflationRate, y);
+          
+          const yGains = runningBalance - cumulativeInvested;
+          const yTaxResults = FinanceEngine.estimateTax(yGains, state['tax-type'], state['custom-tax-rate']);
+          const yPostTaxCorpus = runningBalance - yTaxResults.tax;
+          
+          tableRows.push([
+            y,
+            cumulativeInvested,
+            yGains,
+            runningBalance,
+            runningRealBalance,
+            yTaxResults.taxableGains,
+            yTaxResults.tax,
+            yPostTaxCorpus
+          ]);
+        }
+        
+        const totalInvested = cumulativeInvested;
+        const fv = runningBalance;
+        const totalGains = fv - totalInvested;
+        const realCorpus = tableRows[tableRows.length - 1][4];
         const realGains = realCorpus - totalInvested;
         
-        // Tax estimation
         const taxResults = FinanceEngine.estimateTax(totalGains, state['tax-type'], state['custom-tax-rate']);
         const estimatedTax = taxResults.tax;
         const postTaxCorpus = fv - estimatedTax;
@@ -365,62 +377,6 @@
         document.querySelectorAll('[data-conditional="tax"]').forEach(el => {
           el.style.display = (state['tax-type'] && state['tax-type'] !== 'none') ? '' : 'none';
         });
-        
-        // Populate Table
-        const tableBody = document.getElementById('table-body');
-        const headersRow = document.getElementById('table-headers-row');
-        
-        const headers = ['Year', 'Invested', 'Returns', 'Corpus', 'Real Corpus', 'Taxable Gains', 'Estimated Tax', 'Post-Tax Corpus'];
-        headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
-        
-        let tableRows = [];
-        let runningBalance = 0;
-        let cumulativeInvested = 0;
-        
-        for (let y = 1; y <= years; y++) {
-          const startMonth = (y - 1) * 12 + 1;
-          const endMonth = y * 12;
-          
-          if (compoundingFreq === 'monthly') {
-            const compoundingFreq = state['compounding-freq'] || 'monthly';
-          if (compoundingFreq === 'monthly') {
-            for (let m = startMonth; m <= endMonth; m++) {
-              cumulativeInvested += P;
-              runningBalance = (runningBalance + P) * (1 + i);
-            }
-          } else {
-            const rate = annualRate / 100;
-            const interestOnStart = runningBalance * rate;
-            const interestOnDeposits = P * rate * 6.5;
-            cumulativeInvested += P * 12;
-            runningBalance = runningBalance + (P * 12) + interestOnStart + interestOnDeposits;
-          }
-          } else {
-            const rate = annualRate / 100;
-            const interestOnStart = runningBalance * rate;
-            const interestOnDeposits = P * rate * 6.5;
-            
-            cumulativeInvested += P * 12;
-            runningBalance = runningBalance + (P * 12) + interestOnStart + interestOnDeposits;
-          }
-          
-          const runningRealBalance = FinanceEngine.getRealValue(runningBalance, inflationRate, y);
-          
-          const yGains = runningBalance - cumulativeInvested;
-          const yTaxResults = FinanceEngine.estimateTax(yGains, state['tax-type'], state['custom-tax-rate']);
-          const yPostTaxCorpus = runningBalance - yTaxResults.tax;
-          
-          tableRows.push([
-            y,
-            cumulativeInvested,
-            yGains,
-            runningBalance,
-            runningRealBalance,
-            yTaxResults.taxableGains,
-            yTaxResults.tax,
-            yPostTaxCorpus
-          ]);
-        }
         
         tableBody.innerHTML = tableRows.map(row => 
           '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINRSmart(v, false)) + '</td>').join('') + '</tr>'

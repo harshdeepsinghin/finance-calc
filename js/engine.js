@@ -87,15 +87,17 @@ const FinanceEngine = {
       let yInvested = 0;
 
       if (compoundingFreq === 'monthly') {
-        const i = rate / 12;
+        // True CAGR monthly equivalent rate: (1 + annualRate)^(1/12) - 1
+        const i = Math.pow(1 + rate, 1/12) - 1;
         for (let m = 1; m <= 12; m++) {
           balance = (balance + currentSIP) * (1 + i);
           yInvested += currentSIP;
         }
       } else {
-        // Yearly compounding:
+        // Yearly compounding (EAR): interest credited once at year-end
+        // Mid-year approximation for monthly SIPs deposited throughout the year
         const interestOnStart = balance * rate;
-        const interestOnDeposits = currentSIP * rate * 6.5; // sum from t=1 to 12 of (13-t)/12
+        const interestOnDeposits = currentSIP * 12 * rate * (6.5 / 12);
         balance = balance + (currentSIP * 12) + interestOnStart + interestOnDeposits;
         yInvested = currentSIP * 12;
       }
@@ -129,7 +131,8 @@ const FinanceEngine = {
       let yWithdrawn = 0;
 
       if (compoundingFreq === 'monthly') {
-        const i = rate / 12;
+        // True CAGR monthly equivalent rate
+        const i = Math.pow(1 + rate, 1/12) - 1;
         for (let m = 1; m <= 12; m++) {
           const withdrawal = Math.min(balance, currentSWP);
           balance = balance - withdrawal;
@@ -144,8 +147,8 @@ const FinanceEngine = {
           balance = balance - withdrawal;
           yWithdrawn += withdrawal;
         }
-        // Interest calculated on start balance minus simple interest on withdrawals
-        const interest = Math.max(0, yearStartBalance * rate - currentSWP * rate * 6.5);
+        // Interest calculated on start balance minus mid-year approximation for withdrawals
+        const interest = Math.max(0, yearStartBalance * rate - currentSWP * 12 * rate * (6.5 / 12));
         balance = balance + interest;
       }
 

@@ -15,7 +15,7 @@
   <meta property="og:url" content="https://finplanindia.com/calculators/step-up-sip.html">
   <meta property="og:site_name" content="FinPlan India">
   
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
@@ -51,12 +51,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="starting_sip" min="500" step="500" value="10000" aria-label="Starting Monthly SIP">
+            <input type="number" id="starting_sip" min="500" max="200000" step="500" value="10000" aria-label="Starting Monthly SIP">
             <span class="input-suffix">Mo</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="starting_sip-slider" min="500" max="200000" step="500" value="10000" class="range-slider" aria-label="Starting Monthly SIP Slider">
           </div>
         </div>
       
@@ -66,12 +70,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="step_up_pct" min="1" step="1" value="10" aria-label="Annual Step-Up">
+            <input type="number" id="step_up_pct" min="1" max="30" step="1" value="10" aria-label="Annual Step-Up">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="step_up_pct-slider" min="1" max="30" step="1" value="10" class="range-slider" aria-label="Annual Step-Up Slider">
           </div>
         </div>
       
@@ -81,12 +89,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="return_rate" min="1" step="0.5" value="12" aria-label="Expected Return">
+            <input type="number" id="return_rate" min="1" max="30" step="0.5" value="12" aria-label="Expected Return">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="return_rate-slider" min="1" max="30" step="0.5" value="12" class="range-slider" aria-label="Expected Return Slider">
           </div>
         </div>
       
@@ -96,12 +108,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="years" min="1" step="1" value="15" aria-label="Duration">
+            <input type="number" id="years" min="1" max="40" step="1" value="15" aria-label="Duration">
             <span class="input-suffix">Yrs</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="years-slider" min="1" max="40" step="1" value="15" class="range-slider" aria-label="Duration Slider">
           </div>
         </div>
       
@@ -243,22 +259,22 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js"></script>
-  <script src="../js/shared.js"></script>
+  <script src="../js/engine.js?v=1.0.4"></script>
+  <script src="../js/shared.js?v=1.0.4"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
       
-      const defaults = { 'compounding-freq': 'monthly',  starting_sip: 10000, step_up_pct: 10, return_rate: 12, years: 15, 'tax-type': 'equity_ltcg', 'custom-tax-rate': 12.5, 'inflation-rate': 6 };
+      const defaults = { starting_sip: 10000, step_up_pct: 10, return_rate: 12, years: 15, 'tax-type': 'equity_ltcg', 'custom-tax-rate': 12.5, 'inflation-rate': 6, 'compounding-freq': 'monthly' };
       let state = FinanceEngine.getUrlParams(defaults);
       
-      const elements = [ 'compounding-freq', 'starting_sip', 'step_up_pct', 'return_rate', 'years', 'tax-type', 'custom-tax-rate', 'inflation-rate'];
+      const elements = ['starting_sip', 'step_up_pct', 'return_rate', 'years', 'tax-type', 'custom-tax-rate', 'inflation-rate', 'compounding-freq'];
       
       function syncUI() {
         elements.forEach(id => {
           const el = document.getElementById(id);
           if (!el) return;
-          if (document.activeElement !== el) el.value = state[id];
+          if (document.activeElement !== el) el.value = state[id]; const slider = document.getElementById(id + '-slider'); if (slider) slider.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'starting_sip') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -294,26 +310,17 @@
           const currentSIP = startSIP * Math.pow(1 + stepUp / 100, y - 1);
           
           if (compoundingFreq === 'monthly') {
-            const compoundingFreq = state['compounding-freq'] || 'monthly';
-          if (compoundingFreq === 'monthly') {
             for (let m = 1; m <= 12; m++) {
               cumulativeInvested += currentSIP;
               runningBalance = (runningBalance + currentSIP) * (1 + i);
             }
           } else {
-            const rate = annualRate / 100;
-            const interestOnStart = runningBalance * rate;
-            const interestOnDeposits = currentSIP * rate * 6.5;
+            // Annual compounding with mid-year approximation for monthly SIPs
+            const annualRateDecimal = annualRate / 100;
+            const interestOnPrior = runningBalance * annualRateDecimal;
+            const interestOnDeposits = currentSIP * 12 * annualRateDecimal * (6.5 / 12);
             cumulativeInvested += currentSIP * 12;
-            runningBalance = runningBalance + (currentSIP * 12) + interestOnStart + interestOnDeposits;
-          }
-          } else {
-            const rate = annualRate / 100;
-            const interestOnStart = runningBalance * rate;
-            const interestOnDeposits = currentSIP * rate * 6.5;
-            
-            cumulativeInvested += currentSIP * 12;
-            runningBalance = runningBalance + (currentSIP * 12) + interestOnStart + interestOnDeposits;
+            runningBalance = runningBalance + interestOnPrior + (currentSIP * 12) + interestOnDeposits;
           }
           
           const runningRealBalance = FinanceEngine.getRealValue(runningBalance, inflationRate, y);

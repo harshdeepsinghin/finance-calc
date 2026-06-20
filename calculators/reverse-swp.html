@@ -15,7 +15,7 @@
   <meta property="og:url" content="https://finplanindia.com/calculators/reverse-swp.html">
   <meta property="og:site_name" content="FinPlan India">
   
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
@@ -51,12 +51,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="desired_withdrawal" min="5000" step="5000" value="50000" aria-label="Desired Monthly Income">
+            <input type="number" id="desired_withdrawal" min="5000" max="500000" step="5000" value="50000" aria-label="Desired Monthly Income">
             <span class="input-suffix">Mo</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="desired_withdrawal-slider" min="5000" max="500000" step="5000" value="50000" class="range-slider" aria-label="Desired Monthly Income Slider">
           </div>
         </div>
       
@@ -66,12 +70,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="return_rate" min="1" step="0.5" value="8" aria-label="Expected Return">
+            <input type="number" id="return_rate" min="1" max="20" step="0.5" value="8" aria-label="Expected Return">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="return_rate-slider" min="1" max="20" step="0.5" value="8" class="range-slider" aria-label="Expected Return Slider">
           </div>
         </div>
       
@@ -81,12 +89,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="years" min="1" step="1" value="20" aria-label="Duration">
+            <input type="number" id="years" min="1" max="40" step="1" value="20" aria-label="Duration">
             <span class="input-suffix">Yrs</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="years-slider" min="1" max="40" step="1" value="20" class="range-slider" aria-label="Duration Slider">
           </div>
         </div>
       
@@ -189,19 +201,20 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js"></script>
-  <script src="../js/shared.js"></script>
+  <script src="../js/engine.js?v=1.0.4"></script>
+  <script src="../js/shared.js?v=1.0.4"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
       
-      const defaults = { 'compounding-freq': 'monthly',  desired_withdrawal: 50000, return_rate: 8, years: 20 };
+      const defaults = { desired_withdrawal: 50000, return_rate: 8, years: 20, 'compounding-freq': 'monthly' };
       let state = FinanceEngine.getUrlParams(defaults);
-      const elements = [ 'compounding-freq', 'desired_withdrawal', 'return_rate', 'years'];
+      
+      const elements = ['desired_withdrawal', 'return_rate', 'years', 'compounding-freq'];
       
       function syncUI() {
         elements.forEach(id => {
-          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id]; const sliderVal = document.getElementById(id + '-slider'); if (sliderVal) sliderVal.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'desired_withdrawal') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -218,15 +231,43 @@
         
         const i = FinanceEngine.getMonthlyRate(r);
         const months = years * 12;
+        const compoundingFreq = state['compounding-freq'] || 'monthly';
         
-        // P = W * [1 - (1+i)^-m] / i * (1+i) [Beginning of month withdrawal]
-        const reqCorpus = withdrawal * ((1 - Math.pow(1 + i, -months)) / i) * (1 + i);
+        let reqCorpus = 0;
+        if (compoundingFreq === 'monthly') {
+          reqCorpus = withdrawal * ((1 - Math.pow(1 + i, -months)) / i) * (1 + i);
+        } else {
+          // Binary search for required corpus under yearly compounding
+          let low = 0, high = withdrawal * months * 2;
+          for (let iter = 0; iter < 100; iter++) {
+            const mid = (low + high) / 2;
+            let balance = mid;
+            let ok = true;
+            for (let y = 1; y <= years; y++) {
+              let yWithdrawn = 0;
+              for (let m = 1; m <= 12; m++) {
+                const actualWithdraw = Math.min(balance, withdrawal);
+                balance -= actualWithdraw;
+                yWithdrawn += actualWithdraw;
+              }
+              if (balance < 0) {
+                ok = false;
+                break;
+              }
+              const yInterest = Math.max(0, balance * (r / 100));
+              balance += yInterest;
+            }
+            if (balance >= 0) high = mid;
+            else low = mid;
+          }
+          reqCorpus = high;
+        }
         const totalPayout = withdrawal * months;
         const interestRequired = totalPayout - reqCorpus;
         
-        document.getElementById('required-corpus').textContent = FinanceEngine.formatINR(reqCorpus);
-        document.getElementById('total-withdrawn').textContent = FinanceEngine.formatINR(totalPayout);
-        document.getElementById('gains-portion').textContent = FinanceEngine.formatINR(interestRequired);
+        document.getElementById('required-corpus').textContent = FinanceEngine.formatINRSmart(reqCorpus);
+        document.getElementById('total-withdrawn').textContent = FinanceEngine.formatINRSmart(totalPayout);
+        document.getElementById('gains-portion').textContent = FinanceEngine.formatINRSmart(interestRequired);
         
         const headers = ['Year', 'Beginning Balance', 'Withdrawn', 'Interest Earned', 'Ending Balance'];
         let tableRows = [];
@@ -250,10 +291,10 @@
           }
           tableRows.push([
             y,
-            Math.round(beg),
-            Math.round(yWithdrawn),
-            Math.round(yInterest),
-            Math.round(balance)
+            beg,
+            yWithdrawn,
+            yInterest,
+            balance
           ]);
         }
         
@@ -261,7 +302,7 @@
         const headersRow = document.getElementById('table-headers-row');
         headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
         tableBody.innerHTML = tableRows.map(row => 
-          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINRSmart(v, false)) + '</td>').join('') + '</tr>'
         ).join('');
         
         const chartData = tableRows.map(row => ({

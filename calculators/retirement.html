@@ -15,7 +15,7 @@
   <meta property="og:url" content="https://finplanindia.com/calculators/retirement.html">
   <meta property="og:site_name" content="FinPlan India">
   
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
@@ -51,12 +51,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="current_age" min="18" step="1" value="30" aria-label="Current Age">
+            <input type="number" id="current_age" min="18" max="60" step="1" value="30" aria-label="Current Age">
             <span class="input-suffix">Yrs</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="current_age-slider" min="18" max="60" step="1" value="30" class="range-slider" aria-label="Current Age Slider">
           </div>
         </div>
       
@@ -66,12 +70,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="retire_age" min="35" step="1" value="55" aria-label="Retirement Age">
+            <input type="number" id="retire_age" min="35" max="70" step="1" value="55" aria-label="Retirement Age">
             <span class="input-suffix">Yrs</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="retire_age-slider" min="35" max="70" step="1" value="55" class="range-slider" aria-label="Retirement Age Slider">
           </div>
         </div>
       
@@ -81,12 +89,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="life_expectancy" min="70" step="1" value="85" aria-label="Life Expectancy">
+            <input type="number" id="life_expectancy" min="70" max="100" step="1" value="85" aria-label="Life Expectancy">
             <span class="input-suffix">Yrs</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="life_expectancy-slider" min="70" max="100" step="1" value="85" class="range-slider" aria-label="Life Expectancy Slider">
           </div>
         </div>
       
@@ -96,12 +108,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="monthly_expenses" min="10000" step="5000" value="50000" aria-label="Current Monthly Expenses">
+            <input type="number" id="monthly_expenses" min="10000" max="1000000" step="5000" value="50000" aria-label="Current Monthly Expenses">
             <span class="input-suffix">Mo</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="monthly_expenses-slider" min="10000" max="1000000" step="5000" value="50000" class="range-slider" aria-label="Current Monthly Expenses Slider">
           </div>
         </div>
       
@@ -111,12 +127,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="pre_return" min="4" step="0.5" value="12" aria-label="Pre-retirement Return CAGR">
+            <input type="number" id="pre_return" min="4" max="20" step="0.5" value="12" aria-label="Pre-retirement Return CAGR">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="pre_return-slider" min="4" max="20" step="0.5" value="12" class="range-slider" aria-label="Pre-retirement Return CAGR Slider">
           </div>
         </div>
       
@@ -126,12 +146,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="post_return" min="3" step="0.5" value="8" aria-label="Post-retirement Return CAGR">
+            <input type="number" id="post_return" min="3" max="15" step="0.5" value="8" aria-label="Post-retirement Return CAGR">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="post_return-slider" min="3" max="15" step="0.5" value="8" class="range-slider" aria-label="Post-retirement Return CAGR Slider">
           </div>
         </div>
       
@@ -241,8 +265,8 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js"></script>
-  <script src="../js/shared.js"></script>
+  <script src="../js/engine.js?v=1.0.4"></script>
+  <script src="../js/shared.js?v=1.0.4"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
@@ -253,7 +277,7 @@
       
       function syncUI() {
         elements.forEach(id => {
-          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id]; const sliderVal = document.getElementById(id + '-slider'); if (sliderVal) sliderVal.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'monthly_expenses') valDisplay.textContent = FinanceEngine.formatINR(state[id]);

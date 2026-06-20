@@ -47,6 +47,7 @@ function getCalculatorHtml(calc) {
     if (input.type === 'slider' || input.type === 'number') {
       const stepVal = input.step || 1;
       const minVal = input.min !== undefined ? input.min : 0;
+      const maxVal = input.max !== undefined ? input.max : 1000000000;
       
       inputsHtml += `
         <div class="input-group">
@@ -55,13 +56,17 @@ function getCalculatorHtml(calc) {
           </div>
           <div class="input-wrapper">
             ${prefixHtml}
-            <input type="number" id="${input.id}" min="${minVal}" step="${stepVal}" value="${input.value}" aria-label="${displayLabel}">
+            <input type="number" id="${input.id}" min="${minVal}" max="${maxVal}" step="${stepVal}" value="${input.value}" aria-label="${displayLabel}">
             ${suffixHtml}
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
           </div>
+          ${input.type === 'slider' ? `
+          <div class="slider-wrapper">
+            <input type="range" id="${input.id}-slider" min="${minVal}" max="${maxVal}" step="${stepVal}" value="${input.value}" class="range-slider" aria-label="${displayLabel} Slider">
+          </div>` : ''}
         </div>
       `;
     } else if (input.type === 'select') {
@@ -219,7 +224,7 @@ function getCalculatorHtml(calc) {
   <meta property="og:url" content="https://finplanindia.com/calculators/${calc.filename}">
   <meta property="og:site_name" content="FinPlan India">
   
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.3">
   <script type="application/ld+json">
     ${JSON.stringify(jsonLd, null, 2)}
   </script>
@@ -345,8 +350,8 @@ function getCalculatorHtml(calc) {
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js"></script>
-  <script src="../js/shared.js"></script>
+  <script src="../js/engine.js?v=1.0.3"></script>
+  <script src="../js/shared.js?v=1.0.3"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
@@ -486,20 +491,54 @@ const calculators = [
         const annualRate = isNaN(state.return_rate) ? 12 : state.return_rate;
         const years = isNaN(state.years) || state.years <= 0 ? 15 : state.years;
         const i = FinanceEngine.getMonthlyRate(annualRate);
-        const months = years * 12;
         const compoundingFreq = state['compounding-freq'] || 'monthly';
-        
-        const totalInvested = P * months;
-        const fv = P * ((Math.pow(1 + i, months) - 1) / i) * (1 + i);
-        const totalGains = fv - totalInvested;
-        
-        // Inflation adjustment
         const inflationRate = state['inflation-rate'];
         const r_real = ((1 + annualRate / 100) / (1 + inflationRate / 100)) - 1;
-        const realCorpus = FinanceEngine.getRealValue(fv, inflationRate, years);
+        
+        // Populate Table
+        const tableBody = document.getElementById('table-body');
+        const headersRow = document.getElementById('table-headers-row');
+        
+        const headers = ['Year', 'Invested', 'Returns', 'Corpus', 'Real Corpus', 'Taxable Gains', 'Estimated Tax', 'Post-Tax Corpus'];
+        headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
+        
+        let tableRows = [];
+        let runningBalance = 0;
+        let cumulativeInvested = 0;
+        
+        for (let y = 1; y <= years; y++) {
+          const startMonth = (y - 1) * 12 + 1;
+          const endMonth = y * 12;
+          
+          for (let m = startMonth; m <= endMonth; m++) {
+            cumulativeInvested += P;
+            runningBalance = (runningBalance + P) * (1 + i);
+          }
+          
+          const runningRealBalance = FinanceEngine.getRealValue(runningBalance, inflationRate, y);
+          
+          const yGains = runningBalance - cumulativeInvested;
+          const yTaxResults = FinanceEngine.estimateTax(yGains, state['tax-type'], state['custom-tax-rate']);
+          const yPostTaxCorpus = runningBalance - yTaxResults.tax;
+          
+          tableRows.push([
+            y,
+            cumulativeInvested,
+            yGains,
+            runningBalance,
+            runningRealBalance,
+            yTaxResults.taxableGains,
+            yTaxResults.tax,
+            yPostTaxCorpus
+          ]);
+        }
+        
+        const totalInvested = cumulativeInvested;
+        const fv = runningBalance;
+        const totalGains = fv - totalInvested;
+        const realCorpus = tableRows[tableRows.length - 1][4];
         const realGains = realCorpus - totalInvested;
         
-        // Tax estimation
         const taxResults = FinanceEngine.estimateTax(totalGains, state['tax-type'], state['custom-tax-rate']);
         const estimatedTax = taxResults.tax;
         const postTaxCorpus = fv - estimatedTax;
@@ -520,53 +559,6 @@ const calculators = [
         document.querySelectorAll('[data-conditional="tax"]').forEach(el => {
           el.style.display = (state['tax-type'] && state['tax-type'] !== 'none') ? '' : 'none';
         });
-        
-        // Populate Table
-        const tableBody = document.getElementById('table-body');
-        const headersRow = document.getElementById('table-headers-row');
-        
-        const headers = ['Year', 'Invested', 'Returns', 'Corpus', 'Real Corpus', 'Taxable Gains', 'Estimated Tax', 'Post-Tax Corpus'];
-        headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
-        
-        let tableRows = [];
-        let runningBalance = 0;
-        let cumulativeInvested = 0;
-        
-        for (let y = 1; y <= years; y++) {
-          const startMonth = (y - 1) * 12 + 1;
-          const endMonth = y * 12;
-          
-          if (compoundingFreq === 'monthly') {
-            for (let m = startMonth; m <= endMonth; m++) {
-              cumulativeInvested += P;
-              runningBalance = (runningBalance + P) * (1 + i);
-            }
-          } else {
-            const rate = annualRate / 100;
-            const interestOnStart = runningBalance * rate;
-            const interestOnDeposits = P * rate * 6.5;
-            
-            cumulativeInvested += P * 12;
-            runningBalance = runningBalance + (P * 12) + interestOnStart + interestOnDeposits;
-          }
-          
-          const runningRealBalance = FinanceEngine.getRealValue(runningBalance, inflationRate, y);
-          
-          const yGains = runningBalance - cumulativeInvested;
-          const yTaxResults = FinanceEngine.estimateTax(yGains, state['tax-type'], state['custom-tax-rate']);
-          const yPostTaxCorpus = runningBalance - yTaxResults.tax;
-          
-          tableRows.push([
-            y,
-            cumulativeInvested,
-            yGains,
-            runningBalance,
-            runningRealBalance,
-            yTaxResults.taxableGains,
-            yTaxResults.tax,
-            yPostTaxCorpus
-          ]);
-        }
         
         tableBody.innerHTML = tableRows.map(row => 
           '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINRSmart(v, false)) + '</td>').join('') + '</tr>'
@@ -983,12 +975,42 @@ const calculators = [
         const r = state.return_rate;
         const years = state.years;
         const inf = state['inflation-rate'];
+        const compoundingFreq = state['compounding-freq'] || 'monthly';
         
-        const fv = P * Math.pow(1 + r/100, years);
+        const headers = ['Year', 'Invested', 'Returns', 'Corpus', 'Real Corpus', 'Taxable Gains', 'Estimated Tax', 'Post-Tax Corpus'];
+        let tableRows = [];
+        
+        for (let y = 1; y <= years; y++) {
+          let yCorpus = 0;
+          if (compoundingFreq === 'monthly') {
+            const i = FinanceEngine.getMonthlyRate(r);
+            yCorpus = P * Math.pow(1 + i, y * 12);
+          } else {
+            yCorpus = P * Math.pow(1 + r/100, y);
+          }
+          const yGains = yCorpus - P;
+          const yReal = FinanceEngine.getRealValue(yCorpus, inf, y);
+          const yTax = FinanceEngine.estimateTax(yGains, state['tax-type'], state['custom-tax-rate']);
+          const yPostTax = yCorpus - yTax.tax;
+          
+          tableRows.push([
+            y,
+            P,
+            yGains,
+            yCorpus,
+            yReal,
+            yTax.taxableGains,
+            yTax.tax,
+            yPostTax
+          ]);
+        }
+        
+        const fv = tableRows[tableRows.length - 1][3];
         const gains = fv - P;
-        const realVal = FinanceEngine.getRealValue(fv, inf, years);
+        const realVal = tableRows[tableRows.length - 1][4];
         const realGains = realVal - P;
         const taxResults = FinanceEngine.estimateTax(gains, state['tax-type'], state['custom-tax-rate']);
+        const postTaxCorpus = fv - taxResults.tax;
         
         document.getElementById('total-invested').textContent = FinanceEngine.formatINRSmart(P);
         document.getElementById('total-gains').textContent = FinanceEngine.formatINRSmart(gains);
@@ -1000,40 +1022,17 @@ const calculators = [
           const realCAGR = (r_real * 100).toFixed(2);
           realGainLossEl.innerHTML = "Real CAGR: " + realCAGR + "% &nbsp;&middot;&nbsp; Real Gain: " + FinanceEngine.formatINRSmart(realGains);
         }
-        const postTaxCorpus = fv - taxResults.tax;
         const postTaxEl = document.getElementById('post-tax-corpus');
         if (postTaxEl) postTaxEl.textContent = FinanceEngine.formatINRSmart(postTaxCorpus);
         document.querySelectorAll('[data-conditional="tax"]').forEach(el => {
           el.style.display = (state['tax-type'] && state['tax-type'] !== 'none') ? '' : 'none';
         });
         
-        const headers = ['Year', 'Invested', 'Returns', 'Corpus', 'Real Corpus', 'Taxable Gains', 'Estimated Tax', 'Post-Tax Corpus'];
-        let tableRows = [];
-        
-        for (let y = 1; y <= years; y++) {
-          const yCorpus = P * Math.pow(1 + r/100, y);
-          const yGains = yCorpus - P;
-          const yReal = FinanceEngine.getRealValue(yCorpus, inf, y);
-          const yTax = FinanceEngine.estimateTax(yGains, state['tax-type'], state['custom-tax-rate']);
-          const yPostTax = yCorpus - yTax.tax;
-          
-          tableRows.push([
-            y,
-            P,
-            Math.round(yGains),
-            Math.round(yCorpus),
-            Math.round(yReal),
-            Math.round(yTax.taxableGains),
-            Math.round(yTax.tax),
-            Math.round(yPostTax)
-          ]);
-        }
-        
         const tableBody = document.getElementById('table-body');
         const headersRow = document.getElementById('table-headers-row');
         headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
         tableBody.innerHTML = tableRows.map(row => 
-          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINRSmart(v, false)) + '</td>').join('') + '</tr>'
         ).join('');
         
         const chartData = tableRows.map(row => ({
@@ -1117,23 +1116,36 @@ const calculators = [
         const target = state.target_corpus;
         const r = state.return_rate;
         const years = state.years;
+        const compoundingFreq = state['compounding-freq'] || 'monthly';
         
-        const reqLump = target / Math.pow(1 + r/100, years);
+        let reqLump = 0;
+        if (compoundingFreq === 'monthly') {
+          const i = FinanceEngine.getMonthlyRate(r);
+          reqLump = target / Math.pow(1 + i, years * 12);
+        } else {
+          reqLump = target / Math.pow(1 + r/100, years);
+        }
         const gains = target - reqLump;
         
-        document.getElementById('required-lump').textContent = FinanceEngine.formatINR(reqLump);
-        document.getElementById('estimated-gains').textContent = FinanceEngine.formatINR(gains);
+        document.getElementById('required-lump').textContent = FinanceEngine.formatINRSmart(reqLump);
+        document.getElementById('estimated-gains').textContent = FinanceEngine.formatINRSmart(gains);
         
         const headers = ['Year', 'Invested', 'Gains', 'Corpus'];
         let tableRows = [];
         
         for (let y = 1; y <= years; y++) {
-          const yCorpus = reqLump * Math.pow(1 + r/100, y);
+          let yCorpus = 0;
+          if (compoundingFreq === 'monthly') {
+            const i = FinanceEngine.getMonthlyRate(r);
+            yCorpus = reqLump * Math.pow(1 + i, y * 12);
+          } else {
+            yCorpus = reqLump * Math.pow(1 + r/100, y);
+          }
           tableRows.push([
             y,
-            Math.round(reqLump),
-            Math.round(yCorpus - reqLump),
-            Math.round(yCorpus)
+            reqLump,
+            yCorpus - reqLump,
+            yCorpus
           ]);
         }
         
@@ -1141,7 +1153,7 @@ const calculators = [
         const headersRow = document.getElementById('table-headers-row');
         headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
         tableBody.innerHTML = tableRows.map(row => 
-          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINRSmart(v, false)) + '</td>').join('') + '</tr>'
         ).join('');
         
         const chartData = tableRows.map(row => ({
@@ -1185,13 +1197,16 @@ const calculators = [
       { id: 'initial_corpus', label: 'Initial Corpus (₹)', min: 100000, max: 100000000, step: 100000, value: 5000000, type: 'slider', displayValue: '₹50,00,000' },
       { id: 'monthly_withdrawal', label: 'Monthly Withdrawal (₹)', min: 1000, max: 500000, step: 1000, value: 30000, type: 'slider', displayValue: '₹30,000' },
       { id: 'return_rate', label: 'Expected Return (CAGR %)', min: 1, max: 30, step: 0.5, value: 9, type: 'slider', displayValue: '9%' },
-      { id: 'years', label: 'Duration (Years)', min: 1, max: 40, step: 1, value: 15, type: 'slider', displayValue: '15' }
+      { id: 'years', label: 'Duration (Years)', min: 1, max: 40, step: 1, value: 15, type: 'slider', displayValue: '15' },
+      { id: 'waiting_period', label: 'Waiting Period (Years)', min: 0, max: 20, step: 1, value: 0, type: 'slider', displayValue: '0' }
     ],
     results: [
       { id: 'remaining-corpus', label: 'Remaining Corpus' },
       { id: 'total-withdrawn', label: 'Total Withdrawals' },
-      { id: 'final-gains', label: 'Earned Returns' }
+      { id: 'final-gains', label: 'Earned Returns' },
+      { id: 'depletion-year', label: 'Corpus Lifespan' }
     ],
+    supportCompounding: true,
     supportTax: false,
     supportInflation: false,
     seoContent: `
@@ -1199,13 +1214,15 @@ const calculators = [
       <p>A Systematic Withdrawal Plan (SWP) allows you to withdraw a fixed amount of money regularly from your mutual fund investments, while the remaining balance continues to compound.</p>
     `,
     bindingScript: `
-      const defaults = { initial_corpus: 5000000, monthly_withdrawal: 30000, return_rate: 9, years: 15 };
+      const defaults = { 'compounding-freq': 'monthly', initial_corpus: 5000000, monthly_withdrawal: 30000, return_rate: 9, years: 15, waiting_period: 0 };
       let state = FinanceEngine.getUrlParams(defaults);
-      const elements = ['initial_corpus', 'monthly_withdrawal', 'return_rate', 'years'];
+      const elements = ['compounding-freq', 'initial_corpus', 'monthly_withdrawal', 'return_rate', 'years', 'waiting_period'];
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'initial_corpus' || id === 'monthly_withdrawal') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -1220,6 +1237,7 @@ const calculators = [
         const withdrawal = state.monthly_withdrawal;
         const r = state.return_rate;
         const years = state.years;
+        const waitingPeriod = state.waiting_period || 0;
         
         const i = FinanceEngine.getMonthlyRate(r);
         
@@ -1235,19 +1253,40 @@ const calculators = [
           let yWithdrawn = 0;
           let yInterest = 0;
           
-          for (let m = 1; m <= 12; m++) {
-            if (balance <= 0) {
-              balance = 0;
-              continue;
+          const compoundingFreq = state['compounding-freq'] || 'monthly';
+          const isWaiting = y <= waitingPeriod;
+          
+          if (compoundingFreq === 'monthly') {
+            for (let m = 1; m <= 12; m++) {
+              if (balance <= 0 && !isWaiting) {
+                balance = 0;
+                continue;
+              }
+              const interest = balance * i;
+              yInterest += interest;
+              balance = balance + interest;
+              
+              if (!isWaiting) {
+                const actualWithdraw = Math.min(balance, withdrawal);
+                yWithdrawn += actualWithdraw;
+                balance -= actualWithdraw;
+              }
             }
-            
-            const interest = balance * i;
-            yInterest += interest;
-            balance = balance + interest;
-            
-            const actualWithdraw = Math.min(balance, withdrawal);
-            yWithdrawn += actualWithdraw;
-            balance -= actualWithdraw;
+          } else {
+            // Yearly compounding
+            const yearStart = balance;
+            if (!isWaiting) {
+              for (let m = 1; m <= 12; m++) {
+                const actualWithdraw = Math.min(balance, withdrawal);
+                yWithdrawn += actualWithdraw;
+                balance -= actualWithdraw;
+              }
+              yInterest = Math.max(0, yearStart * (r / 100) - yWithdrawn * (r / 100) * (6.5 / 12));
+              balance = balance + yInterest;
+            } else {
+              yInterest = yearStart * (r / 100);
+              balance = balance + yInterest;
+            }
           }
           
           cumulativeWithdrawn += yWithdrawn;
@@ -1255,22 +1294,89 @@ const calculators = [
           
           tableRows.push([
             y,
-            Math.round(begBal),
-            Math.round(yWithdrawn),
-            Math.round(yInterest),
-            Math.round(balance)
+            begBal,
+            yWithdrawn,
+            yInterest,
+            balance
           ]);
         }
         
-        document.getElementById('remaining-corpus').textContent = FinanceEngine.formatINR(balance);
-        document.getElementById('total-withdrawn').textContent = FinanceEngine.formatINR(cumulativeWithdrawn);
-        document.getElementById('final-gains').textContent = FinanceEngine.formatINR(cumulativeInterest);
+        document.getElementById('remaining-corpus').textContent = FinanceEngine.formatINRSmart(balance);
+        document.getElementById('total-withdrawn').textContent = FinanceEngine.formatINRSmart(cumulativeWithdrawn);
+        document.getElementById('final-gains').textContent = FinanceEngine.formatINRSmart(cumulativeInterest);
+        
+        // Calculate depletion year
+        let depletionYr = 'Perpetual';
+        let simBalance = corpus;
+        let foundDepletion = false;
+        
+        for (let y = 1; y <= 100; y++) {
+          const compoundingFreq = state['compounding-freq'] || 'monthly';
+          const isWaiting = y <= waitingPeriod;
+          let yWithdrawn = 0;
+          let yInterest = 0;
+          const yearStart = simBalance;
+          
+          if (compoundingFreq === 'monthly') {
+            for (let m = 1; m <= 12; m++) {
+              if (simBalance <= 0) {
+                depletionYr = 'Depletes in Year ' + (y - 1);
+                foundDepletion = true;
+                break;
+              }
+              
+              const interest = simBalance * i;
+              simBalance += interest;
+              
+              if (!isWaiting) {
+                const actualWithdraw = Math.min(simBalance, withdrawal);
+                simBalance -= actualWithdraw;
+              }
+              
+              if (simBalance <= 0 && !isWaiting) {
+                depletionYr = 'Depletes in Year ' + y;
+                foundDepletion = true;
+                break;
+              }
+            }
+          } else {
+            // Yearly compounding
+            if (!isWaiting) {
+              for (let m = 1; m <= 12; m++) {
+                if (simBalance <= 0) {
+                  depletionYr = 'Depletes in Year ' + (y - 1);
+                  foundDepletion = true;
+                  break;
+                }
+                const actualWithdraw = Math.min(simBalance, withdrawal);
+                simBalance -= actualWithdraw;
+                yWithdrawn += actualWithdraw;
+              }
+              if (simBalance <= 0) {
+                depletionYr = 'Depletes in Year ' + y;
+                foundDepletion = true;
+              } else {
+                yInterest = Math.max(0, yearStart * (r / 100) - withdrawal * (r / 100) * 6.5);
+                simBalance += yInterest;
+              }
+            } else {
+              yInterest = yearStart * (r / 100);
+              simBalance += yInterest;
+            }
+          }
+          if (foundDepletion) break;
+        }
+        if (!foundDepletion) {
+          depletionYr = 'Perpetual (100+ Yrs)';
+        }
+        
+        document.getElementById('depletion-year').textContent = depletionYr;
         
         const tableBody = document.getElementById('table-body');
         const headersRow = document.getElementById('table-headers-row');
         headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
         tableBody.innerHTML = tableRows.map(row => 
-          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINRSmart(v, false)) + '</td>').join('') + '</tr>'
         ).join('');
         
         const chartData = tableRows.map(row => ({
@@ -1280,8 +1386,8 @@ const calculators = [
         FinanceEngine.renderLineChart('chart-container', chartData, ['nominal'], ['#0071e3']);
         
         const csvExporter = FinanceEngine.exportData('swp-calculator', 
-          { 'Initial Corpus': corpus, 'Monthly Withdrawal': withdrawal, 'CAGR %': r, 'Years': years },
-          { 'Remaining Corpus': balance, 'Total Withdrawals': cumulativeWithdrawn, 'Interest Earned': cumulativeInterest },
+          { 'Initial Corpus': corpus, 'Monthly Withdrawal': withdrawal, 'CAGR %': r, 'Years': years, 'Waiting Period': waitingPeriod },
+          { 'Remaining Corpus': balance, 'Total Withdrawals': cumulativeWithdrawn, 'Interest Earned': cumulativeInterest, 'Lifespan': depletionYr },
           headers,
           tableRows
         );
@@ -1291,8 +1397,11 @@ const calculators = [
       }
       
       elements.forEach(id => {
-        document.getElementById(id).addEventListener('input', (e) => {
-          state[id] = parseFloat(e.target.value);
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', (e) => {
+          state[id] = e.target.value;
+          if (typeof defaults[id] === 'number') state[id] = parseFloat(state[id]);
           syncUI();
           calculate();
           FinanceEngine.updateUrlParams(state);
@@ -1349,15 +1458,43 @@ const calculators = [
         
         const i = FinanceEngine.getMonthlyRate(r);
         const months = years * 12;
+        const compoundingFreq = state['compounding-freq'] || 'monthly';
         
-        // P = W * [1 - (1+i)^-m] / i * (1+i) [Beginning of month withdrawal]
-        const reqCorpus = withdrawal * ((1 - Math.pow(1 + i, -months)) / i) * (1 + i);
+        let reqCorpus = 0;
+        if (compoundingFreq === 'monthly') {
+          reqCorpus = withdrawal * ((1 - Math.pow(1 + i, -months)) / i) * (1 + i);
+        } else {
+          // Binary search for required corpus under yearly compounding
+          let low = 0, high = withdrawal * months * 2;
+          for (let iter = 0; iter < 100; iter++) {
+            const mid = (low + high) / 2;
+            let balance = mid;
+            let ok = true;
+            for (let y = 1; y <= years; y++) {
+              let yWithdrawn = 0;
+              for (let m = 1; m <= 12; m++) {
+                const actualWithdraw = Math.min(balance, withdrawal);
+                balance -= actualWithdraw;
+                yWithdrawn += actualWithdraw;
+              }
+              if (balance < 0) {
+                ok = false;
+                break;
+              }
+              const yInterest = Math.max(0, balance * (r / 100));
+              balance += yInterest;
+            }
+            if (balance >= 0) high = mid;
+            else low = mid;
+          }
+          reqCorpus = high;
+        }
         const totalPayout = withdrawal * months;
         const interestRequired = totalPayout - reqCorpus;
         
-        document.getElementById('required-corpus').textContent = FinanceEngine.formatINR(reqCorpus);
-        document.getElementById('total-withdrawn').textContent = FinanceEngine.formatINR(totalPayout);
-        document.getElementById('gains-portion').textContent = FinanceEngine.formatINR(interestRequired);
+        document.getElementById('required-corpus').textContent = FinanceEngine.formatINRSmart(reqCorpus);
+        document.getElementById('total-withdrawn').textContent = FinanceEngine.formatINRSmart(totalPayout);
+        document.getElementById('gains-portion').textContent = FinanceEngine.formatINRSmart(interestRequired);
         
         const headers = ['Year', 'Beginning Balance', 'Withdrawn', 'Interest Earned', 'Ending Balance'];
         let tableRows = [];
@@ -1381,10 +1518,10 @@ const calculators = [
           }
           tableRows.push([
             y,
-            Math.round(beg),
-            Math.round(yWithdrawn),
-            Math.round(yInterest),
-            Math.round(balance)
+            beg,
+            yWithdrawn,
+            yInterest,
+            balance
           ]);
         }
         
@@ -1392,7 +1529,7 @@ const calculators = [
         const headersRow = document.getElementById('table-headers-row');
         headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
         tableBody.innerHTML = tableRows.map(row => 
-          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINRSmart(v, false)) + '</td>').join('') + '</tr>'
         ).join('');
         
         const chartData = tableRows.map(row => ({
@@ -1436,13 +1573,15 @@ const calculators = [
       { id: 'monthly_withdrawal', label: 'Initial Monthly Withdrawal (₹)', min: 1000, max: 500000, step: 1000, value: 30000, type: 'slider', displayValue: '₹30,000' },
       { id: 'step_up_pct', label: 'Annual Step-Up (%)', min: 1, max: 20, step: 1, value: 6, type: 'slider', displayValue: '6%' },
       { id: 'return_rate', label: 'Expected Return (CAGR %)', min: 1, max: 20, step: 0.5, value: 9, type: 'slider', displayValue: '9%' },
-      { id: 'years', label: 'Duration (Years)', min: 1, max: 40, step: 1, value: 20, type: 'slider', displayValue: '20' }
+      { id: 'years', label: 'Duration (Years)', min: 1, max: 40, step: 1, value: 20, type: 'slider', displayValue: '20' },
+      { id: 'waiting_period', label: 'Waiting Period (Years)', min: 0, max: 20, step: 1, value: 0, type: 'slider', displayValue: '0' }
     ],
     results: [
       { id: 'remaining-corpus', label: 'Remaining Corpus' },
       { id: 'total-withdrawn', label: 'Total Payouts' },
-      { id: 'depletion-year', label: 'Depletion Status', subLabel: 'Years until empty' }
+      { id: 'depletion-year', label: 'Corpus Lifespan' }
     ],
+    supportCompounding: true,
     supportTax: false,
     supportInflation: false,
     seoContent: `
@@ -1450,13 +1589,15 @@ const calculators = [
       <p>Stepping up your SWP withdrawals annually helps you preserve purchasing power as inflation drives costs higher.</p>
     `,
     bindingScript: `
-      const defaults = { initial_corpus: 5000000, monthly_withdrawal: 30000, step_up_pct: 6, return_rate: 9, years: 20 };
+      const defaults = { 'compounding-freq': 'monthly', initial_corpus: 5000000, monthly_withdrawal: 30000, step_up_pct: 6, return_rate: 9, years: 20, waiting_period: 0 };
       let state = FinanceEngine.getUrlParams(defaults);
-      const elements = ['initial_corpus', 'monthly_withdrawal', 'step_up_pct', 'return_rate', 'years'];
+      const elements = ['compounding-freq', 'initial_corpus', 'monthly_withdrawal', 'step_up_pct', 'return_rate', 'years', 'waiting_period'];
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'initial_corpus' || id === 'monthly_withdrawal') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -1472,62 +1613,148 @@ const calculators = [
         const stepUp = state.step_up_pct;
         const r = state.return_rate;
         const years = state.years;
+        const waitingPeriod = state.waiting_period || 0;
         
         const i = FinanceEngine.getMonthlyRate(r);
         
         let balance = corpus;
         let cumulativeWithdrawn = 0;
-        let depletionYr = 'Sufficient';
         
         const headers = ['Year', 'Monthly Withdrawal', 'Beginning Balance', 'Withdrawn', 'Interest Earned', 'Ending Balance'];
         let tableRows = [];
         
         for (let y = 1; y <= years; y++) {
-          const currentW = initialW * Math.pow(1 + stepUp / 100, y - 1);
+          const isWaiting = y <= waitingPeriod;
+          const withdrawalYearIdx = isWaiting ? 0 : (y - waitingPeriod);
+          const currentW = isWaiting ? 0 : initialW * Math.pow(1 + stepUp / 100, withdrawalYearIdx - 1);
           const beg = balance;
           let yWithdrawn = 0;
           let yInterest = 0;
           
-          for (let m = 1; m <= 12; m++) {
-            if (balance <= 0) {
-              if (depletionYr === 'Sufficient') {
-                depletionYr = 'Depleted in Year ' + y;
+          const compoundingFreq = state['compounding-freq'] || 'monthly';
+          if (compoundingFreq === 'monthly') {
+            for (let m = 1; m <= 12; m++) {
+              if (balance <= 0) {
+                balance = 0;
+                continue;
               }
-              balance = 0;
-              continue;
+              
+              if (!isWaiting) {
+                const actualWithdraw = Math.min(balance, currentW);
+                balance -= actualWithdraw;
+                yWithdrawn += actualWithdraw;
+              }
+              
+              const interest = balance * i;
+              balance += interest;
+              yInterest += interest;
             }
-            
-            // Withdrawal at beginning of month
-            const actualWithdraw = Math.min(balance, currentW);
-            balance -= actualWithdraw;
-            yWithdrawn += actualWithdraw;
-            
-            const interest = balance * i;
-            balance += interest;
-            yInterest += interest;
+          } else {
+            // Yearly compounding
+            const yearStart = balance;
+            if (!isWaiting) {
+              for (let m = 1; m <= 12; m++) {
+                const actualWithdraw = Math.min(balance, currentW);
+                balance -= actualWithdraw;
+                yWithdrawn += actualWithdraw;
+              }
+              yInterest = Math.max(0, yearStart * (r / 100) - currentW * (r / 100) * 6.5);
+              balance += yInterest;
+            } else {
+              yInterest = yearStart * (r / 100);
+              balance += yInterest;
+            }
           }
           
           cumulativeWithdrawn += yWithdrawn;
           
           tableRows.push([
             y,
-            Math.round(currentW),
-            Math.round(beg),
-            Math.round(yWithdrawn),
-            Math.round(yInterest),
-            Math.round(balance)
+            currentW,
+            beg,
+            yWithdrawn,
+            yInterest,
+            balance
           ]);
         }
         
-        document.getElementById('remaining-corpus').textContent = FinanceEngine.formatINR(balance);
-        document.getElementById('total-withdrawn').textContent = FinanceEngine.formatINR(cumulativeWithdrawn);
+        // Calculate depletion year
+        let depletionYr = 'Perpetual';
+        let simBalance = corpus;
+        let foundDepletion = false;
+        
+        for (let y = 1; y <= 100; y++) {
+          const compoundingFreq = state['compounding-freq'] || 'monthly';
+          const isWaiting = y <= waitingPeriod;
+          const withdrawalYearIdx = isWaiting ? 0 : (y - waitingPeriod);
+          const currentW = isWaiting ? 0 : initialW * Math.pow(1 + stepUp / 100, withdrawalYearIdx - 1);
+          let yWithdrawn = 0;
+          let yInterest = 0;
+          const yearStart = simBalance;
+          
+          if (compoundingFreq === 'monthly') {
+            for (let m = 1; m <= 12; m++) {
+              if (simBalance <= 0) {
+                depletionYr = 'Depletes in Year ' + (y - 1);
+                foundDepletion = true;
+                break;
+              }
+              
+              if (!isWaiting) {
+                const actualWithdraw = Math.min(simBalance, currentW);
+                simBalance -= actualWithdraw;
+                yWithdrawn += actualWithdraw;
+              }
+              
+              const interest = simBalance * i;
+              simBalance += interest;
+              
+              if (simBalance <= 0 && !isWaiting) {
+                depletionYr = 'Depletes in Year ' + y;
+                foundDepletion = true;
+                break;
+              }
+            }
+          } else {
+            // Yearly compounding
+            if (!isWaiting) {
+              for (let m = 1; m <= 12; m++) {
+                if (simBalance <= 0) {
+                  depletionYr = 'Depletes in Year ' + (y - 1);
+                  foundDepletion = true;
+                  break;
+                }
+                const actualWithdraw = Math.min(simBalance, currentW);
+                simBalance -= actualWithdraw;
+                yWithdrawn += actualWithdraw;
+              }
+              if (simBalance <= 0) {
+                depletionYr = 'Depletes in Year ' + y;
+                foundDepletion = true;
+              } else {
+                yInterest = Math.max(0, yearStart * (r / 100) - currentW * (r / 100) * 6.5);
+                simBalance += yInterest;
+              }
+            } else {
+              yInterest = yearStart * (r / 100);
+              simBalance += yInterest;
+            }
+          }
+          if (foundDepletion) break;
+        }
+        if (!foundDepletion) {
+          depletionYr = 'Perpetual (100+ Yrs)';
+        }
+        
+        document.getElementById('remaining-corpus').textContent = FinanceEngine.formatINRSmart(balance);
+        document.getElementById('total-withdrawn').textContent = FinanceEngine.formatINRSmart(cumulativeWithdrawn);
         document.getElementById('depletion-year').textContent = depletionYr;
         
         const tableBody = document.getElementById('table-body');
         const headersRow = document.getElementById('table-headers-row');
         headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
         tableBody.innerHTML = tableRows.map(row => 
-          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINRSmart(v, false)) + '</td>').join('') + '</tr>'
         ).join('');
         
         const chartData = tableRows.map(row => ({
@@ -1537,8 +1764,8 @@ const calculators = [
         FinanceEngine.renderLineChart('chart-container', chartData, ['nominal'], ['#0071e3']);
         
         const csvExporter = FinanceEngine.exportData('step-up-swp-calculator', 
-          { 'Corpus': corpus, 'Initial Withdraw': initialW, 'Step Up %': stepUp, 'Return %': r, 'Years': years },
-          { 'Remaining': balance, 'Withdrawn': cumulativeWithdrawn, 'Status': depletionYr },
+          { 'Corpus': corpus, 'Initial Withdraw': initialW, 'Step Up %': stepUp, 'Return %': r, 'Years': years, 'Waiting Period': waitingPeriod },
+          { 'Remaining Corpus': balance, 'Total Withdrawals': cumulativeWithdrawn, 'Lifespan': depletionYr },
           headers,
           tableRows
         );
@@ -1548,8 +1775,11 @@ const calculators = [
       }
       
       elements.forEach(id => {
-        document.getElementById(id).addEventListener('input', (e) => {
-          state[id] = parseFloat(e.target.value);
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', (e) => {
+          state[id] = e.target.value;
+          if (typeof defaults[id] === 'number') state[id] = parseFloat(state[id]);
           syncUI();
           calculate();
           FinanceEngine.updateUrlParams(state);
@@ -3590,15 +3820,17 @@ calculators.forEach(calc => {
   
   if (compoundingFiles.includes(calc.filename)) {
     calc.supportCompounding = true;
-    calc.bindingScript = calc.bindingScript
-      .replace(
-        /const defaults\s*=\s*\{/,
-        "const defaults = { 'compounding-freq': 'monthly', "
-      )
-      .replace(
-        /const elements\s*=\s*\[/,
-        "const elements = [ 'compounding-freq', "
-      );
+    if (!calc.bindingScript.includes('compounding-freq')) {
+      calc.bindingScript = calc.bindingScript
+        .replace(
+          /const defaults\s*=\s*\{/,
+          "const defaults = { 'compounding-freq': 'monthly', "
+        )
+        .replace(
+          /const elements\s*=\s*\[/,
+          "const elements = [ 'compounding-freq', "
+        );
+    }
 
     calc.bindingScript = calc.bindingScript.replace(
       /for\s*\(\s*let\s*m\s*=\s*startMonth;\s*m\s*<=\s*endMonth;\s*m\+\+\s*\)\s*\{\s*cumulativeInvested\s*\+=\s*P;\s*runningBalance\s*=\s*\(runningBalance\s*\+\s*P\)\s*\*\s*\(1\s*\+\s*i\);\s*\}/g,
@@ -3905,8 +4137,8 @@ calculators.forEach(calc => {
 
   // Prevent cursor jumping when typing decimal values
   calc.bindingScript = calc.bindingScript
-    .replace(/document\.getElementById\(id\)\.value\s*=\s*state\[id\];/g, "const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];")
-    .replace(/el\.value\s*=\s*state\[id\];/g, "if (document.activeElement !== el) el.value = state[id];");
+    .replace(/document\.getElementById\(id\)\.value\s*=\s*state\[id\];/g, "const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id]; const sliderVal = document.getElementById(id + '-slider'); if (sliderVal) sliderVal.value = state[id];")
+    .replace(/el\.value\s*=\s*state\[id\];/g, "if (document.activeElement !== el) el.value = state[id]; const slider = document.getElementById(id + '-slider'); if (slider) slider.value = state[id];");
 
   // Safe binding of copy and export buttons (null-guards)
   calc.bindingScript = calc.bindingScript
@@ -4024,7 +4256,7 @@ function getDashboardHtml() {
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://finplanindia.com/">
   
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=1.0.3">
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -4055,7 +4287,7 @@ function getDashboardHtml() {
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="js/shared.js"></script>
+  <script src="js/shared.js?v=1.0.3"></script>
 </body>
 </html>`;
 }

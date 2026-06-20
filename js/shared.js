@@ -73,6 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load MathJax globally
   loadMathJax();
+
+  // Setup range sliders
+  setupGlobalSliders();
 });
 
 // --- Theme Management ---
@@ -122,9 +125,11 @@ function injectHeader() {
   
   headerContainer.innerHTML = `
     <div class="logo-section" style="display: flex; align-items: center; gap: 0.75rem;">
-      <button class="sidebar-toggle-btn" id="sidebar-toggle" aria-label="Toggle sidebar" style="margin-right: 0.25rem;">
+    <button class="sidebar-toggle-btn" id="sidebar-toggle" aria-label="Toggle sidebar" style="margin-right: 0.25rem;">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
-          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+          <rect x="3" y="6" width="18" height="1.5" rx="0.75"/>
+          <rect x="3" y="11.25" width="12" height="1.5" rx="0.75"/>
+          <rect x="3" y="16.5" width="15" height="1.5" rx="0.75"/>
         </svg>
       </button>
       <a href="${homePath}" style="display: flex; align-items: center; gap: 0.75rem; color: var(--text-primary);">
@@ -277,8 +282,20 @@ function setupSettingsToggles() {
       }
     };
 
-    monthlyBtn.addEventListener('click', () => syncFreqButtons('monthly'));
-    yearlyBtn.addEventListener('click', () => syncFreqButtons('yearly'));
+    // Use both mousedown and touchend to ensure immediate state on mobile
+    const handleBtnActivate = (btn, freq, e) => {
+      e.preventDefault();
+      // Immediately force visual state - important for iOS/Android
+      monthlyBtn.classList.remove('toggle-btn-active');
+      yearlyBtn.classList.remove('toggle-btn-active');
+      btn.classList.add('toggle-btn-active');
+      syncFreqButtons(freq);
+    };
+
+    monthlyBtn.addEventListener('click', (e) => handleBtnActivate(monthlyBtn, 'monthly', e));
+    yearlyBtn.addEventListener('click', (e) => handleBtnActivate(yearlyBtn, 'yearly', e));
+    monthlyBtn.addEventListener('touchend', (e) => handleBtnActivate(monthlyBtn, 'monthly', e), { passive: false });
+    yearlyBtn.addEventListener('touchend', (e) => handleBtnActivate(yearlyBtn, 'yearly', e), { passive: false });
 
     // Synchronize initial visual button state from compounding-freq input value on load
     if (freqInput) {
@@ -756,6 +773,7 @@ const defaultPreferences = {
   colorCoding: true,
   showGraph: true,
   showTable: true,
+  showSliders: true,
   showInflation: true,
   showTaxation: true,
   globalInflationRate: 6.0
@@ -837,6 +855,12 @@ function applyPreferences() {
     }
   });
 
+  // Sliders
+  const showSliders = getPreference('showSliders');
+  document.querySelectorAll('.slider-wrapper').forEach(wrapper => {
+    wrapper.style.display = showSliders ? '' : 'none';
+  });
+
   // Re-trigger metric words and color coding
   document.querySelectorAll('.metric-value').forEach(el => {
     updateMetricWords(el);
@@ -875,6 +899,17 @@ function initPreferences() {
             </div>
             <label class="switch">
               <input type="checkbox" id="pref-show-words">
+              <span class="slider-switch"></span>
+            </label>
+          </div>
+
+          <div class="pref-item">
+            <div class="pref-info">
+              <span class="pref-title">Show Input Range Sliders</span>
+              <span class="pref-desc">Display the interactive drag sliders below each number input</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="pref-show-sliders">
               <span class="slider-switch"></span>
             </label>
           </div>
@@ -963,6 +998,7 @@ function initPreferences() {
   // Initialize toggle states
   const toggleMapping = {
     'pref-show-words': 'showWords',
+    'pref-show-sliders': 'showSliders',
     'pref-color-coding': 'colorCoding',
     'pref-show-graph': 'showGraph',
     'pref-show-table': 'showTable',
@@ -989,6 +1025,7 @@ function openPreferences() {
   if (modal) {
     const toggleMapping = {
       'pref-show-words': 'showWords',
+      'pref-show-sliders': 'showSliders',
       'pref-color-coding': 'colorCoding',
       'pref-show-graph': 'showGraph',
       'pref-show-table': 'showTable',
@@ -1110,31 +1147,39 @@ function colorCodeTableCells() {
 }
 
 function setupMetricWordsObserver() {
-  const observer = new MutationObserver((mutations) => {
-    let metricChanged = false;
-    let tableChanged = false;
+  // Debounce flags to prevent cascading DOM updates (main perf fix)
+  let metricRafId = null;
+  let tableRafId = null;
+  const pendingMetrics = new Set();
 
+  const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       const target = mutation.target.closest ? mutation.target.closest('.metric-value') : mutation.target.parentElement?.closest('.metric-value');
       if (target) {
-        metricChanged = true;
-        updateMetricWords(target);
-        updateMetricColorCoding(target);
+        pendingMetrics.add(target);
       }
 
       const isTable = mutation.target.closest ? mutation.target.closest('#projections-table') : mutation.target.parentElement?.closest('#projections-table');
-      if (isTable) {
-        tableChanged = true;
+      if (isTable && !tableRafId) {
+        tableRafId = requestAnimationFrame(() => {
+          tableRafId = null;
+          colorCodeTableCells();
+          setupTablePagination();
+        });
       }
     });
 
-    if (tableChanged) {
-      colorCodeTableCells();
-      setupTablePagination();
-    }
-    
-    if (metricChanged) {
-      adjustForInflation();
+    // Batch metric updates in next animation frame
+    if (pendingMetrics.size > 0 && !metricRafId) {
+      metricRafId = requestAnimationFrame(() => {
+        metricRafId = null;
+        pendingMetrics.forEach(target => {
+          updateMetricWords(target);
+          updateMetricColorCoding(target);
+        });
+        pendingMetrics.clear();
+        adjustForInflation();
+      });
     }
   });
 
@@ -1772,6 +1817,9 @@ function setupTablePagination() {
   const card = table.closest('.table-card');
   if (!card) return;
 
+  // Ensure the table-title is outside the scroll wrapper
+  // Structure: .table-card > .table-title, .table-scroll-wrapper > table, .table-pagination-controls
+  
   // Dynamically wrap table inside a scroll wrapper
   let wrapper = table.parentElement;
   if (!wrapper.classList.contains('table-scroll-wrapper')) {
@@ -1781,12 +1829,13 @@ function setupTablePagination() {
     wrapper.appendChild(table);
   }
 
-  // Render controls placeholder if not present, and place it AFTER the wrapper
+  // Render controls placeholder if not present, and place it AFTER the wrapper (outside scroll)
   let controls = card.querySelector('.table-pagination-controls');
   if (!controls) {
     controls = document.createElement('div');
     controls.className = 'table-pagination-controls';
-    wrapper.insertAdjacentElement('afterend', controls);
+    // Insert AFTER the scroll wrapper so it's outside horizontal scroll
+    card.appendChild(controls);
   }
 
   // Initialize state if not present
@@ -1917,5 +1966,38 @@ function loadMathJax() {
     }
   };
   document.head.appendChild(script);
+}
+
+// --- Range Slider Synchronization ---
+
+function setupGlobalSliders() {
+  // Sync all range sliders to their number input values on load
+  const rangeSliders = document.querySelectorAll('input[type="range"]');
+  rangeSliders.forEach(slider => {
+    const numInputId = slider.id.replace('-slider', '');
+    const numInput = document.getElementById(numInputId);
+    if (numInput) {
+      slider.value = numInput.value;
+    }
+  });
+
+  // Listen for slider inputs to update number inputs and vice versa
+  document.body.addEventListener('input', (e) => {
+    if (e.target.tagName === 'INPUT' && e.target.type === 'range' && e.target.id.endsWith('-slider')) {
+      const numInputId = e.target.id.replace('-slider', '');
+      const numInput = document.getElementById(numInputId);
+      if (numInput) {
+        numInput.value = e.target.value;
+        // Trigger both input and change events so the calculator recalculates
+        numInput.dispatchEvent(new Event('input', { bubbles: true }));
+        numInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    } else if (e.target.tagName === 'INPUT' && e.target.type === 'number') {
+      const slider = document.getElementById(e.target.id + '-slider');
+      if (slider) {
+        slider.value = e.target.value;
+      }
+    }
+  });
 }
 

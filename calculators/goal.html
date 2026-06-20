@@ -15,7 +15,7 @@
   <meta property="og:url" content="https://finplanindia.com/calculators/goal.html">
   <meta property="og:site_name" content="FinPlan India">
   
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
@@ -51,12 +51,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="target_goal" min="10000" step="10000" value="5000000" aria-label="Goal Target Amount">
+            <input type="number" id="target_goal" min="10000" max="50000000" step="10000" value="5000000" aria-label="Goal Target Amount">
             
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="target_goal-slider" min="10000" max="50000000" step="10000" value="5000000" class="range-slider" aria-label="Goal Target Amount Slider">
           </div>
         </div>
       
@@ -66,12 +70,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="years" min="1" step="1" value="8" aria-label="Years to Goal">
+            <input type="number" id="years" min="1" max="30" step="1" value="8" aria-label="Years to Goal">
             <span class="input-suffix">Yrs</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="years-slider" min="1" max="30" step="1" value="8" class="range-slider" aria-label="Years to Goal Slider">
           </div>
         </div>
       
@@ -81,12 +89,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="return_rate" min="1" step="0.5" value="12" aria-label="Expected CAGR">
+            <input type="number" id="return_rate" min="1" max="25" step="0.5" value="12" aria-label="Expected CAGR">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="return_rate-slider" min="1" max="25" step="0.5" value="12" class="range-slider" aria-label="Expected CAGR Slider">
           </div>
         </div>
       
@@ -196,8 +208,8 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js"></script>
-  <script src="../js/shared.js"></script>
+  <script src="../js/engine.js?v=1.0.4"></script>
+  <script src="../js/shared.js?v=1.0.4"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
@@ -208,7 +220,7 @@
       
       function syncUI() {
         elements.forEach(id => {
-          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id]; const sliderVal = document.getElementById(id + '-slider'); if (sliderVal) sliderVal.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'target_goal') valDisplay.textContent = FinanceEngine.formatINR(state[id]);

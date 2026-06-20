@@ -15,7 +15,7 @@
   <meta property="og:url" content="https://finplanindia.com/calculators/reverse-lump-sum.html">
   <meta property="og:site_name" content="FinPlan India">
   
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
@@ -51,12 +51,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="target_corpus" min="100000" step="100000" value="10000000" aria-label="Target Corpus">
+            <input type="number" id="target_corpus" min="100000" max="100000000" step="100000" value="10000000" aria-label="Target Corpus">
             
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="target_corpus-slider" min="100000" max="100000000" step="100000" value="10000000" class="range-slider" aria-label="Target Corpus Slider">
           </div>
         </div>
       
@@ -66,12 +70,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="return_rate" min="1" step="0.5" value="12" aria-label="Expected Return">
+            <input type="number" id="return_rate" min="1" max="30" step="0.5" value="12" aria-label="Expected Return">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="return_rate-slider" min="1" max="30" step="0.5" value="12" class="range-slider" aria-label="Expected Return Slider">
           </div>
         </div>
       
@@ -81,12 +89,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="years" min="1" step="1" value="15" aria-label="Duration">
+            <input type="number" id="years" min="1" max="40" step="1" value="15" aria-label="Duration">
             <span class="input-suffix">Yrs</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="years-slider" min="1" max="40" step="1" value="15" class="range-slider" aria-label="Duration Slider">
           </div>
         </div>
       
@@ -183,19 +195,20 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js"></script>
-  <script src="../js/shared.js"></script>
+  <script src="../js/engine.js?v=1.0.4"></script>
+  <script src="../js/shared.js?v=1.0.4"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
       
-      const defaults = { 'compounding-freq': 'monthly',  target_corpus: 10000000, return_rate: 12, years: 15 };
+      const defaults = { target_corpus: 10000000, return_rate: 12, years: 15, 'compounding-freq': 'monthly' };
       let state = FinanceEngine.getUrlParams(defaults);
-      const elements = [ 'compounding-freq', 'target_corpus', 'return_rate', 'years'];
+      
+      const elements = ['target_corpus', 'return_rate', 'years', 'compounding-freq'];
       
       function syncUI() {
         elements.forEach(id => {
-          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id]; const sliderVal = document.getElementById(id + '-slider'); if (sliderVal) sliderVal.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'target_corpus') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -209,23 +222,36 @@
         const target = state.target_corpus;
         const r = state.return_rate;
         const years = state.years;
+        const compoundingFreq = state['compounding-freq'] || 'monthly';
         
-        const reqLump = target / Math.pow(1 + r/100, years);
+        let reqLump = 0;
+        if (compoundingFreq === 'monthly') {
+          const i = FinanceEngine.getMonthlyRate(r);
+          reqLump = target / Math.pow(1 + i, years * 12);
+        } else {
+          reqLump = target / Math.pow(1 + r/100, years);
+        }
         const gains = target - reqLump;
         
-        document.getElementById('required-lump').textContent = FinanceEngine.formatINR(reqLump);
-        document.getElementById('estimated-gains').textContent = FinanceEngine.formatINR(gains);
+        document.getElementById('required-lump').textContent = FinanceEngine.formatINRSmart(reqLump);
+        document.getElementById('estimated-gains').textContent = FinanceEngine.formatINRSmart(gains);
         
         const headers = ['Year', 'Invested', 'Gains', 'Corpus'];
         let tableRows = [];
         
         for (let y = 1; y <= years; y++) {
-          const yCorpus = reqLump * Math.pow(1 + r/100, y);
+          let yCorpus = 0;
+          if (compoundingFreq === 'monthly') {
+            const i = FinanceEngine.getMonthlyRate(r);
+            yCorpus = reqLump * Math.pow(1 + i, y * 12);
+          } else {
+            yCorpus = reqLump * Math.pow(1 + r/100, y);
+          }
           tableRows.push([
             y,
-            Math.round(reqLump),
-            Math.round(yCorpus - reqLump),
-            Math.round(yCorpus)
+            reqLump,
+            yCorpus - reqLump,
+            yCorpus
           ]);
         }
         
@@ -233,7 +259,7 @@
         const headersRow = document.getElementById('table-headers-row');
         headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
         tableBody.innerHTML = tableRows.map(row => 
-          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINRSmart(v, false)) + '</td>').join('') + '</tr>'
         ).join('');
         
         const chartData = tableRows.map(row => ({

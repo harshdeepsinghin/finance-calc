@@ -15,7 +15,7 @@
   <meta property="og:url" content="https://finplanindia.com/calculators/asset-allocation.html">
   <meta property="og:site_name" content="FinPlan India">
   
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
@@ -51,12 +51,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="equity_val" min="0" step="50000" value="500000" aria-label="Current Equity">
+            <input type="number" id="equity_val" min="0" max="20000000" step="50000" value="500000" aria-label="Current Equity">
             
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="equity_val-slider" min="0" max="20000000" step="50000" value="500000" class="range-slider" aria-label="Current Equity Slider">
           </div>
         </div>
       
@@ -66,12 +70,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="debt_val" min="0" step="50000" value="300000" aria-label="Current Debt">
+            <input type="number" id="debt_val" min="0" max="20000000" step="50000" value="300000" aria-label="Current Debt">
             
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="debt_val-slider" min="0" max="20000000" step="50000" value="300000" class="range-slider" aria-label="Current Debt Slider">
           </div>
         </div>
       
@@ -81,12 +89,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="gold_val" min="0" step="20000" value="100000" aria-label="Current Gold">
+            <input type="number" id="gold_val" min="0" max="10000000" step="20000" value="100000" aria-label="Current Gold">
             
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="gold_val-slider" min="0" max="10000000" step="20000" value="100000" class="range-slider" aria-label="Current Gold Slider">
           </div>
         </div>
       
@@ -96,12 +108,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="cash_val" min="0" step="10000" value="100000" aria-label="Current Cash">
+            <input type="number" id="cash_val" min="0" max="10000000" step="10000" value="100000" aria-label="Current Cash">
             
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="cash_val-slider" min="0" max="10000000" step="10000" value="100000" class="range-slider" aria-label="Current Cash Slider">
           </div>
         </div>
       
@@ -111,12 +127,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="target_equity" min="0" step="5" value="60" aria-label="Target Equity">
+            <input type="number" id="target_equity" min="0" max="100" step="5" value="60" aria-label="Target Equity">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="target_equity-slider" min="0" max="100" step="5" value="60" class="range-slider" aria-label="Target Equity Slider">
           </div>
         </div>
       
@@ -126,12 +146,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="target_debt" min="0" step="5" value="20" aria-label="Target Debt">
+            <input type="number" id="target_debt" min="0" max="100" step="5" value="20" aria-label="Target Debt">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="target_debt-slider" min="0" max="100" step="5" value="20" class="range-slider" aria-label="Target Debt Slider">
           </div>
         </div>
       
@@ -141,12 +165,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="target_gold" min="0" step="5" value="10" aria-label="Target Gold">
+            <input type="number" id="target_gold" min="0" max="100" step="5" value="10" aria-label="Target Gold">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="target_gold-slider" min="0" max="100" step="5" value="10" class="range-slider" aria-label="Target Gold Slider">
           </div>
         </div>
       
@@ -231,8 +259,8 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js"></script>
-  <script src="../js/shared.js"></script>
+  <script src="../js/engine.js?v=1.0.4"></script>
+  <script src="../js/shared.js?v=1.0.4"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
@@ -243,7 +271,7 @@
       
       function syncUI() {
         elements.forEach(id => {
-          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id]; const sliderVal = document.getElementById(id + '-slider'); if (sliderVal) sliderVal.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id.startsWith('target_')) valDisplay.textContent = state[id] + '%';

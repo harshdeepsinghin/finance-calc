@@ -15,7 +15,7 @@
   <meta property="og:url" content="https://finplanindia.com/calculators/house-down-payment.html">
   <meta property="og:site_name" content="FinPlan India">
   
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
@@ -51,12 +51,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="property_value" min="1000000" step="500000" value="8000000" aria-label="Target Property Value Today">
+            <input type="number" id="property_value" min="1000000" max="100000000" step="500000" value="8000000" aria-label="Target Property Value Today">
             
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="property_value-slider" min="1000000" max="100000000" step="500000" value="8000000" class="range-slider" aria-label="Target Property Value Today Slider">
           </div>
         </div>
       
@@ -66,12 +70,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="down_pay_pct" min="10" step="5" value="20" aria-label="Down Payment">
+            <input type="number" id="down_pay_pct" min="10" max="100" step="5" value="20" aria-label="Down Payment">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="down_pay_pct-slider" min="10" max="100" step="5" value="20" class="range-slider" aria-label="Down Payment Slider">
           </div>
         </div>
       
@@ -81,12 +89,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="years" min="1" step="1" value="5" aria-label="Years to Purchase">
+            <input type="number" id="years" min="1" max="15" step="1" value="5" aria-label="Years to Purchase">
             <span class="input-suffix">Yrs</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="years-slider" min="1" max="15" step="1" value="5" class="range-slider" aria-label="Years to Purchase Slider">
           </div>
         </div>
       
@@ -96,12 +108,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="return_rate" min="4" step="0.5" value="12" aria-label="Expected CAGR">
+            <input type="number" id="return_rate" min="4" max="20" step="0.5" value="12" aria-label="Expected CAGR">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="return_rate-slider" min="4" max="20" step="0.5" value="12" class="range-slider" aria-label="Expected CAGR Slider">
           </div>
         </div>
       
@@ -211,8 +227,8 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js"></script>
-  <script src="../js/shared.js"></script>
+  <script src="../js/engine.js?v=1.0.4"></script>
+  <script src="../js/shared.js?v=1.0.4"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
@@ -223,7 +239,7 @@
       
       function syncUI() {
         elements.forEach(id => {
-          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id]; const sliderVal = document.getElementById(id + '-slider'); if (sliderVal) sliderVal.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'property_value') valDisplay.textContent = FinanceEngine.formatINR(state[id]);

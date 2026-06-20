@@ -15,7 +15,7 @@
   <meta property="og:url" content="https://finplanindia.com/calculators/emergency-fund.html">
   <meta property="og:site_name" content="FinPlan India">
   
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
@@ -51,12 +51,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="fixed_expenses" min="0" step="2000" value="20000" aria-label="Rent / Home Loan EMI">
+            <input type="number" id="fixed_expenses" min="0" max="200000" step="2000" value="20000" aria-label="Rent / Home Loan EMI">
             
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="fixed_expenses-slider" min="0" max="200000" step="2000" value="20000" class="range-slider" aria-label="Rent / Home Loan EMI Slider">
           </div>
         </div>
       
@@ -66,12 +70,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="food_expenses" min="0" step="1000" value="10000" aria-label="Groceries / Food Costs">
+            <input type="number" id="food_expenses" min="0" max="100000" step="1000" value="10000" aria-label="Groceries / Food Costs">
             
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="food_expenses-slider" min="0" max="100000" step="1000" value="10000" class="range-slider" aria-label="Groceries / Food Costs Slider">
           </div>
         </div>
       
@@ -81,12 +89,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="insurance_utilities" min="0" step="1000" value="8000" aria-label="Insurance & Utilities">
+            <input type="number" id="insurance_utilities" min="0" max="100000" step="1000" value="8000" aria-label="Insurance & Utilities">
             
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="insurance_utilities-slider" min="0" max="100000" step="1000" value="8000" class="range-slider" aria-label="Insurance & Utilities Slider">
           </div>
         </div>
       
@@ -96,12 +108,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="coverage_months" min="3" step="1" value="6" aria-label="Coverage Duration (Months)">
+            <input type="number" id="coverage_months" min="3" max="12" step="1" value="6" aria-label="Coverage Duration (Months)">
             <span class="input-suffix">Yrs</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="coverage_months-slider" min="3" max="12" step="1" value="6" class="range-slider" aria-label="Coverage Duration (Months) Slider">
           </div>
         </div>
       
@@ -191,8 +207,8 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js"></script>
-  <script src="../js/shared.js"></script>
+  <script src="../js/engine.js?v=1.0.4"></script>
+  <script src="../js/shared.js?v=1.0.4"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
@@ -203,7 +219,7 @@
       
       function syncUI() {
         elements.forEach(id => {
-          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id]; const sliderVal = document.getElementById(id + '-slider'); if (sliderVal) sliderVal.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'coverage_months') valDisplay.textContent = state[id];

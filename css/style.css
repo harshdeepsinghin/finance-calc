@@ -61,6 +61,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s ease, color 0.3s ease;
+  /* Performance: prevent scroll bounce on iOS and reduce jank */
+  overscroll-behavior: none;
+  text-rendering: optimizeLegibility;
 }
 
 a {
@@ -118,7 +121,6 @@ header {
 
 .theme-toggle-btn,
 .search-toggle-btn,
-.sidebar-toggle-btn,
 .preferences-btn {
   background: none;
   border: 1px solid var(--border-color);
@@ -130,22 +132,42 @@ header {
   align-items: center;
   justify-content: center;
   transition: background-color 0.2s, border-color 0.2s;
+  touch-action: manipulation;
+}
+
+/* Sidebar toggle is more minimal - no border, just icon */
+.sidebar-toggle-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  padding: 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, color 0.2s;
+  touch-action: manipulation;
 }
 
 .theme-toggle-btn:hover,
 .search-toggle-btn:hover,
-.sidebar-toggle-btn:hover,
 .preferences-btn:hover {
   background-color: var(--input-bg);
   border-color: var(--text-secondary);
+}
+
+.sidebar-toggle-btn:hover {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
 }
 
 .theme-toggle-btn svg,
 .search-toggle-btn svg,
 .sidebar-toggle-btn svg,
 .preferences-btn svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   fill: currentColor;
 }
 
@@ -339,6 +361,9 @@ header {
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
   white-space: nowrap;
+  touch-action: manipulation; /* prevents 300ms tap delay on mobile */
+  -webkit-tap-highlight-color: transparent; /* removes tap flash on iOS */
+  user-select: none;
 }
 
 .toggle-btn + .toggle-btn {
@@ -353,6 +378,11 @@ header {
 .toggle-btn.toggle-btn-active {
   background: var(--accent-color) !important;
   color: #fff !important;
+}
+
+/* Force active state to show immediately on mobile touch */
+.toggle-btn:active {
+  background: var(--border-color);
 }
 
 /* Toggleable chart legend chips */
@@ -762,13 +792,24 @@ input[type="text"]:focus, select:focus {
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: var(--card-shadow);
+  /* No overflow-x here - only the inner scroll wrapper gets it */
   overflow-x: visible;
+  display: flex;
+  flex-direction: column;
+}
+
+.table-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  flex-shrink: 0; /* title never scrolls */
 }
 
 .table-scroll-wrapper {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   width: 100%;
+  /* Only this inner wrapper scrolls horizontally, not the card itself */
 }
 
 .table-scroll-wrapper::-webkit-scrollbar {
@@ -788,11 +829,7 @@ input[type="text"]:focus, select:focus {
   background: var(--text-secondary);
 }
 
-.table-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
+
 
 table {
   width: 100%;
@@ -1606,11 +1643,14 @@ input:checked + .slider-switch:before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.25rem;
+  margin-top: 1rem; /* after the table */
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
   font-size: 0.85rem;
   color: var(--text-secondary);
   gap: 1rem;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .pagination-left, .pagination-right {
@@ -1679,5 +1719,80 @@ input:checked + .slider-switch:before {
 .page-info {
   font-weight: 500;
   font-family: var(--font-sans);
+}
+
+/* Range Slider Styling */
+.slider-wrapper {
+  margin-top: 0.6rem;
+  width: 100%;
+}
+
+.range-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--input-border, #e5e5ea);
+  outline: none;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.range-slider:hover {
+  background: #d1d1d6;
+}
+
+[data-theme="dark"] .range-slider {
+  background: #38383a;
+}
+[data-theme="dark"] .range-slider:hover {
+  background: #48484a;
+}
+
+/* Chrome, Safari, Opera, and Edge */
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent-color, #0071e3);
+  cursor: pointer;
+  border: 2px solid var(--card-bg, #ffffff);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.1s ease, background-color 0.1s ease;
+}
+
+.range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background: var(--accent-color, #0077ed);
+}
+
+.range-slider::-webkit-slider-thumb:active {
+  transform: scale(0.95);
+}
+
+/* Firefox */
+.range-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent-color, #0071e3);
+  cursor: pointer;
+  border: 2px solid var(--card-bg, #ffffff);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.1s ease, background-color 0.1s ease;
+}
+
+.range-slider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  background: var(--accent-color, #0077ed);
+}
+
+.range-slider::-moz-range-thumb:active {
+  transform: scale(0.95);
 }
 

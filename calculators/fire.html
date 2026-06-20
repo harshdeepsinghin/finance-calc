@@ -15,7 +15,7 @@
   <meta property="og:url" content="https://finplanindia.com/calculators/fire.html">
   <meta property="og:site_name" content="FinPlan India">
   
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
@@ -51,12 +51,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="annual_expenses" min="100000" step="50000" value="600000" aria-label="Annual Expenses">
+            <input type="number" id="annual_expenses" min="100000" max="10000000" step="50000" value="600000" aria-label="Annual Expenses">
             
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="annual_expenses-slider" min="100000" max="10000000" step="50000" value="600000" class="range-slider" aria-label="Annual Expenses Slider">
           </div>
         </div>
       
@@ -66,12 +70,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="swr" min="2" step="0.1" value="3.5" aria-label="Safe Withdrawal Rate (SWR %)">
+            <input type="number" id="swr" min="2" max="6" step="0.1" value="3.5" aria-label="Safe Withdrawal Rate (SWR %)">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="swr-slider" min="2" max="6" step="0.1" value="3.5" class="range-slider" aria-label="Safe Withdrawal Rate (SWR %) Slider">
           </div>
         </div>
       
@@ -81,12 +89,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="current_savings" min="0" step="100000" value="2000000" aria-label="Current Net Worth">
+            <input type="number" id="current_savings" min="0" max="50000000" step="100000" value="2000000" aria-label="Current Net Worth">
             
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="current_savings-slider" min="0" max="50000000" step="100000" value="2000000" class="range-slider" aria-label="Current Net Worth Slider">
           </div>
         </div>
       
@@ -96,12 +108,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="monthly_savings" min="0" step="2000" value="40000" aria-label="Monthly Savings Rate">
+            <input type="number" id="monthly_savings" min="0" max="500000" step="2000" value="40000" aria-label="Monthly Savings Rate">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="monthly_savings-slider" min="0" max="500000" step="2000" value="40000" class="range-slider" aria-label="Monthly Savings Rate Slider">
           </div>
         </div>
       
@@ -111,12 +127,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="return_rate" min="4" step="0.5" value="12" aria-label="Return CAGR">
+            <input type="number" id="return_rate" min="4" max="20" step="0.5" value="12" aria-label="Return CAGR">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="return_rate-slider" min="4" max="20" step="0.5" value="12" class="range-slider" aria-label="Return CAGR Slider">
           </div>
         </div>
       
@@ -226,8 +246,8 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js"></script>
-  <script src="../js/shared.js"></script>
+  <script src="../js/engine.js?v=1.0.4"></script>
+  <script src="../js/shared.js?v=1.0.4"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
@@ -238,7 +258,7 @@
       
       function syncUI() {
         elements.forEach(id => {
-          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id]; const sliderVal = document.getElementById(id + '-slider'); if (sliderVal) sliderVal.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'annual_expenses' || id === 'current_savings' || id === 'monthly_savings') valDisplay.textContent = FinanceEngine.formatINR(state[id]);

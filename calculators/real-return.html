@@ -15,7 +15,7 @@
   <meta property="og:url" content="https://finplanindia.com/calculators/real-return.html">
   <meta property="og:site_name" content="FinPlan India">
   
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
@@ -51,12 +51,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="nominal_return" min="1" step="0.5" value="12" aria-label="Nominal Asset Return">
+            <input type="number" id="nominal_return" min="1" max="30" step="0.5" value="12" aria-label="Nominal Asset Return">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="nominal_return-slider" min="1" max="30" step="0.5" value="12" class="range-slider" aria-label="Nominal Asset Return Slider">
           </div>
         </div>
       
@@ -66,12 +70,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="tax_rate" min="0" step="1" value="20" aria-label="Your Income Tax Slab">
+            <input type="number" id="tax_rate" min="0" max="40" step="1" value="20" aria-label="Your Income Tax Slab">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="tax_rate-slider" min="0" max="40" step="1" value="20" class="range-slider" aria-label="Your Income Tax Slab Slider">
           </div>
         </div>
       
@@ -81,12 +89,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="inflation_rate" min="1" step="0.5" value="6" aria-label="Expected Annual Inflation">
+            <input type="number" id="inflation_rate" min="1" max="15" step="0.5" value="6" aria-label="Expected Annual Inflation">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="inflation_rate-slider" min="1" max="15" step="0.5" value="6" class="range-slider" aria-label="Expected Annual Inflation Slider">
           </div>
         </div>
       
@@ -187,8 +199,8 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js"></script>
-  <script src="../js/shared.js"></script>
+  <script src="../js/engine.js?v=1.0.4"></script>
+  <script src="../js/shared.js?v=1.0.4"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
@@ -199,7 +211,7 @@
       
       function syncUI() {
         elements.forEach(id => {
-          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id];
+          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id]; const sliderVal = document.getElementById(id + '-slider'); if (sliderVal) sliderVal.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) valDisplay.textContent = state[id] + '%';
         });

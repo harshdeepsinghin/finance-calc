@@ -15,7 +15,7 @@
   <meta property="og:url" content="https://finplanindia.com/calculators/lump-sum.html">
   <meta property="og:site_name" content="FinPlan India">
   
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=1.0.4">
   <script type="application/ld+json">
     {
   "@context": "https://schema.org",
@@ -51,12 +51,16 @@
           </div>
           <div class="input-wrapper">
             <span class="input-prefix">₹</span>
-            <input type="number" id="principal" min="1000" step="5000" value="100000" aria-label="Investment Amount">
+            <input type="number" id="principal" min="1000" max="10000000" step="5000" value="100000" aria-label="Investment Amount">
             
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="principal-slider" min="1000" max="10000000" step="5000" value="100000" class="range-slider" aria-label="Investment Amount Slider">
           </div>
         </div>
       
@@ -66,12 +70,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="return_rate" min="1" step="0.5" value="12" aria-label="Expected Return">
+            <input type="number" id="return_rate" min="1" max="30" step="0.5" value="12" aria-label="Expected Return">
             <span class="input-suffix">%</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="return_rate-slider" min="1" max="30" step="0.5" value="12" class="range-slider" aria-label="Expected Return Slider">
           </div>
         </div>
       
@@ -81,12 +89,16 @@
           </div>
           <div class="input-wrapper">
             
-            <input type="number" id="years" min="1" step="1" value="10" aria-label="Duration">
+            <input type="number" id="years" min="1" max="45" step="1" value="10" aria-label="Duration">
             <span class="input-suffix">Yrs</span>
             <div class="input-steppers">
               <button class="step-btn" type="button" tabindex="-1">-</button>
               <button class="step-btn" type="button" tabindex="-1">+</button>
             </div>
+          </div>
+          
+          <div class="slider-wrapper">
+            <input type="range" id="years-slider" min="1" max="45" step="1" value="10" class="range-slider" aria-label="Duration Slider">
           </div>
         </div>
       
@@ -226,22 +238,22 @@
     <footer id="global-footer"></footer>
   </div>
 
-  <script src="../js/engine.js"></script>
-  <script src="../js/shared.js"></script>
+  <script src="../js/engine.js?v=1.0.4"></script>
+  <script src="../js/shared.js?v=1.0.4"></script>
   <script>
     // Calculator Specific Script
     document.addEventListener('DOMContentLoaded', () => {
       
-      const defaults = { 'compounding-freq': 'monthly',  principal: 100000, return_rate: 12, years: 10, 'tax-type': 'equity_ltcg', 'custom-tax-rate': 12.5, 'inflation-rate': 6 };
+      const defaults = { principal: 100000, return_rate: 12, years: 10, 'tax-type': 'equity_ltcg', 'custom-tax-rate': 12.5, 'inflation-rate': 6, 'compounding-freq': 'monthly' };
       let state = FinanceEngine.getUrlParams(defaults);
       
-      const elements = [ 'compounding-freq', 'principal', 'return_rate', 'years', 'tax-type', 'custom-tax-rate', 'inflation-rate'];
+      const elements = ['principal', 'return_rate', 'years', 'tax-type', 'custom-tax-rate', 'inflation-rate', 'compounding-freq'];
       
       function syncUI() {
         elements.forEach(id => {
           const el = document.getElementById(id);
           if (!el) return;
-          if (document.activeElement !== el) el.value = state[id];
+          if (document.activeElement !== el) el.value = state[id]; const slider = document.getElementById(id + '-slider'); if (slider) slider.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'principal') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -261,12 +273,42 @@
         const r = state.return_rate;
         const years = state.years;
         const inf = state['inflation-rate'];
+        const compoundingFreq = state['compounding-freq'] || 'monthly';
         
-        const fv = P * Math.pow(1 + r/100, years);
+        const headers = ['Year', 'Invested', 'Returns', 'Corpus', 'Real Corpus', 'Taxable Gains', 'Estimated Tax', 'Post-Tax Corpus'];
+        let tableRows = [];
+        
+        for (let y = 1; y <= years; y++) {
+          let yCorpus = 0;
+          if (compoundingFreq === 'monthly') {
+            const i = FinanceEngine.getMonthlyRate(r);
+            yCorpus = P * Math.pow(1 + i, y * 12);
+          } else {
+            yCorpus = P * Math.pow(1 + r/100, y);
+          }
+          const yGains = yCorpus - P;
+          const yReal = FinanceEngine.getRealValue(yCorpus, inf, y);
+          const yTax = FinanceEngine.estimateTax(yGains, state['tax-type'], state['custom-tax-rate']);
+          const yPostTax = yCorpus - yTax.tax;
+          
+          tableRows.push([
+            y,
+            P,
+            yGains,
+            yCorpus,
+            yReal,
+            yTax.taxableGains,
+            yTax.tax,
+            yPostTax
+          ]);
+        }
+        
+        const fv = tableRows[tableRows.length - 1][3];
         const gains = fv - P;
-        const realVal = FinanceEngine.getRealValue(fv, inf, years);
+        const realVal = tableRows[tableRows.length - 1][4];
         const realGains = realVal - P;
         const taxResults = FinanceEngine.estimateTax(gains, state['tax-type'], state['custom-tax-rate']);
+        const postTaxCorpus = fv - taxResults.tax;
         
         document.getElementById('total-invested').textContent = FinanceEngine.formatINRSmart(P);
         document.getElementById('total-gains').textContent = FinanceEngine.formatINRSmart(gains);
@@ -278,40 +320,17 @@
           const realCAGR = (r_real * 100).toFixed(2);
           realGainLossEl.innerHTML = "Real CAGR: " + realCAGR + "% &nbsp;&middot;&nbsp; Real Gain: " + FinanceEngine.formatINRSmart(realGains);
         }
-        const postTaxCorpus = fv - taxResults.tax;
         const postTaxEl = document.getElementById('post-tax-corpus');
         if (postTaxEl) postTaxEl.textContent = FinanceEngine.formatINRSmart(postTaxCorpus);
         document.querySelectorAll('[data-conditional="tax"]').forEach(el => {
           el.style.display = (state['tax-type'] && state['tax-type'] !== 'none') ? '' : 'none';
         });
         
-        const headers = ['Year', 'Invested', 'Returns', 'Corpus', 'Real Corpus', 'Taxable Gains', 'Estimated Tax', 'Post-Tax Corpus'];
-        let tableRows = [];
-        
-        for (let y = 1; y <= years; y++) {
-          const yCorpus = P * Math.pow(1 + r/100, y);
-          const yGains = yCorpus - P;
-          const yReal = FinanceEngine.getRealValue(yCorpus, inf, y);
-          const yTax = FinanceEngine.estimateTax(yGains, state['tax-type'], state['custom-tax-rate']);
-          const yPostTax = yCorpus - yTax.tax;
-          
-          tableRows.push([
-            y,
-            P,
-            Math.round(yGains),
-            Math.round(yCorpus),
-            Math.round(yReal),
-            Math.round(yTax.taxableGains),
-            Math.round(yTax.tax),
-            Math.round(yPostTax)
-          ]);
-        }
-        
         const tableBody = document.getElementById('table-body');
         const headersRow = document.getElementById('table-headers-row');
         headersRow.innerHTML = headers.map(h => '<th>' + h + '</th>').join('');
         tableBody.innerHTML = tableRows.map(row => 
-          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINR(v, false)) + '</td>').join('') + '</tr>'
+          '<tr>' + row.map((v, idx) => '<td>' + (idx === 0 ? v : FinanceEngine.formatINRSmart(v, false)) + '</td>').join('') + '</tr>'
         ).join('');
         
         const chartData = tableRows.map(row => ({

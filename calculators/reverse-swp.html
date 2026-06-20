@@ -15,6 +15,7 @@
   <meta property="og:url" content="https://moneyinfuture.com/calculators/reverse-swp.html">
   <meta property="og:site_name" content="MoneyInFuture">
   
+  <link rel="canonical" href="https://moneyinfuture.com/calculators/reverse-swp.html">
   <link rel="stylesheet" href="../css/style.css?v=1.0.3">
   <script type="application/ld+json">
     {
@@ -194,6 +195,25 @@
       <h2>Funding Your Retirement Payouts</h2>
       <p>Estimate the required initial nest egg size to pay out a targeted monthly amount over your retirement years, assuming a specific compounding growth rate.</p>
     
+          
+    <div class="formula-assumptions-container" style="margin-top: 2.5rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+      <div class="formula-section">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Formula & Mathematical Approach</h3>
+        <p style="font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 1rem;">
+          Finds the initial corpus required to support a specific monthly SWP withdrawal schedule.
+        </p>
+        <pre class="formula-box" style="background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; margin: 1rem 0; overflow-x: auto; color: var(--text-primary); white-space: pre-wrap; word-break: break-all;">i = (1 + Return Rate / 100) ^ (1 / 12) - 1
+Required Corpus = Monthly Withdrawal * [ (1 - (1 + i) ^ -Months) / i ] * (1 + i)</pre>
+      </div>
+      
+      <div class="assumptions-section" style="margin-top: 2rem;">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Key Assumptions</h3>
+        <ul class="assumptions-list" style="padding-left: 1.25rem; color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem; margin-top: 0.5rem;">
+          <li style="margin-bottom: 0.4rem;">Level monthly withdrawals are made at the start of each month.</li><li style="margin-bottom: 0.4rem;">Conservative withdrawal-before-interest sequence is maintained.</li><li style="margin-bottom: 0.4rem;">Return rate is constant over the withdrawal duration.</li>
+        </ul>
+      </div>
+    </div>
+  
         </section>
       </main>
     </div>
@@ -213,7 +233,9 @@
       
       function syncUI() {
         elements.forEach(id => {
-          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id]; const sliderVal = document.getElementById(id + '-slider'); if (sliderVal) sliderVal.value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (document.activeElement !== el) el.value = state[id]; const slider = document.getElementById(id + '-slider'); if (slider) slider.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'desired_withdrawal') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -238,10 +260,6 @@
           reqCorpus = withdrawal * ((1 - Math.pow(1 + i, -months)) / i) * (1 + i);
         } else {
           // Binary search for required corpus under yearly compounding.
-          // FIX: use forced-withdrawal — if balance drops below zero after a required
-          // withdrawal, the corpus is insufficient (ok = false). Previously Math.min()
-          // silently capped the withdrawal so balance never went negative, causing the
-          // binary search to converge near zero.
           let low = 0, high = withdrawal * months * 2;
           for (let iter = 0; iter < 100; iter++) {
             const mid = (low + high) / 2;
@@ -330,9 +348,18 @@
           headers,
           tableRows
         );
-        if (document.getElementById('btn-export-csv')) document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        if (document.getElementById('btn-export-json')) document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        if (document.getElementById('btn-copy-table')) document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {

@@ -15,6 +15,7 @@
   <meta property="og:url" content="https://moneyinfuture.com/calculators/swp.html">
   <meta property="og:site_name" content="MoneyInFuture">
   
+  <link rel="canonical" href="https://moneyinfuture.com/calculators/swp.html">
   <link rel="stylesheet" href="../css/style.css?v=1.0.3">
   <script type="application/ld+json">
     {
@@ -238,6 +239,25 @@
       <h2>Retirement Planning with SWP</h2>
       <p>A Systematic Withdrawal Plan (SWP) allows you to withdraw a fixed amount of money regularly from your mutual fund investments, while the remaining balance continues to compound.</p>
     
+          
+    <div class="formula-assumptions-container" style="margin-top: 2.5rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+      <div class="formula-section">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Formula & Mathematical Approach</h3>
+        <p style="font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 1rem;">
+          A Systematic Withdrawal Plan (SWP) allows you to withdraw a fixed amount regularly from an accumulated corpus.
+        </p>
+        <pre class="formula-box" style="background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; margin: 1rem 0; overflow-x: auto; color: var(--text-primary); white-space: pre-wrap; word-break: break-all;">i = (1 + Return Rate / 100) ^ (1 / 12) - 1
+Balance after withdrawal = (Current Balance - Monthly Withdrawal) * (1 + i)</pre>
+      </div>
+      
+      <div class="assumptions-section" style="margin-top: 2rem;">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Key Assumptions</h3>
+        <ul class="assumptions-list" style="padding-left: 1.25rem; color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem; margin-top: 0.5rem;">
+          <li style="margin-bottom: 0.4rem;">Withdrawals are executed at the beginning of each month (annuity-due).</li><li style="margin-bottom: 0.4rem;">Interest is applied to the remaining balance after the monthly withdrawal.</li><li style="margin-bottom: 0.4rem;">The return rate is steady and withdrawals remain level.</li>
+        </ul>
+      </div>
+    </div>
+  
         </section>
       </main>
     </div>
@@ -427,9 +447,18 @@
           headers,
           tableRows
         );
-        if (document.getElementById('btn-export-csv')) document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        if (document.getElementById('btn-export-json')) document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        if (document.getElementById('btn-copy-table')) document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {

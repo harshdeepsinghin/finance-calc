@@ -30,6 +30,21 @@ const chartResizeObserver = new ResizeObserver(entries => {
 });
 
 const FinanceEngine = {
+  // Tax configurations (FY 2024-25 Budget updates, reviewed June 2026)
+  TaxConfig: {
+    equity_ltcg: {
+      rate: 0.125,
+      exemption: 125000,
+      description: 'Equity LTCG (12.5% tax on gains exceeding ₹1.25L)'
+    },
+    equity_stcg: {
+      rate: 0.20,
+      exemption: 0,
+      description: 'Equity STCG (20% flat)'
+    },
+    lastReviewed: 'June 2026'
+  },
+
   // 1. Math Helpers
   
   /**
@@ -48,20 +63,16 @@ const FinanceEngine = {
   },
 
   /**
-   * Estimate Indian taxation (FY 2024-25 Budget updates)
-   * - equity_ltcg: 12.5% tax on gains exceeding 1,25,000
-   * - equity_stcg: 20% flat tax on gains
-   * - slab: gains * (customRate / 100)
+   * Estimate Indian taxation using the config-driven system.
    */
   estimateTax(gains, type, customRate = 30) {
     if (gains <= 0) return { tax: 0, taxableGains: 0 };
     
-    if (type === 'equity_ltcg') {
-      const taxableGains = Math.max(0, gains - 125000);
-      const tax = taxableGains * 0.125;
+    const config = this.TaxConfig[type];
+    if (config) {
+      const taxableGains = Math.max(0, gains - config.exemption);
+      const tax = taxableGains * config.rate;
       return { tax, taxableGains };
-    } else if (type === 'equity_stcg') {
-      return { tax: gains * 0.20, taxableGains: gains };
     } else if (type === 'slab' || type === 'custom') {
       const rate = parseFloat(customRate) || 0;
       const tax = gains * (rate / 100);

@@ -14,6 +14,257 @@ if (!fs.existsSync(path.join(__dirname, 'js'))) {
 }
 
 // -------------------------------------------------------------
+// FORMULA AND ASSUMPTIONS HELPER FOR SEO CONTENT
+// -------------------------------------------------------------
+
+function getFormulaAndAssumptions(calc) {
+  const data = {
+    'sip.html': {
+      desc: 'The Systematic Investment Plan (SIP) calculator uses the monthly equivalent interest rate of the expected annual return to model growth.',
+      code: 'i = (1 + Return Rate / 100) ^ (1 / 12) - 1\nFuture Value = Monthly SIP * [((1 + i) ^ Months - 1) / i] * (1 + i)',
+      assumptions: [
+        'Monthly deposits are made at the beginning of each monthly interval (annuity-due).',
+        'Compounding is calculated monthly using the CAGR-equivalent rate.',
+        'The expected return rate is steady and constant throughout the period.',
+        'Taxation and inflation are calculated steadily on the final accumulated corpus.',
+        'Tax rules are estimated based on regulations last reviewed in June 2026.'
+      ]
+    },
+    'step-up-sip.html': {
+      desc: 'Step-Up SIP simulates the growth of an investment where the monthly deposit increases by a fixed percentage annually.',
+      code: 'Investment (Year y) = Monthly SIP * (1 + Step-up % / 100) ^ (y - 1)\nFuture Value = Compounded monthly using the annual step-up increment.',
+      assumptions: [
+        'The step-up increment is applied exactly once at the beginning of each new year.',
+        'Compounding is calculated monthly using the equivalent CAGR rate.',
+        'Rate of return remains constant over the duration.',
+        'All contributions are made at the beginning of each month.',
+        'Tax rules are estimated based on regulations last reviewed in June 2026.'
+      ]
+    },
+    'reverse-sip.html': {
+      desc: 'Calculates the monthly Systematic Investment Plan (SIP) required to accumulate a target corpus.',
+      code: 'i = (1 + Return Rate / 100) ^ (1 / 12) - 1\nMonthly SIP Required = Target Corpus / ([((1 + i) ^ Months - 1) / i] * (1 + i))',
+      assumptions: [
+        'Contributions are made at the start of each month.',
+        'Expected annual return rate is constant.',
+        'Target corpus is in nominal terms.'
+      ]
+    },
+    'lump-sum.html': {
+      desc: 'Calculates the compound growth of a one-time initial lump sum investment.',
+      code: 'Future Value = Principal * (1 + Return Rate / 100) ^ Years',
+      assumptions: [
+        'No additional deposits or withdrawals are made during the term.',
+        'Compounding occurs annually at a constant growth rate.',
+        'Inflation and taxation (if enabled) are applied steadily to the final value.',
+        'Tax rules are estimated based on regulations last reviewed in June 2026.'
+      ]
+    },
+    'reverse-lump-sum.html': {
+      desc: 'Calculates the initial present value investment needed to grow to a target future corpus.',
+      code: 'Required Principal = Target Corpus / (1 + Return Rate / 100) ^ Years',
+      assumptions: [
+        'Growth is compounded annually at a constant rate.',
+        'No interim transactions or withdrawals occur.'
+      ]
+    },
+    'swp.html': {
+      desc: 'A Systematic Withdrawal Plan (SWP) allows you to withdraw a fixed amount regularly from an accumulated corpus.',
+      code: 'i = (1 + Return Rate / 100) ^ (1 / 12) - 1\nBalance after withdrawal = (Current Balance - Monthly Withdrawal) * (1 + i)',
+      assumptions: [
+        'Withdrawals are executed at the beginning of each month (annuity-due).',
+        'Interest is applied to the remaining balance after the monthly withdrawal.',
+        'The return rate is steady and withdrawals remain level.'
+      ]
+    },
+    'reverse-swp.html': {
+      desc: 'Finds the initial corpus required to support a specific monthly SWP withdrawal schedule.',
+      code: 'i = (1 + Return Rate / 100) ^ (1 / 12) - 1\nRequired Corpus = Monthly Withdrawal * [ (1 - (1 + i) ^ -Months) / i ] * (1 + i)',
+      assumptions: [
+        'Level monthly withdrawals are made at the start of each month.',
+        'Conservative withdrawal-before-interest sequence is maintained.',
+        'Return rate is constant over the withdrawal duration.'
+      ]
+    },
+    'step-up-swp.html': {
+      desc: 'Simulates an SWP where the withdrawal amount increases annually by a step-up rate to combat inflation.',
+      code: 'Withdrawal (Year y) = Initial Withdrawal * (1 + Step-up % / 100) ^ (y - 1)\nRemaining corpus simulated using monthly loops with annual withdrawal increases.',
+      assumptions: [
+        'The withdrawal amount increases once at the start of each new year.',
+        'Withdrawals are executed at the beginning of each month.',
+        'Pre-defined return rate is constant.'
+      ]
+    },
+    'retirement.html': {
+      desc: 'Estimates the retirement corpus required to sustain lifestyle expenses and the SIP needed to reach that goal.',
+      code: 'Inflated Monthly Expense = Current Expense * (1 + Inflation / 100) ^ Years to Retire\nRetirement Corpus Required = Inflated Annual Expense * ((1 - (1 + r)^-n) / r) * (1 + r)\n(where r is the post-retirement real rate of return)',
+      assumptions: [
+        'Post-retirement expenses increase annually with inflation.',
+        'Annual returns before and after retirement are constant.',
+        'Life expectancy is accurate, and the retirement corpus is fully depleted at that age.'
+      ]
+    },
+    'fire.html': {
+      desc: 'Calculates the target corpus and years to reach Financial Independence / Retire Early (FIRE).',
+      code: 'FIRE Corpus = Annual Expenses * (100 / Safe Withdrawal Rate)',
+      assumptions: [
+        'Uses the Safe Withdrawal Rate (SWR, e.g. 4%) to size the portfolio.',
+        'Annual expenses are adjusted for inflation.',
+        'No other post-retirement active income is assumed.'
+      ]
+    },
+    'goal.html': {
+      desc: 'Goal planner calculates the SIP or Lump sum required to meet a specific future financial target.',
+      code: 'Required SIP = Future Value / (SIP Compounding Factor)\nRequired Lump Sum = Future Value / (1 + Return Rate / 100) ^ Years',
+      assumptions: [
+        'Returns compound monthly for SIP and annually for Lump Sum.',
+        'Consistent monthly savings are maintained.',
+        'Target goal is in nominal terms.'
+      ]
+    },
+    'education-planner.html': {
+      desc: 'Estimates future college costs adjusted for inflation and calculates the monthly savings required.',
+      code: 'Future Cost = Current Cost * (1 + Inflation / 100) ^ Years\nRequired SIP = Future Cost / (SIP Compounding Factor)',
+      assumptions: [
+        'Education costs inflate at a specific rate (typically higher than CPI).',
+        'Growth rates compound monthly.',
+        'Level monthly contributions are made.'
+      ]
+    },
+    'marriage-planner.html': {
+      desc: 'Estimates future wedding expenses adjusted for inflation and computes the SIP required to meet the goal.',
+      code: 'Future Cost = Current Cost * (1 + Inflation / 100) ^ Years\nRequired SIP = Future Cost / (SIP Compounding Factor)',
+      assumptions: [
+        'Inflation is constant over the period.',
+        'Level monthly savings are maintained at the start of each month.'
+      ]
+    },
+    'house-down-payment.html': {
+      desc: 'Estimates the required down payment for a future home purchase and calculates the monthly savings rate.',
+      code: 'Future House Cost = Current Cost * (1 + Property Inflation / 100) ^ Years\nTarget Down Payment = Future House Cost * (Down Payment % / 100)\nRequired SIP = Target Down Payment / (SIP Compounding Factor)',
+      assumptions: [
+        'Property values rise steadily with property-specific inflation.',
+        'Down payment percentage remains constant.',
+        'Level monthly savings are made.'
+      ]
+    },
+    'child-corpus.html': {
+      desc: 'Models the growth of a child\'s future support fund (for education, marriage, or starting a business) and required contributions.',
+      code: 'Future Goal = Current Cost * (1 + Inflation / 100) ^ Years\nRequired SIP = Future Goal / (SIP Compounding Factor)',
+      assumptions: [
+        'Long-term compounding growth compounds monthly.',
+        'Level monthly contributions are maintained.'
+      ]
+    },
+    'net-worth-projection.html': {
+      desc: 'Projects the expansion of your net worth based on current assets, savings rate, asset growth, and liability reduction.',
+      code: 'Net Worth = Total Projected Assets - Total Projected Liabilities',
+      assumptions: [
+        'Asset growth rates are constant.',
+        'Standard liability repayment schedules are maintained.',
+        'No unexpected large asset sales or liability additions occur.'
+      ]
+    },
+    'asset-allocation.html': {
+      desc: 'Suggests a portfolio rebalancing strategy to align your assets with a target allocation.',
+      code: 'Target Value = Total Portfolio Value * Target % / 100\nRebalance Amount = Current Value - Target Value',
+      assumptions: [
+        'Transaction costs, exit loads, and capital gains taxes are excluded.',
+        'Execution of rebalancing trades is immediate.'
+      ]
+    },
+    'cagr.html': {
+      desc: 'Calculates the Compound Annual Growth Rate (CAGR) between an initial and final value.',
+      code: 'CAGR = (Final Value / Initial Value) ^ (1 / Years) - 1',
+      assumptions: [
+        'Annual compounding is assumed.',
+        'No cash flows occur between the initial and final dates.'
+      ]
+    },
+    'xirr.html': {
+      desc: 'Computes the Internal Rate of Return (IRR) for irregular cash flows using numerical methods.',
+      code: 'Solves for r where: Sum [ Cash Flow_t / (1 + r) ^ ((d_t - d_0) / 365) ] = 0',
+      assumptions: [
+        'Uses actual/365 day count convention.',
+        'Cash flows occur exactly on the specified dates.',
+        'Newton-Raphson with bisection fallback is used to find the root.'
+      ]
+    },
+    'inflation.html': {
+      desc: 'Calculates how inflation erodes purchasing power or increases the nominal cost of items over time.',
+      code: 'Future Cost = Current Price * (1 + Inflation / 100) ^ Years\nPurchasing Power = Current Money / (1 + Inflation / 100) ^ Years',
+      assumptions: [
+        'Inflation rate remains flat across all years.',
+        'No interest or growth is earned on the money.'
+      ]
+    },
+    'real-return.html': {
+      desc: 'Computes the actual return of an investment after stripping out the impact of inflation and taxes.',
+      code: 'Post-Tax Return = Nominal Return * (1 - Tax Rate / 100)\nReal Return = (1 + Post-Tax Return / 100) / (1 + Inflation / 100) - 1',
+      assumptions: [
+        'Fisher equation is used for real return.',
+        'Tax rate is applied flatly to the nominal rate.'
+      ]
+    },
+    'emi.html': {
+      desc: 'Equated Monthly Installment (EMI) for reducing-balance loans.',
+      code: 'Monthly Rate (r) = Annual Rate / 12 / 100\nEMI = [P * r * (1 + r) ^ Months] / [(1 + r) ^ Months - 1]',
+      assumptions: [
+        'Interest rate remains fixed during the loan tenure.',
+        'Payments are made at the end of each month.',
+        'No prepayments or penalty fees are included.'
+      ]
+    },
+    'loan-prepayment.html': {
+      desc: 'Simulates how extra payments accelerate loan payoff and save interest.',
+      code: 'Interest (Month m) = Outstanding Principal * (Annual Rate / 12 / 100)\nPrincipal Paid = EMI + Prepayment - Interest',
+      assumptions: [
+        'Prepayments are applied immediately to reduce the outstanding principal.',
+        'No prepayment penalties or service fees.'
+      ]
+    },
+    'emergency-fund.html': {
+      desc: 'Sizer for a liquid contingency fund to cover unexpected expenses.',
+      code: 'Target Emergency Fund = Monthly Expenses * Coverage Months',
+      assumptions: [
+        'Funds are held in highly liquid, low-risk accounts (savings, liquid funds).',
+        'Monthly expenses include all mandatory living costs.'
+      ]
+    },
+    'financial-independence.html': {
+      desc: 'Timeline calculator showing years remaining to reach financial independence.',
+      code: 'Target Corpus = Annual Expenses * (100 / SWR)\nProjects when net worth compounds to reach this target.',
+      assumptions: [
+        'Annual savings and expenses increase with inflation.',
+        'Safe Withdrawal Rate (SWR) is constant.'
+      ]
+    }
+  };
+
+  const item = data[calc.filename];
+  if (!item) return '';
+
+  return `
+    <div class="formula-assumptions-container" style="margin-top: 2.5rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+      <div class="formula-section">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Formula & Mathematical Approach</h3>
+        <p style="font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 1rem;">
+          ${item.desc}
+        </p>
+        <pre class="formula-box" style="background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; margin: 1rem 0; overflow-x: auto; color: var(--text-primary); white-space: pre-wrap; word-break: break-all;">${item.code}</pre>
+      </div>
+      
+      <div class="assumptions-section" style="margin-top: 2rem;">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Key Assumptions</h3>
+        <ul class="assumptions-list" style="padding-left: 1.25rem; color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem; margin-top: 0.5rem;">
+          ${item.assumptions.map(a => `<li style="margin-bottom: 0.4rem;">${a}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+  `;
+}
+
+// -------------------------------------------------------------
 // HTML LAYOUT TEMPLATE FOR CALCULATORS
 // -------------------------------------------------------------
 
@@ -224,6 +475,7 @@ function getCalculatorHtml(calc) {
   <meta property="og:url" content="https://moneyinfuture.com/calculators/${calc.filename}">
   <meta property="og:site_name" content="MoneyInFuture">
   
+  <link rel="canonical" href="https://moneyinfuture.com/calculators/${calc.filename}">
   <link rel="stylesheet" href="../css/style.css?v=1.0.3">
   <script type="application/ld+json">
     ${JSON.stringify(jsonLd, null, 2)}
@@ -343,6 +595,7 @@ function getCalculatorHtml(calc) {
         <!-- SEO Content -->
         <section class="seo-content">
           ${calc.seoContent}
+          ${getFormulaAndAssumptions(calc)}
         </section>
       </main>
     </div>
@@ -390,64 +643,6 @@ const calculators = [
     seoContent: `
       <h2>Understanding Mutual Fund SIP Compounding</h2>
       <p>A Systematic Investment Plan (SIP) allows you to invest a fixed amount regularly in mutual funds, helping you benefit from rupee cost averaging and power of compounding.</p>
-      <h3>Formula & Mathematical Approach</h3>
-      <p>Unlike standard simple calculators that divide the rate by 12, our system computes compounding returns based on the true <strong>monthly equivalent CAGR</strong> rate:</p>
-      <div class="formula-box">
-        <math display="block">
-          <mi>i</mi>
-          <mo>=</mo>
-          <msup>
-            <mrow>
-              <mo>(</mo>
-              <mn>1</mn>
-              <mo>+</mo>
-              <mfrac>
-                <mi>annualRate</mi>
-                <mn>100</mn>
-              </mfrac>
-              <mo>)</mo>
-            </mrow>
-            <mfrac>
-              <mn>1</mn>
-              <mn>12</mn>
-            </mfrac>
-          </msup>
-          <mo>−</mo>
-          <mn>1</mn>
-        </math>
-        <math display="block">
-          <mi>FV</mi>
-          <mo>=</mo>
-          <mi>P</mi>
-          <mo>×</mo>
-          <mfrac>
-            <mrow>
-              <msup>
-                <mrow>
-                  <mo>(</mo>
-                  <mn>1</mn>
-                  <mo>+</mo>
-                  <mi>i</mi>
-                  <mo>)</mo>
-                </mrow>
-                <mi>m</mi>
-              </msup>
-              <mo>−</mo>
-              <mn>1</mn>
-            </mrow>
-            <mi>i</mi>
-          </mfrac>
-          <mo>×</mo>
-          <mrow>
-            <mo>(</mo>
-            <mn>1</mn>
-            <mo>+</mo>
-            <mi>i</mi>
-            <mo>)</mo>
-          </mrow>
-        </math>
-      </div>
-      <p>Where <em>P</em> is monthly SIP, <em>i</em> is monthly rate, and <em>m</em> is the total number of months.</p>
       <h3>Frequently Asked Questions</h3>
       <div class="faq-list">
         <div class="faq-item">
@@ -640,8 +835,6 @@ const calculators = [
     seoContent: `
       <h2>Why Step-Up SIP Accelerates Wealth Creation</h2>
       <p>By increasing your monthly SIP amount in proportion to your salary hikes (e.g. 10% step-up each year), your final corpus grows exponentially larger than a standard flat SIP.</p>
-      <h3>Compound Algorithm</h3>
-      <p>For each year $y$ in the duration, the monthly SIP becomes $P_y = P \\times (1 + s)^{y-1}$, where $s$ is the annual step-up percentage. The monthly growth compounds dynamically month-on-month using CAGR rate equivalent $i = (1+r)^{1/12} - 1$.</p>
     `,
     bindingScript: `
       const defaults = { starting_sip: 10000, step_up_pct: 10, return_rate: 12, years: 15, 'tax-type': 'equity', 'custom-tax-rate': 20, 'inflation-rate': 6 };
@@ -901,9 +1094,17 @@ const calculators = [
           tableRows
         );
         
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -1054,9 +1255,17 @@ const calculators = [
           tableRows
         );
         
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -1102,7 +1311,9 @@ const calculators = [
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'target_corpus') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -1143,9 +1354,9 @@ const calculators = [
           }
           tableRows.push([
             y,
-            reqLump,
-            yCorpus - reqLump,
-            yCorpus
+            Math.round(reqLump),
+            Math.round(yCorpus - reqLump),
+            Math.round(yCorpus)
           ]);
         }
         
@@ -1169,9 +1380,18 @@ const calculators = [
           headers,
           tableRows
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -1390,9 +1610,18 @@ const calculators = [
           headers,
           tableRows
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -1440,7 +1669,9 @@ const calculators = [
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'desired_withdrawal') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -1465,10 +1696,6 @@ const calculators = [
           reqCorpus = withdrawal * ((1 - Math.pow(1 + i, -months)) / i) * (1 + i);
         } else {
           // Binary search for required corpus under yearly compounding.
-          // FIX: use forced-withdrawal — if balance drops below zero after a required
-          // withdrawal, the corpus is insufficient (ok = false). Previously Math.min()
-          // silently capped the withdrawal so balance never went negative, causing the
-          // binary search to converge near zero.
           let low = 0, high = withdrawal * months * 2;
           for (let iter = 0; iter < 100; iter++) {
             const mid = (low + high) / 2;
@@ -1557,9 +1784,18 @@ const calculators = [
           headers,
           tableRows
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -1782,9 +2018,18 @@ const calculators = [
           headers,
           tableRows
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -1835,7 +2080,9 @@ const calculators = [
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'monthly_expenses') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -1931,9 +2178,18 @@ const calculators = [
           headers,
           tableRows
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -1980,7 +2236,9 @@ const calculators = [
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'annual_expenses' || id === 'current_savings' || id === 'monthly_savings') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -2047,9 +2305,18 @@ const calculators = [
           headers,
           tableRows
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -2094,7 +2361,9 @@ const calculators = [
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'target_goal') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -2124,17 +2393,17 @@ const calculators = [
         const headers = ['Year', 'SIP Cumulative Invested', 'SIP Corpus', 'Lump Sum Corpus'];
         let tableRows = [];
         let sipBal = 0;
-        let sipInvested = 0;
+        let sipInvest = 0;
         
         for (let y = 1; y <= years; y++) {
           for (let m = 1; m <= 12; m++) {
-            sipInvested += reqSIP;
+            sipInvest += reqSIP;
             sipBal = (sipBal + reqSIP) * (1 + i);
           }
           const lumpBal = reqLump * Math.pow(1 + r/100, y);
           tableRows.push([
             y,
-            Math.round(sipInvested),
+            Math.round(sipInvest),
             Math.round(sipBal),
             Math.round(lumpBal)
           ]);
@@ -2160,9 +2429,18 @@ const calculators = [
           headers,
           tableRows
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -2207,7 +2485,9 @@ const calculators = [
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'college_cost') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -2267,9 +2547,18 @@ const calculators = [
           headers,
           tableRows
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -2314,7 +2603,9 @@ const calculators = [
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'wedding_cost') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -2374,9 +2665,18 @@ const calculators = [
           headers,
           tableRows
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -2422,7 +2722,9 @@ const calculators = [
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'property_value') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -2484,9 +2786,18 @@ const calculators = [
           headers,
           tableRows
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -2532,7 +2843,9 @@ const calculators = [
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'target_amount') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -2601,9 +2914,18 @@ const calculators = [
           headers,
           tableRows
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -2650,7 +2972,9 @@ const calculators = [
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'growth_rate') valDisplay.textContent = state[id] + '%';
@@ -2703,9 +3027,18 @@ const calculators = [
           headers,
           tableRows
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -2760,7 +3093,9 @@ const calculators = [
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id.startsWith('target_')) valDisplay.textContent = state[id] + '%';
@@ -2782,7 +3117,6 @@ const calculators = [
         let tCs = 100 - (tEq + tDt + tGd);
         if (tCs < 0) {
           tCs = 0;
-          // Normalize others
           const sum = tEq + tDt + tGd;
           tEq = Math.round((tEq / sum) * 100);
           tDt = Math.round((tDt / sum) * 100);
@@ -2814,9 +3148,8 @@ const calculators = [
         
         document.getElementById('total-portfolio').textContent = FinanceEngine.formatINR(total);
         
-        // Formulate rebalance status text
         let rebalanceNeeded = false;
-        const devThreshold = 5; // 5% threshold
+        const devThreshold = 5;
         for (const k in currentAlloc) {
           if (Math.abs(currentAlloc[k] - targetAlloc[k]) > devThreshold) rebalanceNeeded = true;
         }
@@ -2841,13 +3174,12 @@ const calculators = [
             if (idx === 5) {
               const color = v > 0 ? 'var(--success-color)' : (v < 0 ? 'var(--text-primary)' : 'var(--text-secondary)');
               const sign = v > 0 ? 'Buy ' : (v < 0 ? 'Sell ' : '');
-              return \`<td style="color:\${color}; font-weight:600;">\${sign}\${v === 0 ? 'No Change' : valStr}</td>\`;
+              return \`<td style="color:\\\${color}; font-weight:600;">\\\${sign}\\\${v === 0 ? 'No Change' : valStr}</td>\`;
             }
             return '<td>' + valStr + '</td>';
           }).join('') + '</tr>'
         ).join('');
         
-        // Render Donut Chart
         const slices = [
           { label: 'Equity', value: eq, color: '#0071e3' },
           { label: 'Debt', value: dt, color: '#30d158' },
@@ -2862,9 +3194,18 @@ const calculators = [
           headers,
           tableRows.map(r => [r[0], r[1], r[2], r[3], r[4], r[5]])
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -2902,28 +3243,6 @@ const calculators = [
     seoContent: `
       <h2>Compound Annual Growth Rate</h2>
       <p>CAGR measures the mean annual growth rate of an investment over a specified period of time longer than one year, assuming the investment compounds annually.</p>
-      <div class="formula-box">
-        <math display="block">
-          <mi>CAGR</mi>
-          <mo>=</mo>
-          <msup>
-            <mrow>
-              <mo>(</mo>
-              <mfrac>
-                <mi>Final Value</mi>
-                <mi>Initial Value</mi>
-              </mfrac>
-              <mo>)</mo>
-            </mrow>
-            <mfrac>
-              <mn>1</mn>
-              <mi>Years</mi>
-            </mfrac>
-          </msup>
-          <mo>−</mo>
-          <mn>1</mn>
-        </math>
-      </div>
     `,
     bindingScript: `
       const defaults = { initial_val: 100000, final_val: 250000, years: 5 };
@@ -2932,7 +3251,9 @@ const calculators = [
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'years') valDisplay.textContent = state[id];
@@ -3071,9 +3392,15 @@ const calculators = [
           ['Date', 'Amount'],
           cashFlows.map(f => [f.date, f.amount])
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(['Date', 'Amount'], cashFlows.map(f => [f.date, f.amount]));
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
       }
       
       document.getElementById('btn-add-flow').onclick = () => {
@@ -3121,7 +3448,9 @@ const calculators = [
       
       function syncUI() {
         elements.forEach(id => {
-          document.getElementById(id).value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'inflation_rate') valDisplay.textContent = state[id] + '%';
@@ -3172,9 +3501,18 @@ const calculators = [
           headers,
           tableRows
         );
-        document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {
@@ -3211,56 +3549,6 @@ const calculators = [
     noTable: true,
     seoContent: `
       <h2>The Real Rate of Return</h2>
-      <p>True purchasing power growth occurs when nominal returns exceed both taxes and inflation. Real Return is calculated as:</p>
-      <div class="formula-box">
-        <math display="block">
-          <msub>
-            <mi>R</mi>
-            <mtext>post-tax</mtext>
-          </msub>
-          <mo>=</mo>
-          <msub>
-            <mi>R</mi>
-            <mtext>nominal</mtext>
-          </msub>
-          <mo>×</mo>
-          <mrow>
-            <mo>(</mo>
-            <mn>1</mn>
-            <mo>−</mo>
-            <mfrac>
-              <mi>Tax Rate</mi>
-              <mn>100</mn>
-            </mfrac>
-            <mo>)</mo>
-          </mrow>
-        </math>
-        <math display="block">
-          <msub>
-            <mi>R</mi>
-            <mtext>real</mtext>
-          </msub>
-          <mo>=</mo>
-          <mfrac>
-            <mrow>
-              <mn>1</mn>
-              <mo>+</mo>
-              <msub>
-                <mi>R</mi>
-                <mtext>post-tax</mtext>
-              </msub>
-            </mrow>
-            <mrow>
-              <mn>1</mn>
-              <mo>+</mo>
-              <mfrac>
-                <mi>Inflation Rate</mi>
-                <mn>100</mn>
-              </mfrac>
-            </mrow>
-          </mfrac>
-          <mo>−</mo>
-          <mn>1</mn>
         </math>
       </div>
     `,
@@ -4269,6 +4557,7 @@ function getDashboardHtml() {
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://moneyinfuture.com/">
   
+  <link rel="canonical" href="https://moneyinfuture.com/">
   <link rel="stylesheet" href="css/style.css?v=1.0.3">
   <script type="application/ld+json">
     {

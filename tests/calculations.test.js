@@ -164,3 +164,26 @@ test('Formatting: respects decimalPlaces preference in summary output', () => {
 
   delete globalThis.localStorage;
 });
+
+test('Taxation: verify config-driven tax calculations', () => {
+  // Test equity_ltcg with exemption
+  const ltcgRes = FinanceEngine.estimateTax(200000, 'equity_ltcg');
+  // (200,000 - 125,000) * 0.125 = 75,000 * 0.125 = 9375
+  assert.equal(ltcgRes.tax, 9375);
+  assert.equal(ltcgRes.taxableGains, 75000);
+
+  // Test equity_ltcg under exemption limit
+  const ltcgResUnder = FinanceEngine.estimateTax(100000, 'equity_ltcg');
+  assert.equal(ltcgResUnder.tax, 0);
+  assert.equal(ltcgResUnder.taxableGains, 0);
+
+  // Test equity_stcg flat tax
+  const stcgRes = FinanceEngine.estimateTax(100000, 'equity_stcg');
+  assert.equal(stcgRes.tax, 20000);
+  assert.equal(stcgRes.taxableGains, 100000);
+
+  // Test custom slab rate
+  const slabRes = FinanceEngine.estimateTax(100000, 'slab', 30);
+  assert.equal(slabRes.tax, 30000);
+  assert.equal(slabRes.taxableGains, 100000);
+});

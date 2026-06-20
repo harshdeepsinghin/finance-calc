@@ -15,6 +15,7 @@
   <meta property="og:url" content="https://moneyinfuture.com/calculators/cagr.html">
   <meta property="og:site_name" content="MoneyInFuture">
   
+  <link rel="canonical" href="https://moneyinfuture.com/calculators/cagr.html">
   <link rel="stylesheet" href="../css/style.css?v=1.0.3">
   <script type="application/ld+json">
     {
@@ -140,29 +141,25 @@
           
       <h2>Compound Annual Growth Rate</h2>
       <p>CAGR measures the mean annual growth rate of an investment over a specified period of time longer than one year, assuming the investment compounds annually.</p>
-      <div class="formula-box">
-        <math display="block">
-          <mi>CAGR</mi>
-          <mo>=</mo>
-          <msup>
-            <mrow>
-              <mo>(</mo>
-              <mfrac>
-                <mi>Final Value</mi>
-                <mi>Initial Value</mi>
-              </mfrac>
-              <mo>)</mo>
-            </mrow>
-            <mfrac>
-              <mn>1</mn>
-              <mi>Years</mi>
-            </mfrac>
-          </msup>
-          <mo>−</mo>
-          <mn>1</mn>
-        </math>
-      </div>
     
+          
+    <div class="formula-assumptions-container" style="margin-top: 2.5rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+      <div class="formula-section">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Formula & Mathematical Approach</h3>
+        <p style="font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 1rem;">
+          Calculates the Compound Annual Growth Rate (CAGR) between an initial and final value.
+        </p>
+        <pre class="formula-box" style="background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; margin: 1rem 0; overflow-x: auto; color: var(--text-primary); white-space: pre-wrap; word-break: break-all;">CAGR = (Final Value / Initial Value) ^ (1 / Years) - 1</pre>
+      </div>
+      
+      <div class="assumptions-section" style="margin-top: 2rem;">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Key Assumptions</h3>
+        <ul class="assumptions-list" style="padding-left: 1.25rem; color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem; margin-top: 0.5rem;">
+          <li style="margin-bottom: 0.4rem;">Annual compounding is assumed.</li><li style="margin-bottom: 0.4rem;">No cash flows occur between the initial and final dates.</li>
+        </ul>
+      </div>
+    </div>
+  
         </section>
       </main>
     </div>
@@ -182,7 +179,9 @@
       
       function syncUI() {
         elements.forEach(id => {
-          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id]; const sliderVal = document.getElementById(id + '-slider'); if (sliderVal) sliderVal.value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (document.activeElement !== el) el.value = state[id]; const slider = document.getElementById(id + '-slider'); if (slider) slider.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'years') valDisplay.textContent = state[id];

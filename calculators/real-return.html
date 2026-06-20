@@ -15,6 +15,7 @@
   <meta property="og:url" content="https://moneyinfuture.com/calculators/real-return.html">
   <meta property="og:site_name" content="MoneyInFuture">
   
+  <link rel="canonical" href="https://moneyinfuture.com/calculators/real-return.html">
   <link rel="stylesheet" href="../css/style.css?v=1.0.3">
   <script type="application/ld+json">
     {
@@ -139,59 +140,28 @@
         <section class="seo-content">
           
       <h2>The Real Rate of Return</h2>
-      <p>True purchasing power growth occurs when nominal returns exceed both taxes and inflation. Real Return is calculated as:</p>
-      <div class="formula-box">
-        <math display="block">
-          <msub>
-            <mi>R</mi>
-            <mtext>post-tax</mtext>
-          </msub>
-          <mo>=</mo>
-          <msub>
-            <mi>R</mi>
-            <mtext>nominal</mtext>
-          </msub>
-          <mo>×</mo>
-          <mrow>
-            <mo>(</mo>
-            <mn>1</mn>
-            <mo>−</mo>
-            <mfrac>
-              <mi>Tax Rate</mi>
-              <mn>100</mn>
-            </mfrac>
-            <mo>)</mo>
-          </mrow>
-        </math>
-        <math display="block">
-          <msub>
-            <mi>R</mi>
-            <mtext>real</mtext>
-          </msub>
-          <mo>=</mo>
-          <mfrac>
-            <mrow>
-              <mn>1</mn>
-              <mo>+</mo>
-              <msub>
-                <mi>R</mi>
-                <mtext>post-tax</mtext>
-              </msub>
-            </mrow>
-            <mrow>
-              <mn>1</mn>
-              <mo>+</mo>
-              <mfrac>
-                <mi>Inflation Rate</mi>
-                <mn>100</mn>
-              </mfrac>
-            </mrow>
-          </mfrac>
-          <mo>−</mo>
-          <mn>1</mn>
         </math>
       </div>
     
+          
+    <div class="formula-assumptions-container" style="margin-top: 2.5rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+      <div class="formula-section">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Formula & Mathematical Approach</h3>
+        <p style="font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 1rem;">
+          Computes the actual return of an investment after stripping out the impact of inflation and taxes.
+        </p>
+        <pre class="formula-box" style="background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; margin: 1rem 0; overflow-x: auto; color: var(--text-primary); white-space: pre-wrap; word-break: break-all;">Post-Tax Return = Nominal Return * (1 - Tax Rate / 100)
+Real Return = (1 + Post-Tax Return / 100) / (1 + Inflation / 100) - 1</pre>
+      </div>
+      
+      <div class="assumptions-section" style="margin-top: 2rem;">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Key Assumptions</h3>
+        <ul class="assumptions-list" style="padding-left: 1.25rem; color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem; margin-top: 0.5rem;">
+          <li style="margin-bottom: 0.4rem;">Fisher equation is used for real return.</li><li style="margin-bottom: 0.4rem;">Tax rate is applied flatly to the nominal rate.</li>
+        </ul>
+      </div>
+    </div>
+  
         </section>
       </main>
     </div>

@@ -15,6 +15,7 @@
   <meta property="og:url" content="https://moneyinfuture.com/calculators/retirement.html">
   <meta property="og:site_name" content="MoneyInFuture">
   
+  <link rel="canonical" href="https://moneyinfuture.com/calculators/retirement.html">
   <link rel="stylesheet" href="../css/style.css?v=1.0.3">
   <script type="application/ld+json">
     {
@@ -258,6 +259,26 @@
       <h2>Retirement Nest Egg Strategy</h2>
       <p>Inflation is the biggest threat to retirement. A monthly expense of ₹50,000 today will expand dramatically over 20-30 years. This planner calculates your target corpus and required monthly savings.</p>
     
+          
+    <div class="formula-assumptions-container" style="margin-top: 2.5rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
+      <div class="formula-section">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Formula & Mathematical Approach</h3>
+        <p style="font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 1rem;">
+          Estimates the retirement corpus required to sustain lifestyle expenses and the SIP needed to reach that goal.
+        </p>
+        <pre class="formula-box" style="background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; margin: 1rem 0; overflow-x: auto; color: var(--text-primary); white-space: pre-wrap; word-break: break-all;">Inflated Monthly Expense = Current Expense * (1 + Inflation / 100) ^ Years to Retire
+Retirement Corpus Required = Inflated Annual Expense * ((1 - (1 + r)^-n) / r) * (1 + r)
+(where r is the post-retirement real rate of return)</pre>
+      </div>
+      
+      <div class="assumptions-section" style="margin-top: 2rem;">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Key Assumptions</h3>
+        <ul class="assumptions-list" style="padding-left: 1.25rem; color: var(--text-secondary); line-height: 1.6; font-size: 0.9rem; margin-top: 0.5rem;">
+          <li style="margin-bottom: 0.4rem;">Post-retirement expenses increase annually with inflation.</li><li style="margin-bottom: 0.4rem;">Annual returns before and after retirement are constant.</li><li style="margin-bottom: 0.4rem;">Life expectancy is accurate, and the retirement corpus is fully depleted at that age.</li>
+        </ul>
+      </div>
+    </div>
+  
         </section>
       </main>
     </div>
@@ -277,7 +298,9 @@
       
       function syncUI() {
         elements.forEach(id => {
-          const elVal = document.getElementById(id); if (elVal && document.activeElement !== elVal) elVal.value = state[id]; const sliderVal = document.getElementById(id + '-slider'); if (sliderVal) sliderVal.value = state[id];
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (document.activeElement !== el) el.value = state[id]; const slider = document.getElementById(id + '-slider'); if (slider) slider.value = state[id];
           const valDisplay = document.getElementById(id + '-val');
           if (valDisplay) {
             if (id === 'monthly_expenses') valDisplay.textContent = FinanceEngine.formatINR(state[id]);
@@ -418,9 +441,18 @@
           headers,
           tableRows
         );
-        if (document.getElementById('btn-export-csv')) document.getElementById('btn-export-csv').onclick = csvExporter.exportCSV;
-        if (document.getElementById('btn-export-json')) document.getElementById('btn-export-json').onclick = csvExporter.exportJSON;
-        if (document.getElementById('btn-copy-table')) document.getElementById('btn-copy-table').onclick = () => FinanceEngine.copyTableToClipboard(headers, tableRows);
+        
+        const btnCsv = document.getElementById('btn-export-csv');
+        const btnJson = document.getElementById('btn-export-json');
+        const btnCopy = document.getElementById('btn-copy-table');
+        
+        btnCsv.replaceWith(btnCsv.cloneNode(true));
+        btnJson.replaceWith(btnJson.cloneNode(true));
+        btnCopy.replaceWith(btnCopy.cloneNode(true));
+        
+        document.getElementById('btn-export-csv').addEventListener('click', csvExporter.exportCSV);
+        document.getElementById('btn-export-json').addEventListener('click', csvExporter.exportJSON);
+        document.getElementById('btn-copy-table').addEventListener('click', () => FinanceEngine.copyTableToClipboard(headers, tableRows));
       }
       
       elements.forEach(id => {

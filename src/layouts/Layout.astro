@@ -20,6 +20,17 @@ const {
 } = Astro.props;
 
 const currentPath = Astro.url.pathname;
+const adsenseClientId = 'ca-pub-XXXXXXXXXXXXXX'; // Replace with your real publisher ID
+const showAds = adsenseClientId && !adsenseClientId.includes('XXXXXXXXXXXXXX');
+const socialImage = new URL('/assets/MoneyInFuture_Logo_Light_Mode.png', Astro.site || 'https://moneyinfuture.com').href;
+
+// Clean canonical URL (no .html or /index.html)
+let canonicalUrl = Astro.url.href;
+if (canonicalUrl.endsWith('/index.html')) {
+  canonicalUrl = canonicalUrl.replace(/\/index\.html$/, '/');
+} else {
+  canonicalUrl = canonicalUrl.replace(/\.html$/, '');
+}
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -40,12 +51,21 @@ const currentPath = Astro.url.pathname;
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content={Astro.url.href} />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:image" content={socialImage} />
   
-  <link rel="canonical" href={Astro.url.href} />
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content={socialImage} />
+  
+  <link rel="canonical" href={canonicalUrl} />
   
   <!-- Google AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+  {showAds && (
+    <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`} crossorigin="anonymous"></script>
+  )}
 
   <!-- Theme setup script to prevent light-flash (FOUC) -->
   <script is:inline>
@@ -69,6 +89,8 @@ const currentPath = Astro.url.pathname;
       "description": "Blazing-fast financial calculators for Indian retail investors"
     }
   </script>
+  
+  <slot name="head" />
 </head>
 <body>
   <div class="app-container">
@@ -85,7 +107,7 @@ const currentPath = Astro.url.pathname;
     <Footer />
   </div>
 
-  {loadEngine && <script is:inline src="/js/engine.js"></script>}
-  <script is:inline src="/js/shared.js"></script>
+  {loadEngine && <script src="/js/engine.js" defer></script>}
+  <script src="/js/shared.js" defer></script>
 </body>
 </html>

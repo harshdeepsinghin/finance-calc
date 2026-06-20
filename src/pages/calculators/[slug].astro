@@ -48,13 +48,125 @@ function getCleanLabel(label: string) {
     .replace(/\s*\(cagr\s*%\)/gi, '')
     .trim();
 }
+
+function getTableHeaders(filename: string) {
+  switch (filename) {
+    case 'sip.html':
+    case 'lump-sum.html':
+      return ['Year', 'Invested', 'Returns', 'Corpus', 'Real Corpus', 'Taxable Gains', 'Estimated Tax', 'Post-Tax Corpus'];
+    case 'step-up-sip.html':
+      return ['Year', 'Monthly SIP', 'Invested', 'Returns', 'Corpus', 'Real Corpus', 'Taxable Gains', 'Estimated Tax', 'Post-Tax Corpus'];
+    case 'reverse-sip.html':
+      return ['Year', 'Monthly SIP', 'Invested', 'Returns', 'Corpus'];
+    case 'reverse-lump-sum.html':
+    case 'goal.html':
+    case 'net-worth-projection.html':
+    case 'real-return.html':
+      return ['Year', 'Invested', 'Gains', 'Corpus'];
+    case 'swp.html':
+    case 'reverse-swp.html':
+    case 'step-up-swp.html':
+    case 'education-planner.html':
+    case 'marriage-planner.html':
+    case 'child-corpus.html':
+      return ['Year', 'Beginning Balance', 'Withdrawn', 'Interest Earned', 'Ending Balance'];
+    case 'retirement.html':
+      return ['Year', 'Age', 'Annual Expense', 'Nest Egg Needed', 'Beginning Balance', 'Savings/SIP', 'Interest Earned', 'Withdrawals', 'Ending Balance'];
+    case 'house-down-payment.html':
+      return ['Year', 'Inflated House Cost', 'Target Down Payment', 'Savings', 'Gains', 'Accumulated'];
+    case 'asset-allocation.html':
+      return ['Asset Class', 'Current Value', 'Current Alloc %', 'Target Alloc %', 'Target Value', 'Adjustment (Buy/Sell)'];
+    case 'inflation.html':
+      return ['Year', 'Future Cost', 'Purchasing Power'];
+    case 'emi.html':
+      return ['Year', 'Opening Balance', 'EMI Paid', 'Interest Paid', 'Principal Paid', 'Closing Balance'];
+    case 'loan-prepayment.html':
+      return ['Year', 'Opening Balance', 'EMI Paid', 'Prepayments', 'Interest Paid', 'Principal Paid', 'Closing Balance'];
+    case 'emergency-fund.html':
+      return ['Category', 'Monthly Expense', 'Coverage (Months)', 'Target Allocation', 'Recommended Allocation', 'Sizing Value'];
+    case 'financial-independence.html':
+      return ['Year', 'Beginning Balance', 'Investments', 'Gains', 'Ending Balance', 'Annual Expenses'];
+    default:
+      return ['Year', 'Value'];
+  }
+}
+
+function getFaqSchema(seoContent: string) {
+  if (!seoContent) return null;
+  const faqRegex = /<div class="faq-question">([\s\S]*?)<\/div>\s*<div class="faq-answer">([\s\S]*?)<\/div>/g;
+  const matches = [...seoContent.matchAll(faqRegex)];
+  if (matches.length === 0) return null;
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": matches.map(m => ({
+      "@type": "Question",
+      "name": m[1].replace(/<[^>]*>/g, '').trim(),
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": m[2].replace(/<[^>]*>/g, '').trim()
+      }
+    }))
+  };
+}
+
+const defaultHeaders = getTableHeaders(calc.filename);
+const yearsInput = calc.inputs.find(input => ['years', 'duration', 'tenure', 'years_to_goal', 'years_to_fi', 'years_to_college', 'years_to_marriage'].includes(input.id));
+let defaultRowsCount = yearsInput ? yearsInput.value : 10;
+if (calc.filename === 'asset-allocation.html') defaultRowsCount = 4;
+if (calc.filename === 'emergency-fund.html') defaultRowsCount = 6;
+
+const canonicalUrl = new URL(`/calculators/${calc.filename.replace(/\.html$/, '')}`, Astro.site || 'https://moneyinfuture.com').href;
+
+// WebApplication structured data
+const webAppSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": calc.title,
+  "url": canonicalUrl,
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript. Requires HTML5.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+  },
+  "description": calc.metaDescription
+};
+
+// BreadcrumbList structured data
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": new URL('/', Astro.site || 'https://moneyinfuture.com').href
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": calc.title,
+      "item": canonicalUrl
+    }
+  ]
+};
+
+const faqSchema = getFaqSchema(calc.seoContent);
 ---
 <Layout 
-  title={`${calc.title} - India | MoneyInFuture`}
+  title={`${calc.title} - Calculate Future Wealth & Returns | MoneyInFuture`}
   description={calc.metaDescription}
   keywords={calc.keywords}
   loadEngine={true}
 >
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(webAppSchema)} />
+  <script slot="head" type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  {faqSchema && <script slot="head" type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
   <div class="calculator-header">
     <h1>{calc.title}</h1>
     <p class="calculator-description">{calc.subtitle || calc.metaDescription}</p>
@@ -250,16 +362,26 @@ function getCleanLabel(label: string) {
       
       <div class="table-card full-width-card">
         <span class="table-title">Yearly Breakdowns</span>
-        <table id="projections-table">
-          <thead>
-            <tr id="table-headers-row">
-              <!-- Headers generated in JS -->
-            </tr>
-          </thead>
-          <tbody id="table-body">
-            <!-- Data generated in JS -->
-          </tbody>
-        </table>
+        <div class="table-scroll-wrapper">
+          <table id="projections-table">
+            <thead>
+              <tr id="table-headers-row">
+                {defaultHeaders.map(h => <th>{h}</th>)}
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              {Array.from({ length: defaultRowsCount }).map((_, rIdx) => (
+                <tr>
+                  {defaultHeaders.map((_, cIdx) => (
+                    <td>
+                      {cIdx === 0 && calc.filename !== 'asset-allocation.html' && calc.filename !== 'emergency-fund.html' ? rIdx + 1 : <span class="placeholder-cell">&nbsp;</span>}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </>
   )}

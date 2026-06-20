@@ -60,7 +60,7 @@ const categories = [
 <aside class="sidebar" id="global-sidebar">
   {categories.map(cat => (
     <div>
-      <h3>{cat.title}</h3>
+      <div class="sidebar-category-title">{cat.title}</div>
       <ul class="nav-list">
         {cat.items.map(item => {
           const isActive = filename === item.url;

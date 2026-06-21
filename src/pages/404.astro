@@ -17,7 +17,7 @@ for (let i = 0; i < 2 && tempCalcs.length > 0; i++) {
   title="Error 404: Page Not Found | MoneyInFuture"
   description="This page has depreciated to zero value, but here's some compounding wisdom to keep you motivated."
 >
-  <div class="calculator-header">
+  <div class="calculator-header error-header">
     <h1>Error 404: Page Not Found</h1>
     <p class="calculator-description">
       We couldn't find the page you were looking for. However, in personal finance, <strong>no asset is wasted if it leads to learning</strong>. 
@@ -179,13 +179,14 @@ for (let i = 0; i < 2 && tempCalcs.length > 0; i++) {
 
   blockquote {
     font-size: 1.35rem;
-    font-weight: 500;
+    font-weight: 400;
     line-height: 1.6;
     color: var(--text-primary);
     margin: 0 0 1.25rem 0;
     transition: opacity 0.2s ease-in-out;
     z-index: 1;
     max-width: 600px;
+    font-style: italic;
   }
 
   cite {
@@ -195,6 +196,7 @@ for (let i = 0; i < 2 && tempCalcs.length > 0; i++) {
     color: var(--accent-color);
     transition: opacity 0.2s ease-in-out;
     z-index: 1;
+    align-self: flex-end;
   }
 
   .calculator-play-section {
@@ -223,12 +225,12 @@ for (let i = 0; i < 2 && tempCalcs.length > 0; i++) {
     margin-top: 1.5rem;
   }
 
-  /* Style the 404 page heading in red */
-  :global(.calculator-header h1) {
+  /* Red styling scoped to the 404 error header */
+  .error-header h1 {
     color: #d70015; /* Elegant iOS light mode red */
   }
 
-  :global([data-theme="dark"] .calculator-header h1) {
+  :global([data-theme="dark"]) .error-header h1 {
     color: #ff453a; /* Elegant iOS dark mode red */
   }
 </style>

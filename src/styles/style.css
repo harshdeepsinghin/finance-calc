@@ -138,27 +138,27 @@ header {
 }
 
 .header-nav-link:hover {
-  color: var(--text-primary);
+  color: var(--accent-color);
   background-color: var(--input-bg);
 }
 
 .header-menu-toggle-btn {
   display: none;
   background: none;
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
+  border: none;
+  color: var(--text-secondary);
   padding: 0.5rem;
   border-radius: 6px;
   cursor: pointer;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s, border-color 0.2s;
+  transition: background-color 0.2s, color 0.2s;
   touch-action: manipulation;
 }
 
 .header-menu-toggle-btn:hover {
   background-color: var(--input-bg);
-  border-color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 .header-menu-toggle-btn svg {
@@ -988,6 +988,13 @@ table td:last-child {
   max-width: 800px;
 }
 
+/* If .seo-content immediately follows .calculator-header, remove duplicate top border and reduce top spacing */
+.calculator-header + .seo-content {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 1.5rem;
+}
+
 .seo-content h2 {
   font-size: 1.5rem;
   font-weight: 700;
@@ -1115,6 +1122,25 @@ table td:last-child {
 }
 
 /* Footer Section */
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.82rem;
+}
+
+.footer-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-links a:hover {
+  color: var(--accent-color);
+}
+
 footer {
   text-align: center;
   padding: 3rem 2rem;

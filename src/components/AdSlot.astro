@@ -25,7 +25,9 @@ if (type === 'banner') {
   minHeight = '250px';
   width = '250px';
 }
+const showAds = false; // Set to false to remove/hide all ads and placeholders
 ---
+{showAds && (
 <div class={`ad-container-outer ad-type-${type}`} style={`width:${width}; margin:1.5rem auto; text-align:center; ${style}`}>
   <div class="ad-label" style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.25rem; letter-spacing: 0.05em; user-select: none;">
     Advertisement
@@ -60,3 +62,5 @@ if (type === 'banner') {
   // Push to AdSense queue if adsbygoogle is loaded
   (adsbygoogle = window.adsbygoogle || []).push({});
 </script>
+)}
+

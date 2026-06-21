@@ -507,16 +507,39 @@ const FinanceEngine = {
         }
       }
       
-      // URL parameters override cache
-      if (params.has(key)) {
-        const val = params.get(key);
+      // URL parameters override cache (supporting flexible synonyms / alias names)
+      const aliases = {
+        'monthly_sip': ['monthly_sip', 'monthly', 'amount', 'amt', 'invest', 'investment', 'p'],
+        'starting_sip': ['starting_sip', 'starting', 'start'],
+        'monthly_withdrawal': ['monthly_withdrawal', 'withdrawal', 'swp', 'withdraw'],
+        'principal': ['principal', 'investment', 'amount', 'amt', 'lump', 'lumpsum', 'p'],
+        'target_corpus': ['target_corpus', 'target', 'goal', 'corpus'],
+        'initial_corpus': ['initial_corpus', 'corpus', 'principal', 'amount'],
+        'return_rate': ['return_rate', 'rate', 'interest', 'return', 'r', 'percent'],
+        'years': ['years', 'duration', 'tenure', 'time', 'period', 'y']
+      };
+
+      let paramVal = null;
+      if (aliases[key]) {
+        for (const alias of aliases[key]) {
+          if (params.has(alias)) {
+            paramVal = params.get(alias);
+            break;
+          }
+        }
+      }
+      if (paramVal === null && params.has(key)) {
+        paramVal = params.get(key);
+      }
+
+      if (paramVal !== null) {
         if (typeof defaults[key] === 'number') {
-          const parsed = parseFloat(val);
+          const parsed = parseFloat(paramVal);
           result[key] = isNaN(parsed) ? defaults[key] : parsed;
         } else if (typeof defaults[key] === 'boolean') {
-          result[key] = val === 'true';
+          result[key] = paramVal === 'true';
         } else {
-          result[key] = val;
+          result[key] = paramVal;
         }
       }
 
@@ -701,7 +724,7 @@ const FinanceEngine = {
     svg.appendChild(defs);
     
     // Coordinate mapping functions
-    const getX = (index) => padding.left + (index / (data.length - 1)) * chartWidth;
+    const getX = (index) => padding.left + (data.length > 1 ? (index / (data.length - 1)) * chartWidth : chartWidth);
     const getY = (value) => padding.top + chartHeight - ((value - minVal) / (maxVal - minVal)) * chartHeight;
     
     // Render Y gridlines & labels

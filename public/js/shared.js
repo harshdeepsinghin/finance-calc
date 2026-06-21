@@ -74,9 +74,97 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Setup range sliders
   setupGlobalSliders();
+
+  // Dynamically update document tags for SEO if query parameters are present
+  updateDynamicSeoTags();
 });
 
+// --- Dynamic SEO Tag Updater ---
+
+function updateDynamicSeoTags() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.size > 0) {
+    const h1 = document.querySelector('.calculator-header h1');
+    if (!h1) return;
+    const calculatorName = h1.textContent.trim();
+    
+    // Find amount, rate, years from aliases or exact keys
+    const amountKeys = ['monthly_sip', 'monthly', 'amount', 'amt', 'principal', 'lump', 'target_corpus', 'corpus', 'initial_corpus', 'starting_sip'];
+    const rateKeys = ['return_rate', 'rate', 'interest', 'return', 'r'];
+    const yearsKeys = ['years', 'duration', 'tenure', 'time', 'y'];
+    
+    let amount = null;
+    let rate = null;
+    let years = null;
+    
+    for (const k of amountKeys) {
+      if (params.has(k)) {
+        amount = parseFloat(params.get(k));
+        break;
+      }
+    }
+    for (const k of rateKeys) {
+      if (params.has(k)) {
+        rate = parseFloat(params.get(k));
+        break;
+      }
+    }
+    for (const k of yearsKeys) {
+      if (params.has(k)) {
+        years = parseFloat(params.get(k));
+        break;
+      }
+    }
+    
+    if (amount !== null && rate !== null && years !== null && !isNaN(amount) && !isNaN(rate) && !isNaN(years)) {
+      // Format values for SEO snippet
+      const formattedAmount = '₹' + amount.toLocaleString('en-IN');
+      const formattedRate = rate + '%';
+      const formattedYears = years + (years === 1 ? ' Year' : ' Years');
+      
+      let titleText = '';
+      let descText = '';
+      
+      if (calculatorName.toLowerCase().includes('sip')) {
+        titleText = `SIP Calculator: Invest ${formattedAmount}/month for ${formattedYears} at ${formattedRate} | MoneyInFuture`;
+        descText = `Calculated results for investing ${formattedAmount} per month for ${formattedYears} at ${formattedRate} expected return rate. Find total investment, returns, and future compounding corpus.`;
+      } else if (calculatorName.toLowerCase().includes('lump sum') || calculatorName.toLowerCase().includes('lumpsum')) {
+        titleText = `Lump Sum Calculator: Invest ${formattedAmount} for ${formattedYears} at ${formattedRate} | MoneyInFuture`;
+        descText = `Calculated results for investing a lump sum of ${formattedAmount} for ${formattedYears} at ${formattedRate} CAGR return rate. See your projected returns and final wealth.`;
+      } else {
+        titleText = `${calculatorName}: ${formattedAmount} for ${formattedYears} at ${formattedRate} | MoneyInFuture`;
+        descText = `Calculate ${calculatorName} with ${formattedAmount} investment/corpus over ${formattedYears} at ${formattedRate} annual return rate. See full projections.`;
+      }
+      
+      // Update Title
+      document.title = titleText;
+      
+      // Update Meta description
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.setAttribute('content', descText);
+      
+      // Update OG & Twitter Meta Tags
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      if (ogTitle) ogTitle.setAttribute('content', titleText);
+      const ogDesc = document.querySelector('meta[property="og:description"]');
+      if (ogDesc) ogDesc.setAttribute('content', descText);
+      
+      const twitterTitle = document.querySelector('meta[name="twitter:title"]');
+      if (twitterTitle) twitterTitle.setAttribute('content', titleText);
+      const twitterDesc = document.querySelector('meta[name="twitter:description"]');
+      if (twitterDesc) twitterDesc.setAttribute('content', descText);
+
+      // Update Canonical Link dynamically so Google indexes the parameters
+      const canonicalLink = document.querySelector('link[rel="canonical"]');
+      if (canonicalLink) {
+        canonicalLink.setAttribute('href', window.location.href);
+      }
+    }
+  }
+}
+
 // --- Theme Management ---
+
 
 function initTheme() {
   const savedTheme = localStorage.getItem('theme');

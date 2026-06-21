@@ -1,0 +1,102 @@
+---
+// src/pages/popular-calculations.astro
+import Layout from '../layouts/Layout.astro';
+import { getCuratedIndexScenarios } from '../data/popularCombinations.js';
+
+const groups = getCuratedIndexScenarios();
+---
+<Layout 
+  title="Popular Investment Calculations & Projections | MoneyInFuture"
+  description="Quick access to popular financial calculations including SIP, Lump Sum, Step-Up SIP, and SWP projections for retail investors."
+>
+  <div class="calculator-header">
+    <h1>Popular Investment Projections</h1>
+    <p class="calculator-description">Explore pre-calculated scenarios for systematic investments, lump sums, retirement withdrawals, and more. Click any query to load the calculator with the exact parameters.</p>
+  </div>
+
+  <div class="popular-calculations-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2.5rem; margin-top: 2rem;">
+    {/* 1. SIP Calculations Group */}
+    <div class="scenarios-card" style="background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.75rem; box-shadow: var(--card-shadow);">
+      <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--accent-color);"></span>
+        SIP Projections
+      </h2>
+      <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem;">
+        {groups.sip.map(item => (
+          <li>
+            <a 
+              href={item.url} 
+              style="font-size: 0.92rem; font-weight: 500; color: var(--accent-color); text-decoration: none; display: inline-block; transition: transform 0.15s ease;"
+              onmouseover="this.style.transform='translateX(4px)'"
+              onmouseout="this.style.transform='translateX(0)'"
+            >
+              {item.text} &rarr;
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    {/* 2. Lump Sum Calculations Group */}
+    <div class="scenarios-card" style="background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.75rem; box-shadow: var(--card-shadow);">
+      <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--success-color);"></span>
+        Lump Sum Projections
+      </h2>
+      <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem;">
+        {groups.lumpSum.map(item => (
+          <li>
+            <a 
+              href={item.url} 
+              style="font-size: 0.92rem; font-weight: 500; color: var(--accent-color); text-decoration: none; display: inline-block; transition: transform 0.15s ease;"
+              onmouseover="this.style.transform='translateX(4px)'"
+              onmouseout="this.style.transform='translateX(0)'"
+            >
+              {item.text} &rarr;
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    {/* 3. Step-Up & SWP Group */}
+    <div class="scenarios-card" style="background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.75rem; box-shadow: var(--card-shadow);">
+      <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 0.75rem;">
+        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--warning-color);"></span>
+        Step-Up SIP & SWP
+      </h2>
+      
+      <h3 style="font-size: 0.95rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.75rem; letter-spacing: 0.05em;">Step-Up SIP Scenarios</h3>
+      <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
+        {groups.stepUp.map(item => (
+          <li>
+            <a 
+              href={item.url} 
+              style="font-size: 0.92rem; font-weight: 500; color: var(--accent-color); text-decoration: none; display: inline-block; transition: transform 0.15s ease;"
+              onmouseover="this.style.transform='translateX(4px)'"
+              onmouseout="this.style.transform='translateX(0)'"
+            >
+              {item.text} &rarr;
+            </a>
+          </li>
+        ))}
+      </ul>
+
+      <h3 style="font-size: 0.95rem; font-weight: 600; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.75rem; letter-spacing: 0.05em; border-top: 1px solid var(--border-color); padding-top: 1rem;">Systematic Withdrawal (SWP)</h3>
+      <ul style="list-style: none; padding: 0; display: flex; flex-direction: column; gap: 1rem;">
+        {groups.swp.map(item => (
+          <li>
+            <a 
+              href={item.url} 
+              style="font-size: 0.92rem; font-weight: 500; color: var(--accent-color); text-decoration: none; display: inline-block; transition: transform 0.15s ease;"
+              onmouseover="this.style.transform='translateX(4px)'"
+              onmouseout="this.style.transform='translateX(0)'"
+            >
+              {item.text} &rarr;
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</Layout>

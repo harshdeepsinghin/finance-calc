@@ -21,4 +21,3 @@ node_modules
 # Astro & build output
 .astro/
 dist/
-package-lock.json

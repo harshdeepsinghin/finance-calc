@@ -4,6 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import { calculators } from '../../data/calculators.js';
 import { formulas } from '../../data/formulas.js';
+import katex from 'katex';
 
 export async function getStaticPaths() {
   return calculators.map(calc => {
@@ -17,6 +18,16 @@ export async function getStaticPaths() {
 
 const { calc } = Astro.props;
 const formulaData = formulas[calc.filename];
+
+// Pre-render KaTeX formulas at build time
+const renderedMath = formulaData?.latex?.map(item => {
+  try {
+    return katex.renderToString(item, { displayMode: true, throwOnError: false });
+  } catch (err) {
+    console.error('KaTeX rendering error for:', item, err);
+    return null;
+  }
+}).filter(Boolean) || [];
 
 // Helpers for rendering input prefix / suffix
 function getInputPrefix(id: string, label: string) {
@@ -164,6 +175,7 @@ const faqSchema = getFaqSchema(calc.seoContent);
   keywords={calc.keywords}
   loadEngine={true}
 >
+  <link slot="head" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous" />
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(webAppSchema)} />
   <script slot="head" type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
   {faqSchema && <script slot="head" type="application/ld+json" set:html={JSON.stringify(faqSchema)} />}
@@ -394,10 +406,22 @@ const faqSchema = getFaqSchema(calc.seoContent);
       <div class="formula-assumptions-container" style="margin-top: 2.5rem; border-top: 1px solid var(--border-color); padding-top: 2rem;">
         <div class="formula-section">
           <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--text-primary);">Formula & Mathematical Approach</h3>
-          <p style="font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 1rem;">
+          <p style="font-size: 0.9rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 1.25rem;">
             {formulaData.desc}
           </p>
-          <pre class="formula-box" style="background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; margin: 1rem 0; overflow-x: auto; color: var(--text-primary); white-space: pre-wrap; word-break: break-all;">{formulaData.code}</pre>
+          
+          {renderedMath.length > 0 && (
+            <div class="math-equations">
+              {renderedMath.map(html => (
+                <div class="math-equation-row" set:html={html} />
+              ))}
+            </div>
+          )}
+
+          <details class="raw-formula-details">
+            <summary>Show Plain Text / Excel Formula</summary>
+            <pre class="formula-box" style="background-color: transparent; border: none; border-radius: 0; padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; margin: 0; overflow-x: auto; color: var(--text-primary); white-space: pre-wrap; word-break: break-all;">{formulaData.code}</pre>
+          </details>
         </div>
         
         <div class="assumptions-section" style="margin-top: 2rem;">
@@ -419,3 +443,54 @@ const faqSchema = getFaqSchema(calc.seoContent);
     });
   `} />
 </Layout>
+
+<style>
+  .math-equations {
+    margin: 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow-x: auto;
+  }
+
+  .math-equation-row {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .math-equations :global(.katex-display) {
+    margin: 0.5rem 0;
+    text-align: center;
+  }
+
+  .raw-formula-details {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-primary);
+  }
+
+  .raw-formula-details summary {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    font-weight: 500;
+    user-select: none;
+    outline: none;
+    transition: background-color 0.2s;
+  }
+
+  .raw-formula-details summary:hover {
+    background-color: var(--input-bg);
+  }
+
+  .raw-formula-details[open] summary {
+    border-bottom: 1px solid var(--border-color);
+  }
+</style>

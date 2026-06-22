@@ -340,5 +340,33 @@ export const terminologies = {
       },
       "simple": null
     }
+  },
+  "real_future_value": {
+    "id": "real_future_value",
+    "tiers": {
+      "professional": {
+        "label": "Real Future Value",
+        "definition": "The inflation-adjusted future value of your corpus, representing its purchasing power in today's currency."
+      },
+      "investor": {
+        "label": "Inflation-Adjusted Corpus",
+        "definition": "The final value of your investment adjusted to reflect the impact of inflation."
+      },
+      "simple": null
+    }
+  },
+  "post_tax_future_value": {
+    "id": "post_tax_future_value",
+    "tiers": {
+      "professional": {
+        "label": "Post-Tax Future Value",
+        "definition": "The final projected future value of your corpus after estimating and deducting capital gains taxes."
+      },
+      "investor": {
+        "label": "Post-Tax Corpus",
+        "definition": "The expected final value of your investment after estimating applicable taxes."
+      },
+      "simple": null
+    }
   }
 };

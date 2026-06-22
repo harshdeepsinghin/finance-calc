@@ -1,0 +1,143 @@
+---
+// src/pages/finance-levels.astro
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout 
+  title="Understanding Finance Profile Levels | MoneyInFuture"
+  description="Learn about the different Finance Profile Levels (Simple, Investor, Professional) on MoneyInFuture and how they customize your calculator experience."
+>
+  <div class="calculator-header">
+    <h1>Finance Profile Levels</h1>
+    <p class="calculator-description">How MoneyInFuture customizes parameters and terminologies to match your personal background.</p>
+  </div>
+
+  <section class="seo-content" style="max-width: 800px; margin: 0 auto; line-height: 1.7;">
+    <p style="font-size: 1.1rem; margin-bottom: 2rem; color: var(--text-secondary);">
+      MoneyInFuture is designed for everyone—from first-time savers to experienced Chartered Accountants (CAs). To make our calculators as intuitive as possible, we offer three profile levels that customize the visual detail and terminology of inputs and results.
+    </p>
+
+    <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-bottom: 3rem;">
+      <!-- Simple Tier Description -->
+      <div style="border-left: 4px solid var(--success-color); padding-left: 1.5rem; margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem; color: var(--text-primary);">🌱 Simple Level (Beginner)</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
+          Designed for individuals beginning their financial journey. This level uses simple, everyday terms and hides advanced economic factors to prevent cognitive overload.
+        </p>
+        <ul style="padding-left: 1.25rem; color: var(--text-secondary);">
+          <li><strong>Plain English:</strong> Parameters like <em>Principal</em> are renamed to <em>Starting Money</em>, and <em>SIP</em> is renamed to <em>Money Added Every Month</em>.</li>
+          <li><strong>Clean Interface:</strong> Hides complex elements like Compounding Frequencies, Inflation Rates, and Capital Gains Taxes, running calculations on safe defaults behind the scenes.</li>
+        </ul>
+      </div>
+
+      <!-- Investor Tier Description -->
+      <div style="border-left: 4px solid var(--accent-color); padding-left: 1.5rem; margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem; color: var(--text-primary);">📈 Investor Level (Intermediate)</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
+          Designed for active retail investors who understand standard brokerage terminology and follow mutual fund SIP portfolios.
+        </p>
+        <ul style="padding-left: 1.25rem; color: var(--text-secondary);">
+          <li><strong>Practical Language:</strong> Uses common app terms like <em>SIP Amount</em>, <em>Expected Returns</em>, and <em>Inflation Rate</em>.</li>
+          <li><strong>Full Controls:</strong> Reveals inflation adjustments and custom taxation estimation tools.</li>
+        </ul>
+      </div>
+
+      <!-- Professional Tier Description -->
+      <div style="border-left: 4px solid #af52de; padding-left: 1.5rem; margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem; color: var(--text-primary);">🎓 Professional Level (Advanced)</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
+          Designed for financial planners, analysts, CAs, and experts who require industry-standard terminology.
+        </p>
+        <ul style="padding-left: 1.25rem; color: var(--text-secondary);">
+          <li><strong>Industry Standard:</strong> Uses precise financial vocabulary like <em>Principal</em>, <em>Periodic Investment</em>, <em>CAGR</em>, <em>XIRR</em>, and <em>SWP</em>.</li>
+          <li><strong>Complete Projections:</strong> Displays detailed cash flow breakdowns, compounding settings, and full tax estimations.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 style="font-size: 1.6rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Terminology Translation Guide</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+      Here is how key inputs and outputs are translated across different profile levels on the MoneyInFuture website:
+    </p>
+
+    <!-- Comparison Table -->
+    <div style="overflow-x: auto; margin-bottom: 3rem; border: 1px solid var(--border-color); border-radius: 12px; background: var(--card-bg);">
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+        <thead>
+          <tr style="border-bottom: 1.5px solid var(--border-color); background: var(--input-bg);">
+            <th style="padding: 0.75rem 1rem;">Core Concept</th>
+            <th style="padding: 0.75rem 1rem; color: #af52de;">Professional</th>
+            <th style="padding: 0.75rem 1rem; color: var(--accent-color);">Investor</th>
+            <th style="padding: 0.75rem 1rem; color: var(--success-color);">Simple</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 0.75rem 1rem; font-weight: 600;">Lump sum input</td>
+            <td style="padding: 0.75rem 1rem;">Principal</td>
+            <td style="padding: 0.75rem 1rem;">Investment Amount</td>
+            <td style="padding: 0.75rem 1rem;">Starting Money</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 0.75rem 1rem; font-weight: 600;">Monthly investment</td>
+            <td style="padding: 0.75rem 1rem;">Periodic Investment</td>
+            <td style="padding: 0.75rem 1rem;">SIP Amount</td>
+            <td style="padding: 0.75rem 1rem;">Money Added Every Month</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 0.75rem 1rem; font-weight: 600;">Time duration</td>
+            <td style="padding: 0.75rem 1rem;">Time Horizon</td>
+            <td style="padding: 0.75rem 1rem;">Investment Period</td>
+            <td style="padding: 0.75rem 1rem;">How Long You Will Invest</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 0.75rem 1rem; font-weight: 600;">SIP yearly step-up</td>
+            <td style="padding: 0.75rem 1rem;">Annual Increment</td>
+            <td style="padding: 0.75rem 1rem;">Step-Up SIP Rate</td>
+            <td style="padding: 0.75rem 1rem;">Yearly Increase</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 0.75rem 1rem; font-weight: 600;">Final value</td>
+            <td style="padding: 0.75rem 1rem;">Future Value</td>
+            <td style="padding: 0.75rem 1rem;">Final Corpus / Expected Corpus</td>
+            <td style="padding: 0.75rem 1rem;">Final Amount</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 0.75rem 1rem; font-weight: 600;">Interest earned</td>
+            <td style="padding: 0.75rem 1rem;">Total Wealth Gained</td>
+            <td style="padding: 0.75rem 1rem;">Total Returns</td>
+            <td style="padding: 0.75rem 1rem;">Total Profit</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 0.75rem 1rem; font-weight: 600;">Monthly withdrawal</td>
+            <td style="padding: 0.75rem 1rem;">Systematic Withdrawal (SWP)</td>
+            <td style="padding: 0.75rem 1rem;">SWP Amount</td>
+            <td style="padding: 0.75rem 1rem;">Regular Monthly Income</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 0.75rem 1rem; font-weight: 600;">Growth rate</td>
+            <td style="padding: 0.75rem 1rem;">Expected Return</td>
+            <td style="padding: 0.75rem 1rem;">Expected Return</td>
+            <td style="padding: 0.75rem 1rem;">Expected Growth Rate</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 0.75rem 1rem; font-weight: 600;">Annualized return</td>
+            <td style="padding: 0.75rem 1rem;">Compound Annual Growth Rate (CAGR)</td>
+            <td style="padding: 0.75rem 1rem;">Annual Return (CAGR)</td>
+            <td style="padding: 0.75rem 1rem;">Average Yearly Growth</td>
+          </tr>
+          <tr style="border-bottom: 1px solid var(--border-color);">
+            <td style="padding: 0.75rem 1rem; font-weight: 600;">SIP return</td>
+            <td style="padding: 0.75rem 1rem;">Extended Internal Rate of Return (XIRR)</td>
+            <td style="padding: 0.75rem 1rem;">SIP Return (XIRR)</td>
+            <td style="padding: 0.75rem 1rem;">Actual Annual Growth</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+      You can change your profile level at any time using the toggle switch located in the top navigation bar. If you ever need to view a term's definition or see its equivalent name in other tiers, simply hover over (or tap on) the term label to open the instant glossary popup.
+    </p>
+  </section>
+</Layout>

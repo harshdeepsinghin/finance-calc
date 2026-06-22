@@ -506,6 +506,34 @@ const FinanceTerminologies = {
       },
       "simple": null
     }
+  },
+  "real_future_value": {
+    "id": "real_future_value",
+    "tiers": {
+      "professional": {
+        "label": "Real Future Value",
+        "definition": "The inflation-adjusted future value of your corpus, representing its purchasing power in today's currency."
+      },
+      "investor": {
+        "label": "Inflation-Adjusted Corpus",
+        "definition": "The final value of your investment adjusted to reflect the impact of inflation."
+      },
+      "simple": null
+    }
+  },
+  "post_tax_future_value": {
+    "id": "post_tax_future_value",
+    "tiers": {
+      "professional": {
+        "label": "Post-Tax Future Value",
+        "definition": "The final projected future value of your corpus after estimating and deducting capital gains taxes."
+      },
+      "investor": {
+        "label": "Post-Tax Corpus",
+        "definition": "The expected final value of your investment after estimating applicable taxes."
+      },
+      "simple": null
+    }
   }
 };
 
@@ -531,31 +559,27 @@ const termIdMapping = {
   'inflation_rate': 'inflation_rate',
   
   // Results / Outputs
-  'total-invested': 'principal',
   'total-gains': 'total_wealth_gained',
   'total-corpus': 'future_value',
   'remaining-corpus': 'future_value',
   'required-sip': 'periodic_investment',
   'required-lump': 'principal',
-  'adjusted-corpus': 'real_rate',
-  'post-tax-corpus': 'tax_liability',
-  'total-withdrawn': 'total_wealth_gained',
+  'adjusted-corpus': 'real_future_value',
+  'post-tax-corpus': 'post_tax_future_value',
   'final-gains': 'total_wealth_gained',
   
   // Table headers matching text (clean values)
-  'invested': 'principal',
-  'principal paid': 'principal',
   'monthly sip': 'periodic_investment',
   'returns': 'total_wealth_gained',
   'interest earned': 'total_wealth_gained',
   'gains': 'total_wealth_gained',
   'corpus': 'future_value',
   'ending balance': 'future_value',
-  'real corpus': 'real_rate',
-  'real value': 'real_rate',
+  'real corpus': 'real_future_value',
+  'real value': 'real_future_value',
   'taxable gains': 'capital_gains',
   'estimated tax': 'tax_liability',
-  'post-tax corpus': 'tax_liability'
+  'post-tax corpus': 'post_tax_future_value'
 };
 
 let preservedLevelSettings = {};
@@ -589,8 +613,7 @@ function setupOnboardingPopup(completed) {
   }
   
   const closeBtn = document.getElementById('onboarding-close-btn');
-  const skipBtn = document.getElementById('onboarding-skip-btn');
-  const tierCards = document.querySelectorAll('.onboarding-tier-card');
+  const optButtons = document.querySelectorAll('.onboarding-btn-opt');
   
   const completeOnboarding = (levelVal) => {
     localStorage.setItem('moneyinfuture_onboarding_completed', 'true');
@@ -605,12 +628,9 @@ function setupOnboardingPopup(completed) {
   if (closeBtn) {
     closeBtn.addEventListener('click', () => completeOnboarding('simple'));
   }
-  if (skipBtn) {
-    skipBtn.addEventListener('click', () => completeOnboarding('simple'));
-  }
-  tierCards.forEach(card => {
-    card.addEventListener('click', () => {
-      const selectedLevel = card.getAttribute('data-level') || 'simple';
+  optButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const selectedLevel = btn.getAttribute('data-level') || 'simple';
       completeOnboarding(selectedLevel);
     });
   });
@@ -869,10 +889,8 @@ function setupFloatingTooltips() {
   const tooltipBox = document.getElementById('finance-tooltip');
   if (!tooltipBox) return;
   
-  const titleEl = tooltipBox.querySelector('.tooltip-term-title');
-  const badgeEl = tooltipBox.querySelector('.tooltip-term-badge');
   const defEl = tooltipBox.querySelector('.tooltip-definition');
-  const synonymsEl = tooltipBox.querySelector('.tooltip-synonyms');
+  const dividerEl = tooltipBox.querySelector('.tooltip-divider');
   const synonymsListEl = tooltipBox.querySelector('.tooltip-synonyms-list');
   
   let activeElement = null;
@@ -887,23 +905,27 @@ function setupFloatingTooltips() {
     const tierData = term.tiers[level];
     if (!tierData) return;
     
-    titleEl.textContent = tierData.label;
-    badgeEl.textContent = level.charAt(0).toUpperCase() + level.slice(1);
-    badgeEl.className = `tooltip-term-badge badge-${level}`;
-    defEl.textContent = tierData.definition;
+    if (defEl) defEl.textContent = tierData.definition;
     
     const synonyms = [];
     for (const lvl in term.tiers) {
-      if (lvl !== level && term.tiers[lvl]) {
-        synonyms.push(`"${term.tiers[lvl].label}" (${lvl.charAt(0).toUpperCase() + lvl.slice(1)})`);
+      if (term.tiers[lvl] && term.tiers[lvl].label) {
+        const label = term.tiers[lvl].label;
+        if (!synonyms.includes(label)) {
+          synonyms.push(label);
+        }
       }
     }
     
     if (synonyms.length > 0) {
-      synonymsEl.style.display = 'block';
-      synonymsListEl.textContent = synonyms.join(', ');
+      if (dividerEl) dividerEl.style.display = 'block';
+      if (synonymsListEl) {
+        synonymsListEl.style.display = 'block';
+        synonymsListEl.textContent = synonyms.join(' / ');
+      }
     } else {
-      synonymsEl.style.display = 'none';
+      if (dividerEl) dividerEl.style.display = 'none';
+      if (synonymsListEl) synonymsListEl.style.display = 'none';
     }
     
     const rect = el.getBoundingClientRect();

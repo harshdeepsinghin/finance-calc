@@ -714,6 +714,17 @@ function setFinanceLevel(level) {
       btn.classList.toggle('active', btn.getAttribute('data-level') === level);
     });
   }
+
+  // Set level-specific preferences
+  if (level === 'simple') {
+    setPreference('showSliders', true);
+    setPreference('showInflation', false);
+    setPreference('showTaxation', false);
+  } else {
+    setPreference('showSliders', false);
+    setPreference('showInflation', true);
+    setPreference('showTaxation', true);
+  }
   
   applyDefaultsAndVisibility(level);
   translateUI(level);
@@ -722,6 +733,7 @@ function setFinanceLevel(level) {
 
 function applyDefaultsAndVisibility(level) {
   const isSimple = level === 'simple';
+  const showTaxation = getPreference('showTaxation');
   
   // Compounding Freq
   const compoundingInput = document.getElementById('compounding-freq');
@@ -749,10 +761,10 @@ function applyDefaultsAndVisibility(level) {
   // Tax Type
   const taxTypeSelect = document.getElementById('tax-type');
   if (taxTypeSelect) {
-    if (isSimple) {
+    if (isSimple && !showTaxation) {
       preservedLevelSettings['tax-type'] = taxTypeSelect.value;
       taxTypeSelect.value = 'none';
-    } else if (preservedLevelSettings['tax-type']) {
+    } else if (!isSimple && preservedLevelSettings['tax-type']) {
       taxTypeSelect.value = preservedLevelSettings['tax-type'];
     }
   }
@@ -760,8 +772,18 @@ function applyDefaultsAndVisibility(level) {
 
 function translateUI(level) {
   const hiddenTermKeys = [];
+  const showInflation = getPreference('showInflation');
+  const showTaxation = getPreference('showTaxation');
+
   for (const key in FinanceTerminologies) {
     if (FinanceTerminologies[key].tiers[level] === null) {
+      // Don't hide if user enabled them in preferences manually
+      if ((key === 'real_future_value' || key === 'inflation_rate' || key === 'real_rate') && showInflation) {
+        continue;
+      }
+      if ((key === 'post_tax_future_value' || key === 'tax_liability' || key === 'capital_gains') && showTaxation) {
+        continue;
+      }
       hiddenTermKeys.push(key);
     }
   }
@@ -852,9 +874,26 @@ function translateUI(level) {
     }
   });
   
+  // Hide settings-bar container if all items inside it are hidden
+  document.querySelectorAll('.settings-bar').forEach(bar => {
+    const items = Array.from(bar.querySelectorAll('.settings-bar-item'));
+    const allHidden = items.every(item => item.style.display === 'none');
+    if (allHidden && items.length > 0) {
+      bar.style.display = 'none';
+    } else {
+      bar.style.display = '';
+    }
+  });
+  
   // Hide dynamic inflation injections
   document.querySelectorAll('.dynamic-inflation-setting, .dynamic-inflation-card').forEach(el => {
     el.style.display = hiddenTermKeys.includes('inflation_rate') ? 'none' : '';
+  });
+  
+  // Show/hide range sliders based on level & preferences
+  const showSliders = getPreference('showSliders');
+  document.querySelectorAll('.slider-container').forEach(slider => {
+    slider.style.display = showSliders ? '' : 'none';
   });
   
   // Translate and toggle columns in table
@@ -1743,7 +1782,7 @@ function applyPreferences() {
 
   // Sliders
   const showSliders = getPreference('showSliders');
-  document.querySelectorAll('.slider-wrapper').forEach(wrapper => {
+  document.querySelectorAll('.slider-container').forEach(wrapper => {
     wrapper.style.display = showSliders ? '' : 'none';
   });
 
@@ -1877,6 +1916,10 @@ function initPreferences() {
             </label>
           </div>
         </div>
+        
+        <div style="margin-top: 1.5rem; text-align: center; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+          <button id="pref-reset-btn" class="onboarding-btn-opt" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.2s; width: auto; display: inline-block;" type="button">Reset Preferences</button>
+        </div>
       </div>
     </div>
   `;
@@ -1916,6 +1959,8 @@ function initPreferences() {
       checkbox.checked = getPreference(toggleMapping[id]);
       checkbox.addEventListener('change', (e) => {
         setPreference(toggleMapping[id], e.target.checked);
+        translateUI(window.currentFinanceLevel || 'simple');
+        triggerCalculatorRecalculate();
       });
     }
   }
@@ -1925,6 +1970,19 @@ function initPreferences() {
     decimalSelect.value = getPreference('decimalPlaces');
     decimalSelect.addEventListener('change', (e) => {
       setPreference('decimalPlaces', parseInt(e.target.value) || 0);
+      translateUI(window.currentFinanceLevel || 'simple');
+      triggerCalculatorRecalculate();
+    });
+  }
+
+  // Bind reset button
+  const resetBtn = document.getElementById('pref-reset-btn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      localStorage.removeItem('moneyinfuture_user_prefs');
+      localStorage.removeItem('moneyinfuture_finance_level');
+      localStorage.removeItem('moneyinfuture_onboarding_completed');
+      window.location.reload();
     });
   }
 

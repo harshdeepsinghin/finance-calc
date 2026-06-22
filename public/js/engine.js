@@ -791,7 +791,40 @@ const FinanceEngine = {
     
     // Build lookup: key → human label
     const defaultLabels = { invested: 'Invested', corpus: 'Corpus', nominal: 'Corpus', real: 'Real Value', gains: 'Net Gains', withdrawn: 'Withdrawn', balance: 'Balance' };
-    const labels = lineLabels || valueKeys.map(k => defaultLabels[k] || (k.charAt(0).toUpperCase() + k.slice(1)));
+    let labels = lineLabels || valueKeys.map(k => defaultLabels[k] || (k.charAt(0).toUpperCase() + k.slice(1)));
+
+    // Translate labels dynamically based on active level
+    if (window.FinanceTerminologies) {
+      const level = window.currentFinanceLevel || 'simple';
+      const terms = window.FinanceTerminologies;
+      const mapping = window.termIdMapping;
+      labels = labels.map(label => {
+        const cleanLabel = label.toLowerCase().trim();
+        let termKey = null;
+        if (mapping && mapping[cleanLabel]) {
+          termKey = mapping[cleanLabel];
+        } else {
+          for (const k in terms) {
+            const tiers = terms[k].tiers;
+            if (
+              (tiers.professional && tiers.professional.label.toLowerCase() === cleanLabel) ||
+              (tiers.investor && tiers.investor.label.toLowerCase() === cleanLabel) ||
+              (tiers.simple && tiers.simple.label && tiers.simple.label.toLowerCase() === cleanLabel)
+            ) {
+              termKey = k;
+              break;
+            }
+          }
+        }
+        if (termKey && terms[termKey] && terms[termKey].tiers[level]) {
+          const tierData = terms[termKey].tiers[level];
+          if (tierData && tierData.label) {
+            return tierData.label;
+          }
+        }
+        return label;
+      });
+    }
 
     // Track visibility per series (all visible by default)
     const visible = valueKeys.map(() => true);

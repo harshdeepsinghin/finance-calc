@@ -139,5 +139,37 @@ import Layout from '../layouts/Layout.astro';
     <p style="color: var(--text-secondary); margin-bottom: 2rem;">
       You can change your profile level at any time using the toggle switch located in the top navigation bar. If you ever need to view a term's definition or see its equivalent name in other tiers, simply hover over (or tap on) the term label to open the instant glossary popup.
     </p>
+
+    <div style="border-top: 1px solid var(--border-color); margin-top: 2.5rem; padding-top: 2rem;">
+      <h2 style="font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--text-primary);">Reset Your Preferences</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 1.25rem; font-size: 0.9rem;">
+        Your selected profile level and all calculator preferences are saved locally in your browser's storage, so they persist across sessions on this device. To start fresh — clearing your level selection, visibility preferences, and onboarding status — use the button below.
+      </p>
+      <button id="guide-reset-btn" type="button" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0.55rem 1.25rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: border-color 0.2s, color 0.2s; font-family: inherit;">
+        Clear Saved Preferences &amp; Reset Level
+      </button>
+    </div>
   </section>
+
+  <script is:inline>
+    (function () {
+      var btn = document.getElementById('guide-reset-btn');
+      if (btn) {
+        btn.addEventListener('mouseenter', function () {
+          btn.style.borderColor = 'var(--accent-color)';
+          btn.style.color = 'var(--accent-color)';
+        });
+        btn.addEventListener('mouseleave', function () {
+          btn.style.borderColor = 'var(--border-color)';
+          btn.style.color = 'var(--text-secondary)';
+        });
+        btn.addEventListener('click', function () {
+          localStorage.removeItem('moneyinfuture_user_prefs');
+          localStorage.removeItem('moneyinfuture_finance_level');
+          localStorage.removeItem('moneyinfuture_onboarding_completed');
+          window.location.href = '/';
+        });
+      }
+    })();
+  </script>
 </Layout>

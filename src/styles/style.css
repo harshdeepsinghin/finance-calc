@@ -2118,19 +2118,16 @@ body.modal-open {
 .onboarding-btn-opt[data-level="simple"]:hover {
   border-color: var(--success-color);
   color: var(--success-color);
-  background: rgba(48, 209, 88, 0.08);
 }
 
 .onboarding-btn-opt[data-level="investor"]:hover {
   border-color: var(--accent-color);
   color: var(--accent-color);
-  background: rgba(0, 113, 227, 0.08);
 }
 
 .onboarding-btn-opt[data-level="professional"]:hover {
   border-color: #af52de;
   color: #af52de;
-  background: rgba(175, 82, 222, 0.08);
 }
 
 .onboarding-info-link {

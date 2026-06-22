@@ -2298,7 +2298,42 @@ body.modal-open {
   }
 }
 
-/* Mobile responsive adjustments */
+/* Level toggle right-click context menu */
+.level-context-menu {
+  position: fixed;
+  z-index: 9999;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.35rem 0;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+  min-width: 180px;
+  animation: tooltipFadeIn 0.15s ease;
+  font-family: var(--font-sans);
+}
+
+[data-theme="dark"] .level-context-menu {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+}
+
+.level-context-menu a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.15s, background-color 0.15s;
+  white-space: nowrap;
+}
+
+.level-context-menu a:hover {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+}
+
 @media (max-width: 768px) {
   .onboarding-card {
     padding: 1.5rem;

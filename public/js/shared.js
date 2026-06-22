@@ -701,6 +701,55 @@ function setupHeaderLevelToggle() {
       syncButtons(level);
     });
   });
+
+  // Right-click on the level toggle → tiny "About Finance Levels" popup
+  let levelContextMenu = null;
+
+  function removeLevelContextMenu() {
+    if (levelContextMenu) {
+      levelContextMenu.remove();
+      levelContextMenu = null;
+    }
+  }
+
+  toggleContainer.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    removeLevelContextMenu();
+
+    const menu = document.createElement('div');
+    menu.className = 'level-context-menu';
+    menu.innerHTML = `
+      <a href="/finance-levels.html">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="flex-shrink:0;opacity:0.7">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+        </svg>
+        About Finance Levels
+      </a>
+    `;
+
+    // Position near cursor, nudge inside viewport
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    let x = e.clientX;
+    let y = e.clientY;
+    document.body.appendChild(menu);
+    const mw = menu.offsetWidth;
+    const mh = menu.offsetHeight;
+    if (x + mw > vw - 8) x = vw - mw - 8;
+    if (y + mh > vh - 8) y = vh - mh - 8;
+    menu.style.left = x + 'px';
+    menu.style.top  = y + 'px';
+    levelContextMenu = menu;
+
+    // Dismiss handlers
+    const dismiss = () => removeLevelContextMenu();
+    setTimeout(() => {
+      document.addEventListener('click',      dismiss, { once: true });
+      document.addEventListener('contextmenu', dismiss, { once: true });
+      document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') dismiss(); }, { once: true });
+      window.addEventListener('scroll',      dismiss, { once: true, passive: true });
+    }, 0);
+  });
 }
 
 function setFinanceLevel(level) {

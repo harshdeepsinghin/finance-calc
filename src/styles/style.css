@@ -2115,9 +2115,22 @@ body.modal-open {
   font-family: inherit;
 }
 
-.onboarding-btn-opt:hover {
-  background: var(--border-color);
-  border-color: var(--text-secondary);
+.onboarding-btn-opt[data-level="simple"]:hover {
+  border-color: var(--success-color);
+  color: var(--success-color);
+  background: rgba(48, 209, 88, 0.08);
+}
+
+.onboarding-btn-opt[data-level="investor"]:hover {
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  background: rgba(0, 113, 227, 0.08);
+}
+
+.onboarding-btn-opt[data-level="professional"]:hover {
+  border-color: #af52de;
+  color: #af52de;
+  background: rgba(175, 82, 222, 0.08);
 }
 
 .onboarding-info-link {
@@ -2162,8 +2175,16 @@ body.modal-open {
   user-select: none;
 }
 
-.level-pill-btn:hover {
-  color: var(--text-primary);
+.level-pill-btn[data-level="simple"]:hover {
+  color: var(--success-color);
+}
+
+.level-pill-btn[data-level="investor"]:hover {
+  color: var(--accent-color);
+}
+
+.level-pill-btn[data-level="professional"]:hover {
+  color: #af52de;
 }
 
 .level-pill-btn.active {

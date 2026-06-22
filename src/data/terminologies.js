@@ -368,5 +368,39 @@ export const terminologies = {
       },
       "simple": null
     }
+  },
+  "total_invested": {
+    "id": "total_invested",
+    "tiers": {
+      "professional": {
+        "label": "Total Principal Invested",
+        "definition": "The aggregate sum of all periodic or one-time capital contributions made over the investment term."
+      },
+      "investor": {
+        "label": "Invested Amount",
+        "definition": "The total amount of money you have contributed to the investment plan."
+      },
+      "simple": {
+        "label": "Total Money Put In",
+        "definition": "The total sum of all the cash you added over the entire time."
+      }
+    }
+  },
+  "total_withdrawals": {
+    "id": "total_withdrawals",
+    "tiers": {
+      "professional": {
+        "label": "Total Systematic Withdrawals",
+        "definition": "The aggregate value of all systematic payouts redeemed from the capital base over the duration."
+      },
+      "investor": {
+        "label": "Total Withdrawals",
+        "definition": "The total sum of all monthly cash payouts you received from your investment."
+      },
+      "simple": {
+        "label": "Total Money Taken Out",
+        "definition": "The total amount of cash you withdrew and spent over the entire time."
+      }
+    }
   }
 };

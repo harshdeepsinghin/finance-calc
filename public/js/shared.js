@@ -534,6 +534,40 @@ const FinanceTerminologies = {
       },
       "simple": null
     }
+  },
+  "total_invested": {
+    "id": "total_invested",
+    "tiers": {
+      "professional": {
+        "label": "Total Principal Invested",
+        "definition": "The aggregate sum of all periodic or one-time capital contributions made over the investment term."
+      },
+      "investor": {
+        "label": "Invested Amount",
+        "definition": "The total amount of money you have contributed to the investment plan."
+      },
+      "simple": {
+        "label": "Total Money Put In",
+        "definition": "The total sum of all the cash you added over the entire time."
+      }
+    }
+  },
+  "total_withdrawals": {
+    "id": "total_withdrawals",
+    "tiers": {
+      "professional": {
+        "label": "Total Systematic Withdrawals",
+        "definition": "The aggregate value of all systematic payouts redeemed from the capital base over the duration."
+      },
+      "investor": {
+        "label": "Total Withdrawals",
+        "definition": "The total sum of all monthly cash payouts you received from your investment."
+      },
+      "simple": {
+        "label": "Total Money Taken Out",
+        "definition": "The total amount of cash you withdrew and spent over the entire time."
+      }
+    }
   }
 };
 
@@ -559,6 +593,7 @@ const termIdMapping = {
   'inflation_rate': 'inflation_rate',
   
   // Results / Outputs
+  'total-invested': 'total_invested',
   'total-gains': 'total_wealth_gained',
   'total-corpus': 'future_value',
   'remaining-corpus': 'future_value',
@@ -567,6 +602,10 @@ const termIdMapping = {
   'adjusted-corpus': 'real_future_value',
   'post-tax-corpus': 'post_tax_future_value',
   'final-gains': 'total_wealth_gained',
+  'total-withdrawn': 'total_withdrawals',
+  'estimated-gains': 'total_wealth_gained',
+  'gains-portion': 'total_wealth_gained',
+  'required-corpus': 'principal',
   
   // Table headers matching text (clean values)
   'monthly sip': 'periodic_investment',
@@ -614,6 +653,7 @@ function setupOnboardingPopup(completed) {
   
   const closeBtn = document.getElementById('onboarding-close-btn');
   const optButtons = document.querySelectorAll('.onboarding-btn-opt');
+  const infoLink = overlay.querySelector('.onboarding-info-link a');
   
   const completeOnboarding = (levelVal) => {
     localStorage.setItem('moneyinfuture_onboarding_completed', 'true');
@@ -627,6 +667,9 @@ function setupOnboardingPopup(completed) {
   
   if (closeBtn) {
     closeBtn.addEventListener('click', () => completeOnboarding('simple'));
+  }
+  if (infoLink) {
+    infoLink.addEventListener('click', () => completeOnboarding('simple'));
   }
   optButtons.forEach(btn => {
     btn.addEventListener('click', () => {

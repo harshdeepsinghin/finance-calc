@@ -892,7 +892,7 @@ function translateUI(level) {
   
   // Show/hide range sliders based on level & preferences
   const showSliders = getPreference('showSliders');
-  document.querySelectorAll('.slider-container').forEach(slider => {
+  document.querySelectorAll('.slider-wrapper').forEach(slider => {
     slider.style.display = showSliders ? '' : 'none';
   });
   
@@ -1782,7 +1782,7 @@ function applyPreferences() {
 
   // Sliders
   const showSliders = getPreference('showSliders');
-  document.querySelectorAll('.slider-container').forEach(wrapper => {
+  document.querySelectorAll('.slider-wrapper').forEach(wrapper => {
     wrapper.style.display = showSliders ? '' : 'none';
   });
 

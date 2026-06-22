@@ -4,7 +4,7 @@ import Layout from '../layouts/Layout.astro';
 ---
 <Layout 
   title="Privacy Policy - MoneyInFuture"
-  description="MoneyInFuture privacy policy: no data collection, no cookies, no analytics. All calculations run locally in your browser."
+  description="MoneyInFuture privacy policy: no tracking cookies, no analytics. Calculator preferences are stored locally in your browser only and never leave your device."
 >
   <div class="calculator-header">
     <h1>Privacy Policy</h1>
@@ -26,8 +26,10 @@ import Layout from '../layouts/Layout.astro';
     </ul>
 
     <h2 style="margin-top: 2rem;">Cookies</h2>
-    <p>MoneyInFuture does not use tracking cookies. We store your display preferences (dark mode, show/hide
-      sliders, etc.) in your browser's <code>localStorage</code>. This data never leaves your device.</p>
+    <p>MoneyInFuture does not use tracking cookies of any kind. All preference data is stored exclusively in
+      your browser's <code>localStorage</code> — this data never leaves your device and is never sent to any server.
+      <strong>localStorage is completely different from cookies</strong>: it is never transmitted with HTTP requests
+      and is only accessible to JavaScript running on the same domain.</p>
 
     <h2 style="margin-top: 2rem;">Analytics</h2>
     <p>We do not use Google Analytics, Meta Pixel, or any third-party analytics service. There are no tracking
@@ -39,15 +41,19 @@ import Layout from '../layouts/Layout.astro';
       other JavaScript (engine.js, shared.js, html2canvas, jsPDF) is served from the same domain.</p>
 
     <h2 style="margin-top: 2rem;">Local Storage</h2>
-    <p>We store the following data in your browser's localStorage, purely for improving your experience:</p>
+    <p>We store the following keys in your browser's localStorage to improve your experience. None of this data
+      is transmitted anywhere:</p>
     <ul style="margin-left: 1.5rem; margin-top: 0.75rem; line-height: 2;">
       <li><code>theme</code> — your preferred light/dark mode</li>
-      <li><code>moneyinfuture_user_prefs</code> — display preferences (sliders, words, color coding, etc.)</li>
-      <li><code>moneyinfuture_shared_prefs</code> — last-used return rate, years, and inflation rate</li>
+      <li><code>moneyinfuture_finance_level</code> — your selected Finance Profile Level (Simple, Investor, or Professional)</li>
+      <li><code>moneyinfuture_onboarding_completed</code> — whether the welcome level-selection popup has been shown</li>
+      <li><code>moneyinfuture_user_prefs</code> — calculator display preferences (sliders, words, color coding, graph, table, inflation, taxation, decimal places)</li>
+      <li><code>moneyinfuture_shared_prefs</code> — last-used return rate, years, and inflation rate across calculators</li>
       <li><code>sidebar-collapsed</code> — sidebar layout preference</li>
     </ul>
-    <p style="margin-top: 0.75rem;">You can clear this data at any time by clearing your browser's site data for
-      this domain.</p>
+    <p style="margin-top: 0.75rem;">You can clear all saved preferences at any time from the
+      <a href="/finance-levels.html">Finance Profile Levels</a> page using the "Reset Preferences" button,
+      or by clearing your browser's site data for this domain.</p>
 
     <h2 style="margin-top: 2rem;">Changes to This Policy</h2>
     <p>We may update this policy as the site evolves. The "last updated" date at the top of this page reflects

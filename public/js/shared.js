@@ -704,17 +704,30 @@ function setupHeaderLevelToggle() {
 
   // Right-click on the level toggle → tiny "About Finance Levels" popup
   let levelContextMenu = null;
+  // Named refs so we can tear down stale listeners before each new open
+  let _dismissClick = null;
+  let _dismissCtx   = null;
+  let _dismissKey   = null;
+  let _dismissScr   = null;
 
   function removeLevelContextMenu() {
     if (levelContextMenu) {
       levelContextMenu.remove();
       levelContextMenu = null;
     }
+    if (_dismissClick) {
+      document.removeEventListener('click',      _dismissClick);
+      document.removeEventListener('contextmenu', _dismissCtx);
+      document.removeEventListener('keydown',    _dismissKey);
+      window.removeEventListener('scroll',       _dismissScr);
+      _dismissClick = _dismissCtx = _dismissKey = _dismissScr = null;
+    }
   }
 
   toggleContainer.addEventListener('contextmenu', (e) => {
     e.preventDefault();
-    removeLevelContextMenu();
+    e.stopPropagation();        // don't bubble so old document listener can't fire
+    removeLevelContextMenu();   // clean up menu + all stale listeners
 
     const menu = document.createElement('div');
     menu.className = 'level-context-menu';
@@ -741,13 +754,19 @@ function setupHeaderLevelToggle() {
     menu.style.top  = y + 'px';
     levelContextMenu = menu;
 
-    // Dismiss handlers
-    const dismiss = () => removeLevelContextMenu();
+    // Attach dismiss handlers (deferred so this very event doesn't trigger them)
+    _dismissClick = () => removeLevelContextMenu();
+    _dismissCtx   = (ev) => {
+      // Only dismiss if right-clicking outside the toggle
+      if (!ev.target.closest('#header-level-toggle')) removeLevelContextMenu();
+    };
+    _dismissKey   = (ev) => { if (ev.key === 'Escape') removeLevelContextMenu(); };
+    _dismissScr   = () => removeLevelContextMenu();
     setTimeout(() => {
-      document.addEventListener('click',      dismiss, { once: true });
-      document.addEventListener('contextmenu', dismiss, { once: true });
-      document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') dismiss(); }, { once: true });
-      window.addEventListener('scroll',      dismiss, { once: true, passive: true });
+      document.addEventListener('click',      _dismissClick);
+      document.addEventListener('contextmenu', _dismissCtx);
+      document.addEventListener('keydown',    _dismissKey);
+      window.addEventListener('scroll',       _dismissScr, { passive: true });
     }, 0);
   });
 }

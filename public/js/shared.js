@@ -770,198 +770,253 @@ function applyDefaultsAndVisibility(level) {
   }
 }
 
-function translateUI(level) {
-  const hiddenTermKeys = [];
+// ─── Shared helper: build the set of term keys that should be hidden ───────────
+// Preferences are the FINAL authority:
+//   • Inflation keys → hidden whenever showInflation = false, visible when true
+//     (regardless of whether the current level has a null tier for them)
+//   • Tax keys       → same with showTaxation
+//   • All other keys → hidden only when tiers[level] === null
+function buildHiddenTermKeys(level) {
   const showInflation = getPreference('showInflation');
-  const showTaxation = getPreference('showTaxation');
+  const showTaxation  = getPreference('showTaxation');
 
+  const inflationKeys = new Set(['real_future_value', 'inflation_rate', 'real_rate']);
+  const taxKeys       = new Set(['post_tax_future_value', 'tax_liability', 'capital_gains']);
+
+  const hidden = [];
   for (const key in FinanceTerminologies) {
-    if (FinanceTerminologies[key].tiers[level] === null) {
-      // Don't hide if user enabled them in preferences manually
-      if ((key === 'real_future_value' || key === 'inflation_rate' || key === 'real_rate') && showInflation) {
-        continue;
-      }
-      if ((key === 'post_tax_future_value' || key === 'tax_liability' || key === 'capital_gains') && showTaxation) {
-        continue;
-      }
-      hiddenTermKeys.push(key);
+    if (inflationKeys.has(key)) {
+      if (!showInflation) hidden.push(key);
+    } else if (taxKeys.has(key)) {
+      if (!showTaxation) hidden.push(key);
+    } else {
+      if (FinanceTerminologies[key].tiers[level] === null) hidden.push(key);
     }
   }
-  
-  // Translate Input Labels
+  return hidden;
+}
+
+function translateUI(level) {
+  const hiddenTermKeys = buildHiddenTermKeys(level);
+
+  // ── Translate Input Labels ───────────────────────────────────────────────────
   document.querySelectorAll('label[for]').forEach(labelEl => {
-    const forId = labelEl.getAttribute('for');
+    const forId   = labelEl.getAttribute('for');
     const termKey = termIdMapping[forId];
-    if (termKey) {
-      const termData = FinanceTerminologies[termKey];
-      if (termData) {
-        const tierData = termData.tiers[level];
-        if (tierData) {
-          labelEl.textContent = tierData.label;
-          labelEl.classList.add('term-hoverable');
-          labelEl.setAttribute('data-term-id', termKey);
-        }
-      }
+    if (!termKey) return;
+    const termData = FinanceTerminologies[termKey];
+    if (!termData) return;
+    const tierData = termData.tiers[level];
+    if (tierData) {
+      labelEl.textContent = tierData.label;
+      labelEl.classList.add('term-hoverable');
+      labelEl.setAttribute('data-term-id', termKey);
     }
   });
-  
-  // Translate Result Card Labels
+
+  // ── Translate Result Card Labels ─────────────────────────────────────────────
   document.querySelectorAll('.metric-card').forEach(card => {
     const valueEl = card.querySelector('.metric-value');
     if (!valueEl) return;
-    const metricId = valueEl.id;
-    const termKey = termIdMapping[metricId];
-    if (termKey) {
-      const termData = FinanceTerminologies[termKey];
-      if (termData) {
-        const tierData = termData.tiers[level];
-        const labelEl = card.querySelector('.metric-label');
-        if (labelEl && tierData) {
-          labelEl.textContent = tierData.label;
-          labelEl.classList.add('term-hoverable');
-          labelEl.setAttribute('data-term-id', termKey);
-        }
-      }
+    const termKey = termIdMapping[valueEl.id];
+    if (!termKey) return;
+    const termData = FinanceTerminologies[termKey];
+    if (!termData) return;
+    const tierData = termData.tiers[level];
+    const labelEl  = card.querySelector('.metric-label');
+    if (labelEl && tierData) {
+      labelEl.textContent = tierData.label;
+      labelEl.classList.add('term-hoverable');
+      labelEl.setAttribute('data-term-id', termKey);
     }
   });
-  
-  // Hiding inputs
+
+  // ── Hide / Show input groups ──────────────────────────────────────────────────
   document.querySelectorAll('.input-group').forEach(group => {
-    const input = group.querySelector('input, select');
-    if (input) {
-      const termKey = termIdMapping[input.id];
-      if (termKey && hiddenTermKeys.includes(termKey)) {
-        group.style.display = 'none';
-      } else {
-        group.style.display = '';
-      }
-    }
+    const input   = group.querySelector('input, select');
+    if (!input) return;
+    const termKey = termIdMapping[input.id];
+    group.style.display = (termKey && hiddenTermKeys.includes(termKey)) ? 'none' : '';
   });
-  
-  // Hiding metric cards
+
+  // ── Hide / Show metric cards ──────────────────────────────────────────────────
+  // preference is king: if a term is in hiddenTermKeys it MUST be hidden,
+  // if it is NOT in hiddenTermKeys it MUST be shown (respecting tax-type dropdown)
   document.querySelectorAll('.metric-card').forEach(card => {
     const valueEl = card.querySelector('.metric-value');
-    if (valueEl) {
-      const termKey = termIdMapping[valueEl.id];
-      if (termKey && hiddenTermKeys.includes(termKey)) {
-        card.style.setProperty('display', 'none', 'important');
+    if (!valueEl) return;
+    const termKey = termIdMapping[valueEl.id];
+    if (termKey && hiddenTermKeys.includes(termKey)) {
+      // Hard-hide: overwrite any prior inline style
+      card.style.setProperty('display', 'none', 'important');
+    } else {
+      // Show — but respect the conditional-tax visibility rule
+      const isTax   = card.getAttribute('data-conditional') === 'tax';
+      const taxType = document.getElementById('tax-type');
+      if (isTax && taxType && taxType.value === 'none') {
+        card.style.display = 'none';
       } else {
-        const isTax = card.getAttribute('data-conditional') === 'tax';
-        if (isTax) {
-          const taxTypeEl = document.getElementById('tax-type');
-          if (taxTypeEl && taxTypeEl.value === 'none') {
-            card.style.display = 'none';
-          } else {
-            card.style.removeProperty('display');
-          }
-        } else {
-          card.style.display = '';
-        }
+        card.style.removeProperty('display');
       }
     }
   });
-  
-  // Hiding settings bar items
+
+  // ── Hide / Show settings-bar items ───────────────────────────────────────────
+  const showInflation = getPreference('showInflation');
+  const showTaxation  = getPreference('showTaxation');
   document.querySelectorAll('.settings-bar-item').forEach(item => {
     if (item.querySelector('#compounding-freq') || item.querySelector('#freq-monthly-btn')) {
       item.style.display = hiddenTermKeys.includes('compounding_frequency') ? 'none' : '';
     }
     if (item.querySelector('#inflation-rate') || item.id === 'inflation-rate-group') {
-      item.style.display = hiddenTermKeys.includes('inflation_rate') ? 'none' : '';
+      item.style.display = showInflation ? '' : 'none';
     }
-    if (item.querySelector('#tax-type') || item.id === 'custom-tax-group') {
-      item.style.display = hiddenTermKeys.includes('tax_liability') ? 'none' : '';
+    if (item.querySelector('#tax-type')) {
+      item.style.display = showTaxation ? '' : 'none';
+    }
+    if (item.id === 'custom-tax-group') {
+      // Only show custom-tax-group if both taxation is enabled AND the dropdown is slab/custom
+      const taxType = document.getElementById('tax-type');
+      item.style.display = (showTaxation && taxType && (taxType.value === 'custom' || taxType.value === 'slab'))
+        ? 'block' : 'none';
     }
   });
-  
-  // Hide settings-bar container if all items inside it are hidden
+
+  // ── Hide settings-bar container when all its items are hidden ─────────────────
   document.querySelectorAll('.settings-bar').forEach(bar => {
-    const items = Array.from(bar.querySelectorAll('.settings-bar-item'));
-    const allHidden = items.every(item => item.style.display === 'none');
-    if (allHidden && items.length > 0) {
-      bar.style.display = 'none';
-    } else {
-      bar.style.display = '';
-    }
+    const items      = Array.from(bar.querySelectorAll('.settings-bar-item'));
+    const allHidden  = items.length > 0 && items.every(item => item.style.display === 'none');
+    bar.style.display = allHidden ? 'none' : '';
   });
-  
-  // Hide dynamic inflation injections
+
+  // ── Hide / Show dynamic inflation injections ──────────────────────────────────
   document.querySelectorAll('.dynamic-inflation-setting, .dynamic-inflation-card').forEach(el => {
-    el.style.display = hiddenTermKeys.includes('inflation_rate') ? 'none' : '';
+    el.style.display = showInflation ? '' : 'none';
   });
-  
-  // Show/hide range sliders based on level & preferences
+
+  // ── Show / hide range sliders based on preference ─────────────────────────────
   const showSliders = getPreference('showSliders');
   document.querySelectorAll('.slider-wrapper').forEach(slider => {
     slider.style.display = showSliders ? '' : 'none';
   });
-  
-  // Translate and toggle columns in table
+
+  // ── Translate HTML chart legend items ─────────────────────────────────────────
+  translateChartLegend(level, hiddenTermKeys);
+
+  // ── Translate and toggle table columns ────────────────────────────────────────
   translateTableHeadersAndColumns();
+}
+
+// Translate the visible HTML legend items inside #chart-legend-container
+function translateChartLegend(level, hiddenTermKeys) {
+  const container = document.getElementById('chart-legend-container');
+  if (!container) return;
+
+  container.querySelectorAll('.legend-item').forEach(item => {
+    // Resolve term key: use stored data-term-id first, then match by text
+    let termKey = item.getAttribute('data-term-id');
+    if (!termKey) {
+      // Collect current text content (skip child <span> elements)
+      let rawText = '';
+      item.childNodes.forEach(n => {
+        if (n.nodeType === Node.TEXT_NODE) rawText += n.textContent;
+      });
+      const cleanText = rawText.trim().toLowerCase();
+
+      // Try termIdMapping first
+      termKey = termIdMapping[cleanText] || null;
+
+      // Fallback: scan all tier labels
+      if (!termKey) {
+        for (const k in FinanceTerminologies) {
+          const tiers = FinanceTerminologies[k].tiers;
+          for (const t in tiers) {
+            if (tiers[t] && tiers[t].label.toLowerCase() === cleanText) {
+              termKey = k;
+              break;
+            }
+          }
+          if (termKey) break;
+        }
+      }
+
+      if (termKey) item.setAttribute('data-term-id', termKey);
+    }
+
+    if (!termKey) return;
+
+    // Hide legend item if the term is hidden at this level/preference combo
+    if (hiddenTermKeys && hiddenTermKeys.includes(termKey)) {
+      item.style.display = 'none';
+      return;
+    }
+    item.style.display = '';
+
+    // Translate label text
+    const tierData = FinanceTerminologies[termKey]?.tiers[level];
+    if (!tierData) return;
+
+    // Replace only the text node(s), preserving inner <span class="legend-color">
+    item.childNodes.forEach(n => {
+      if (n.nodeType === Node.TEXT_NODE && n.textContent.trim()) {
+        n.textContent = tierData.label;
+      }
+    });
+  });
 }
 
 function translateTableHeadersAndColumns() {
   const table = document.getElementById('projections-table');
   if (!table) return;
-  
-  const level = window.currentFinanceLevel || 'simple';
-  const hiddenTermKeys = [];
-  for (const key in FinanceTerminologies) {
-    if (FinanceTerminologies[key].tiers[level] === null) {
-      hiddenTermKeys.push(key);
-    }
-  }
-  
+
+  const level          = window.currentFinanceLevel || 'simple';
+  const hiddenTermKeys = buildHiddenTermKeys(level);  // use unified helper
+
   const headers = Array.from(table.querySelectorAll('thead th'));
-  const rows = Array.from(table.querySelectorAll('tbody tr'));
-  
+  const rows    = Array.from(table.querySelectorAll('tbody tr'));
+
+  // Reset all first
   headers.forEach(th => th.style.display = '');
-  rows.forEach(row => {
-    Array.from(row.children).forEach(td => td.style.display = '');
-  });
-  
+  rows.forEach(row => Array.from(row.children).forEach(td => td.style.display = ''));
+
   headers.forEach((th, index) => {
-    const text = th.textContent.trim();
-    const cleanText = text.toLowerCase()
-      .replace(/\s*\([\u20B9₹%]\)/g, '')
-      .replace(/\s*\(years\)/gi, '')
-      .replace(/\s*\(cagr\s*%\)/gi, '')
-      .trim();
-    
-    let termKey = null;
-    if (termIdMapping[cleanText]) {
-      termKey = termIdMapping[cleanText];
-    } else {
-      for (const k in FinanceTerminologies) {
-        const tiers = FinanceTerminologies[k].tiers;
-        if (
-          (tiers.professional && tiers.professional.label.toLowerCase() === cleanText) ||
-          (tiers.investor && tiers.investor.label.toLowerCase() === cleanText) ||
-          (tiers.simple && tiers.simple.label && tiers.simple.label.toLowerCase() === cleanText)
-        ) {
-          termKey = k;
-          break;
+    // Resolve term key: data-term-id → termIdMapping → tier-label scan
+    let termKey = th.getAttribute('data-term-id');
+    if (!termKey) {
+      const cleanText = th.textContent.trim().toLowerCase()
+        .replace(/\s*\([\u20B9₹%]\)/g, '')
+        .replace(/\s*\(years\)/gi, '')
+        .replace(/\s*\(cagr\s*%\)/gi, '')
+        .trim();
+
+      termKey = termIdMapping[cleanText] || null;
+      if (!termKey) {
+        for (const k in FinanceTerminologies) {
+          const tiers = FinanceTerminologies[k].tiers;
+          if (
+            (tiers.professional && tiers.professional.label.toLowerCase() === cleanText) ||
+            (tiers.investor     && tiers.investor.label.toLowerCase()     === cleanText) ||
+            (tiers.simple       && tiers.simple.label && tiers.simple.label.toLowerCase() === cleanText)
+          ) { termKey = k; break; }
         }
       }
     }
-    
-    if (termKey) {
-      const termData = FinanceTerminologies[termKey];
-      if (termData) {
-        if (hiddenTermKeys.includes(termKey)) {
-          th.style.display = 'none';
-          rows.forEach(row => {
-            const td = row.children[index];
-            if (td) td.style.display = 'none';
-          });
-        } else {
-          const tierData = termData.tiers[level];
-          if (tierData) {
-            th.textContent = tierData.label;
-            th.classList.add('term-hoverable');
-            th.setAttribute('data-term-id', termKey);
-          }
-        }
+
+    if (!termKey) return;
+
+    th.setAttribute('data-term-id', termKey);  // cache for next call
+    const termData = FinanceTerminologies[termKey];
+    if (!termData) return;
+
+    if (hiddenTermKeys.includes(termKey)) {
+      th.style.display = 'none';
+      rows.forEach(row => { const td = row.children[index]; if (td) td.style.display = 'none'; });
+    } else {
+      const tierData = termData.tiers[level];
+      if (tierData) {
+        th.textContent = tierData.label;
+        th.classList.add('term-hoverable');
+        th.setAttribute('data-term-id', termKey);
       }
     }
   });
@@ -1724,60 +1779,15 @@ function setPreference(key, value) {
 
 function applyPreferences() {
   // Graph
-  const chartCards = document.querySelectorAll('.chart-card');
   const showGraph = getPreference('showGraph');
-  chartCards.forEach(card => {
+  document.querySelectorAll('.chart-card').forEach(card => {
     card.style.display = showGraph ? '' : 'none';
   });
 
   // Table
-  const tableCards = document.querySelectorAll('.table-card, .action-toolbar');
   const showTable = getPreference('showTable');
-  tableCards.forEach(card => {
+  document.querySelectorAll('.table-card, .action-toolbar').forEach(card => {
     card.style.display = showTable ? '' : 'none';
-  });
-
-  // Inflation Adjusted values:
-  const showInflation = getPreference('showInflation');
-  document.querySelectorAll('.metric-card').forEach(card => {
-    const label = card.querySelector('.metric-label')?.textContent.toLowerCase() || '';
-    if (label.includes('real') || label.includes('adjusted') || label.includes('inflation')) {
-      card.style.display = showInflation ? '' : 'none';
-    }
-  });
-  document.querySelectorAll('.settings-bar-item').forEach(item => {
-    const label = item.querySelector('.settings-bar-label')?.textContent.toLowerCase() || '';
-    if (label.includes('inflation')) {
-      item.style.display = showInflation ? '' : 'none';
-    }
-  });
-  document.querySelectorAll('.dynamic-inflation-setting').forEach(el => {
-    el.style.display = showInflation ? '' : 'none';
-  });
-
-  // Taxation:
-  const showTaxation = getPreference('showTaxation');
-  document.querySelectorAll('.metric-card').forEach(card => {
-    const label = card.querySelector('.metric-label')?.textContent.toLowerCase() || '';
-    const isTax = label.includes('tax') || card.getAttribute('data-conditional') === 'tax';
-    if (isTax) {
-      if (!showTaxation) {
-        card.style.setProperty('display', 'none', 'important');
-      } else {
-        const taxTypeEl = document.getElementById('tax-type');
-        if (taxTypeEl && taxTypeEl.value === 'none') {
-          card.style.display = 'none';
-        } else {
-          card.style.removeProperty('display');
-        }
-      }
-    }
-  });
-  document.querySelectorAll('.settings-bar-item').forEach(item => {
-    const label = item.querySelector('.settings-bar-label')?.textContent.toLowerCase() || '';
-    if (label.includes('tax') || item.id === 'custom-tax-group') {
-      item.style.display = showTaxation ? '' : 'none';
-    }
   });
 
   // Sliders

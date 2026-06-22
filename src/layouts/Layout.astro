@@ -3,6 +3,7 @@
 import Header from '../components/Header.astro';
 import Sidebar from '../components/Sidebar.astro';
 import Footer from '../components/Footer.astro';
+import OnboardingPopup from '../components/OnboardingPopup.astro';
 import '../styles/style.css';
 
 interface Props {
@@ -123,6 +124,21 @@ if (canonicalUrl.endsWith('/index.html')) {
     </div>
     
     <Footer />
+  </div>
+
+  <OnboardingPopup />
+
+  <!-- Dynamic Finance Glossary Tooltip -->
+  <div id="finance-tooltip" class="finance-tooltip-box" style="opacity: 0; pointer-events: none; position: absolute; z-index: 10000;">
+    <div class="tooltip-arrow"></div>
+    <div class="tooltip-content">
+      <div class="tooltip-header">
+        <span class="tooltip-term-title"></span>
+        <span class="tooltip-term-badge"></span>
+      </div>
+      <p class="tooltip-definition"></p>
+      <div class="tooltip-synonyms"><strong>Synonyms:</strong> <span class="tooltip-synonyms-list"></span></div>
+    </div>
   </div>
 
   {loadEngine && <script src="/js/engine.js" defer></script>}

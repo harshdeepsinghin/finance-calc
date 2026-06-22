@@ -2004,3 +2004,446 @@ input:checked+.slider-switch:before {
 .range-slider::-moz-range-thumb:active {
   transform: scale(0.95);
 }
+
+/* ==========================================================================
+   Personal Finance Profile Tiers, Onboarding Popup, and Tooltips
+   ========================================================================== */
+
+/* Prevent scrolling when modal is open */
+body.modal-open {
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* Onboarding Popup Modal Styles */
+.onboarding-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1.5rem;
+  opacity: 1;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.onboarding-overlay.fade-out {
+  opacity: 0;
+}
+
+.onboarding-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 620px;
+  padding: 2.25rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05);
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+  transform: scale(1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.onboarding-overlay.fade-out .onboarding-card {
+  transform: scale(0.95);
+}
+
+.onboarding-close-btn {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.onboarding-close-btn:hover {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+}
+
+.onboarding-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.onboarding-badge-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.onboarding-header h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.onboarding-desc {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.onboarding-tiers-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.onboarding-tier-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1.25rem;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  font-family: inherit;
+  color: inherit;
+}
+
+.onboarding-tier-card:hover {
+  border-color: var(--accent-color);
+  box-shadow: 0 4px 15px rgba(0, 113, 227, 0.08);
+  transform: translateY(-2px);
+}
+
+.tier-card-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  bottom: 0;
+}
+
+.tier-glow-simple { background: var(--success-color); }
+.tier-glow-investor { background: var(--accent-color); }
+.tier-glow-professional { background: #af52de; }
+
+.tier-card-content {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.tier-icon-wrapper {
+  font-size: 1.75rem;
+  padding: 0.5rem;
+  background: var(--input-bg);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tier-text-wrapper {
+  flex: 1;
+}
+
+.tier-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: inline-block;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.tier-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.onboarding-tier-card[data-level="simple"] .tier-badge {
+  background: rgba(48, 209, 88, 0.12);
+  color: var(--success-color);
+}
+
+.onboarding-tier-card[data-level="investor"] .tier-badge {
+  background: rgba(0, 113, 227, 0.12);
+  color: var(--accent-color);
+}
+
+.onboarding-tier-card[data-level="professional"] .tier-badge {
+  background: rgba(175, 82, 222, 0.12);
+  color: #af52de;
+}
+
+.tier-summary {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-top: 0.25rem;
+}
+
+.onboarding-footer {
+  text-align: center;
+}
+
+.onboarding-skip-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.onboarding-skip-btn:hover {
+  color: var(--text-primary);
+}
+
+/* Header Segmented Control Toggle Pills */
+.level-pill-toggle {
+  display: inline-flex;
+  background-color: var(--input-bg);
+  border: 1px solid var(--border-color);
+  padding: 3px;
+  border-radius: 30px;
+  gap: 2px;
+}
+
+.level-pill-btn {
+  background: transparent;
+  border: none;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--font-sans);
+  user-select: none;
+}
+
+.level-pill-btn:hover {
+  color: var(--text-primary);
+}
+
+.level-pill-btn.active {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.03);
+  font-weight: 600;
+}
+
+[data-theme="dark"] .level-pill-btn.active {
+  background-color: #2c2c2e;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Terminology Glossary Tooltip Box */
+.finance-tooltip-box {
+  display: none;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  width: 280px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  pointer-events: none;
+  animation: tooltipFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="dark"] .finance-tooltip-box {
+  background: rgba(28, 28, 30, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tooltip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.35rem;
+}
+
+.tooltip-term-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tooltip-term-badge {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
+.tooltip-term-badge.badge-simple {
+  background: rgba(48, 209, 88, 0.12);
+  color: var(--success-color);
+}
+
+.tooltip-term-badge.badge-investor {
+  background: rgba(0, 113, 227, 0.12);
+  color: var(--accent-color);
+}
+
+.tooltip-term-badge.badge-professional {
+  background: rgba(175, 82, 222, 0.12);
+  color: #af52de;
+}
+
+.tooltip-definition {
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.tooltip-synonyms {
+  font-size: 0.72rem;
+  border-top: 1px dashed var(--border-color);
+  padding-top: 0.4rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+}
+
+.tooltip-synonyms strong {
+  color: var(--text-primary);
+}
+
+.tooltip-synonyms-list {
+  font-style: italic;
+}
+
+.tooltip-arrow {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.tooltip-top .tooltip-arrow {
+  bottom: -8px;
+  border-width: 8px 8px 0 8px;
+  border-color: rgba(255, 255, 255, 0.85) transparent transparent transparent;
+}
+
+[data-theme="dark"] .tooltip-top .tooltip-arrow {
+  border-color: rgba(28, 28, 30, 0.85) transparent transparent transparent;
+}
+
+.tooltip-bottom .tooltip-arrow {
+  top: -8px;
+  border-width: 0 8px 8px 8px;
+  border-color: transparent transparent rgba(255, 255, 255, 0.85) transparent;
+}
+
+[data-theme="dark"] .tooltip-bottom .tooltip-arrow {
+  border-color: transparent transparent rgba(28, 28, 30, 0.85) transparent;
+}
+
+/* Hoverable Glossary term underlines */
+.term-hoverable {
+  border-bottom: 1px dotted var(--text-secondary);
+  cursor: help;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.term-hoverable:hover {
+  color: var(--accent-color);
+  border-bottom-color: var(--accent-color);
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .onboarding-card {
+    padding: 1.5rem;
+  }
+  
+  .onboarding-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .tier-icon-wrapper {
+    font-size: 1.4rem;
+    padding: 0.4rem;
+  }
+  
+  .tier-title {
+    font-size: 1rem;
+  }
+  
+  .tier-summary {
+    font-size: 0.82rem;
+  }
+
+  .level-pill-toggle {
+    width: 100%;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: stretch;
+  }
+
+  .level-pill-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 0.5rem;
+    font-size: 0.78rem;
+  }
+}

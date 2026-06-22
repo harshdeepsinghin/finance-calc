@@ -1,0 +1,64 @@
+---
+// src/components/OnboardingPopup.astro
+---
+
+<div id="onboarding-overlay" class="onboarding-overlay" style="display: none;">
+  <div class="onboarding-card">
+    <button id="onboarding-close-btn" class="onboarding-close-btn" aria-label="Skip and close onboarding popup">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+      </svg>
+    </button>
+    
+    <div class="onboarding-header">
+      <div class="onboarding-badge-icon">🎯</div>
+      <h2>Customize Your Experience</h2>
+      <p class="onboarding-desc">Select a finance profile. We'll adjust terminology and metrics across the calculators to match your background.</p>
+    </div>
+
+    <div class="onboarding-tiers-grid">
+      <!-- Simple Card -->
+      <button class="onboarding-tier-card" data-level="simple">
+        <div class="tier-card-glow tier-glow-simple"></div>
+        <div class="tier-card-content">
+          <div class="tier-icon-wrapper tier-icon-simple">🌱</div>
+          <div class="tier-text-wrapper">
+            <h3 class="tier-title">Simple</h3>
+            <span class="tier-badge">Beginner</span>
+            <p class="tier-summary">Uses everyday plain English (e.g. "Starting Money", "Total Profit") and hides advanced economics to prevent cognitive overload.</p>
+          </div>
+        </div>
+      </button>
+
+      <!-- Investor Card -->
+      <button class="onboarding-tier-card" data-level="investor">
+        <div class="tier-card-glow tier-glow-investor"></div>
+        <div class="tier-card-content">
+          <div class="tier-icon-wrapper tier-icon-investor">📈</div>
+          <div class="tier-text-wrapper">
+            <h3 class="tier-title">Investor</h3>
+            <span class="tier-badge">Intermediate</span>
+            <p class="tier-summary">Uses practical app and brokerage language (e.g. "SIP Amount", "Expected Returns", "Inflation Rate"). Ideal for retail investors.</p>
+          </div>
+        </div>
+      </button>
+
+      <!-- Professional Card -->
+      <button class="onboarding-tier-card" data-level="professional">
+        <div class="tier-card-glow tier-glow-professional"></div>
+        <div class="tier-card-content">
+          <div class="tier-icon-wrapper tier-icon-professional">🎓</div>
+          <div class="tier-text-wrapper">
+            <h3 class="tier-title">Professional</h3>
+            <span class="tier-badge">Advanced</span>
+            <p class="tier-summary">Uses accurate, industry-standard financial terms (e.g. "Principal", "CAGR", "XIRR", "SWP"). Best for CAs, CFAs, and experts.</p>
+          </div>
+        </div>
+      </button>
+    </div>
+
+    <div class="onboarding-footer">
+      <button id="onboarding-skip-btn" class="onboarding-skip-btn">Skip (Default to Simple)</button>
+    </div>
+  </div>
+</div>

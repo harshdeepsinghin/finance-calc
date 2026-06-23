@@ -2552,25 +2552,9 @@ body.modal-open {
   transition: none !important;
 }
 
-/* Always show toggle button with low opacity on touch devices so it is visible */
+/* Hide the edge handle on mobile — sidebar is opened via the header menu button instead */
 @media (hover: none), (max-width: 1100px) {
-  .sidebar-toggle-handle .handle-button {
-    opacity: 0.8;
-    transform: scale(1);
-    background-color: var(--bg-secondary);
-  }
-  
-  .sidebar-toggle-handle .handle-line {
-    width: 3px;
-    background-color: rgba(0, 0, 0, 0.05);
-  }
-  
-  [data-theme="dark"] .sidebar-toggle-handle .handle-line {
-    background-color: rgba(255, 255, 255, 0.05);
-  }
-
-  .sidebar-toggle-handle:hover .handle-line,
-  .sidebar-dragging-active .sidebar-toggle-handle .handle-line {
-    background-color: var(--border-color);
+  .sidebar-toggle-handle {
+    display: none !important;
   }
 }

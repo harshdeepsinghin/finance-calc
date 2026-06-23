@@ -75,7 +75,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load MathJax only on pages that actually contain TeX math delimiters
   maybeLoadMathJax();
 
-  // Setup range sliders
+  // Setup range sliders and lock buttons
+  setupInputLocks();
   setupGlobalSliders();
 
   // Dynamically update document tags for SEO if query parameters are present
@@ -406,7 +407,10 @@ const FinanceTerminologies = {
         "label": "Inflation-Adjusted Return",
         "definition": "The actual return rate of your investment after subtracting the rate of inflation."
       },
-      "simple": null
+      "simple": {
+        "label": "Inflation-Adjusted Growth Rate",
+        "definition": "Your actual growth rate after accounting for inflation — shows how much your money is really growing in terms of what you can buy."
+      }
     }
   },
   "inflation_rate": {
@@ -420,7 +424,10 @@ const FinanceTerminologies = {
         "label": "Inflation Rate",
         "definition": "The yearly rate at which costs and prices rise, causing money to lose its buying power over time."
       },
-      "simple": null
+      "simple": {
+        "label": "Price Rise Rate",
+        "definition": "How much prices go up each year - this shows how inflation affects your money's buying power."
+      }
     }
   },
   "ter": {
@@ -518,7 +525,10 @@ const FinanceTerminologies = {
         "label": "Inflation-Adjusted Corpus",
         "definition": "The final value of your investment adjusted to reflect the impact of inflation."
       },
-      "simple": null
+      "simple": {
+        "label": "What It's Worth Today",
+        "definition": "This shows how much your future money is actually worth in today's money — because inflation makes things more expensive over time, your future amount buys less than it seems."
+      }
     }
   },
   "post_tax_future_value": {
@@ -2416,9 +2426,12 @@ function setupSidebarToggle() {
       handle.className = 'sidebar-toggle-handle';
       handle.setAttribute('title', 'Drag to resize sidebar or click to toggle');
       handle.innerHTML = `
-        <svg class="sidebar-handle-svg" viewBox="0 0 18 80" width="18" height="80">
-          <path d="M 0 6 Q 0 0 6 3 L 15 36 Q 18 40 15 44 L 6 77 Q 0 80 0 74 Z" />
-        </svg>
+        <div class="handle-line"></div>
+        <button class="handle-button" aria-label="Toggle sidebar">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
       `;
       sidebar.parentNode.insertBefore(handle, sidebar.nextSibling);
     }
@@ -2431,12 +2444,15 @@ function setupSidebarToggle() {
 
     const onMouseDown = (e) => {
       if (e.type === 'mousedown' && e.button !== 0) return;
-      if (window.innerWidth <= 1100) return;
 
       isDragging = true;
       hasDragged = false;
       startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-      startCollapsed = appContainer.classList.contains('sidebar-collapsed');
+      
+      const isMobile = window.innerWidth <= 1100;
+      startCollapsed = isMobile 
+        ? !appContainer.classList.contains('sidebar-open')
+        : appContainer.classList.contains('sidebar-collapsed');
 
       appContainer.classList.add('sidebar-dragging-active');
       document.body.style.cursor = 'ew-resize';
@@ -2471,10 +2487,14 @@ function setupSidebarToggle() {
       sidebar.style.transform = `translateX(${newWidth - 260}px)`;
 
       handle.style.left = `${newWidth}px`;
-      if (newWidth <= 0) {
-        handle.style.transform = 'translate(0, -50%) rotate(0deg)';
-      } else {
-        handle.style.transform = 'translate(-50%, -50%) rotate(180deg)';
+      
+      const buttonSvg = handle.querySelector('.handle-button svg');
+      if (buttonSvg) {
+        if (newWidth <= 130) {
+          buttonSvg.style.transform = 'rotate(180deg)';
+        } else {
+          buttonSvg.style.transform = 'rotate(0deg)';
+        }
       }
     };
 
@@ -2496,18 +2516,18 @@ function setupSidebarToggle() {
       sidebar.style.paddingRight = '';
       sidebar.style.transform = '';
       handle.style.left = '';
-      handle.style.transform = '';
-      handle.style.borderRadius = '';
+      const buttonSvg = handle.querySelector('.handle-button svg');
+      if (buttonSvg) buttonSvg.style.transform = '';
+
+      const isMobile = window.innerWidth <= 1100;
 
       if (!hasDragged) {
-        // Simple click to toggle
-        const isCollapsed = appContainer.classList.contains('sidebar-collapsed');
-        if (isCollapsed) {
-          appContainer.classList.remove('sidebar-collapsed');
-          localStorage.setItem('sidebar-collapsed', 'false');
+        // Click to toggle
+        if (isMobile) {
+          appContainer.classList.toggle('sidebar-open');
         } else {
-          appContainer.classList.add('sidebar-collapsed');
-          localStorage.setItem('sidebar-collapsed', 'true');
+          appContainer.classList.toggle('sidebar-collapsed');
+          localStorage.setItem('sidebar-collapsed', appContainer.classList.contains('sidebar-collapsed'));
         }
       } else {
         // Drag end snap
@@ -2520,12 +2540,20 @@ function setupSidebarToggle() {
           finalWidth = Math.max(0, Math.min(260, 260 + deltaX));
         }
 
-        if (finalWidth > 130) {
-          appContainer.classList.remove('sidebar-collapsed');
-          localStorage.setItem('sidebar-collapsed', 'false');
+        if (isMobile) {
+          if (finalWidth > 130) {
+            appContainer.classList.add('sidebar-open');
+          } else {
+            appContainer.classList.remove('sidebar-open');
+          }
         } else {
-          appContainer.classList.add('sidebar-collapsed');
-          localStorage.setItem('sidebar-collapsed', 'true');
+          if (finalWidth > 130) {
+            appContainer.classList.remove('sidebar-collapsed');
+            localStorage.setItem('sidebar-collapsed', 'false');
+          } else {
+            appContainer.classList.add('sidebar-collapsed');
+            localStorage.setItem('sidebar-collapsed', 'true');
+          }
         }
       }
     };
@@ -2547,6 +2575,11 @@ function setupDraggableLabels() {
     if (!inputId) return;
     const input = document.getElementById(inputId);
     if (!input) return;
+
+    // Check if input is locked
+    if (input.classList.contains('input-locked')) {
+      return;
+    }
 
     // Only prevent default on label click to prevent text selection and scroll interference
     e.preventDefault();
@@ -2575,8 +2608,9 @@ function setupDraggableLabels() {
       const currentX = isTouch ? moveEvent.touches[0].clientX : moveEvent.clientX;
       const deltaX = currentX - startX;
 
-      // Speed multiplier: drag 1px = 0.5 * step units
-      let newVal = startVal + (deltaX * step * 0.5);
+      // Speed multiplier: drag 1px = 0.4 * step units on desktop, or 0.08 * step units on touch/mobile
+      const multiplier = isTouch ? 0.08 : 0.4;
+      let newVal = startVal + (deltaX * step * multiplier);
 
       // Enforce bounds
       newVal = Math.max(min, newVal);
@@ -2690,6 +2724,11 @@ function setupStepperButtons() {
 
     const input = wrapper.querySelector('input[type="number"]');
     if (!input) return;
+
+    // Check if input is locked
+    if (input.classList.contains('input-locked')) {
+      return;
+    }
 
     const startVal = parseFloat(input.value) || 0;
     let step = 1;
@@ -3525,6 +3564,27 @@ function updateDynamicMetric(parentEl, label, valueText) {
     card.after(dynamicCard);
   }
 
+  // Make dynamic inflation label hoverable and translate it appropriately
+  const labelEl = dynamicCard.querySelector('.metric-label');
+  if (labelEl) {
+    let termKey = '';
+    if (label.includes('Rate') || label.includes('CAGR')) {
+      termKey = 'real_rate';
+    } else {
+      termKey = 'real_future_value';
+    }
+
+    if (termKey && FinanceTerminologies[termKey]) {
+      const level = window.currentFinanceLevel || 'simple';
+      const tierData = FinanceTerminologies[termKey].tiers[level];
+      if (tierData) {
+        labelEl.textContent = tierData.label;
+      }
+      labelEl.classList.add('term-hoverable');
+      labelEl.setAttribute('data-term-id', termKey);
+    }
+  }
+
   dynamicCard.style.display = getPreference('showInflation') ? '' : 'none';
   const valEl = dynamicCard.querySelector('.metric-value');
   valEl.textContent = valueText;
@@ -4225,7 +4285,61 @@ function loadMathJax() {
   document.head.appendChild(script);
 }
 
-// --- Range Slider Synchronization ---
+// --- Range Slider & Lock Setup ---
+
+function setupInputLocks() {
+  const globalLockBtn = document.getElementById('global-lock-btn');
+  if (!globalLockBtn) return;
+
+  const setGlobalLockedState = (isLocked) => {
+    const inputs = document.querySelectorAll('.inputs-card input[type="number"]');
+    const rangeSliders = document.querySelectorAll('.inputs-card .range-slider');
+    const groups = document.querySelectorAll('.inputs-card .input-group');
+
+    if (isLocked) {
+      globalLockBtn.classList.add('locked');
+      globalLockBtn.querySelector('.lock-open').style.display = 'none';
+      globalLockBtn.querySelector('.lock-closed').style.display = '';
+      globalLockBtn.querySelector('.lock-text').textContent = 'Sliders Locked';
+      
+      inputs.forEach(input => input.classList.add('input-locked'));
+      groups.forEach(group => group.classList.add('locked-group'));
+      rangeSliders.forEach(slider => {
+        slider.disabled = true;
+        slider.setAttribute('disabled', 'true');
+      });
+    } else {
+      globalLockBtn.classList.remove('locked');
+      globalLockBtn.querySelector('.lock-open').style.display = '';
+      globalLockBtn.querySelector('.lock-closed').style.display = 'none';
+      globalLockBtn.querySelector('.lock-text').textContent = 'Lock Sliders';
+
+      inputs.forEach(input => input.classList.remove('input-locked'));
+      groups.forEach(group => group.classList.remove('locked-group'));
+      rangeSliders.forEach(slider => {
+        slider.disabled = false;
+        slider.removeAttribute('disabled');
+      });
+    }
+  };
+
+  // Load initial state
+  const saved = localStorage.getItem('global_inputs_locked');
+  if (saved === 'true') {
+    setGlobalLockedState(true);
+  } else {
+    setGlobalLockedState(false);
+  }
+
+  globalLockBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const currentlyLocked = globalLockBtn.classList.contains('locked');
+    const newState = !currentlyLocked;
+    setGlobalLockedState(newState);
+    localStorage.setItem('global_inputs_locked', newState ? 'true' : 'false');
+  });
+}
 
 function setupGlobalSliders() {
   // Sync all range sliders to their number input values on load
@@ -4235,6 +4349,11 @@ function setupGlobalSliders() {
     const numInput = document.getElementById(numInputId);
     if (numInput) {
       slider.value = numInput.value;
+      // If locked state was loaded, make sure range slider starts disabled
+      if (numInput.classList.contains('input-locked')) {
+        slider.disabled = true;
+        slider.setAttribute('disabled', 'true');
+      }
     }
   });
 
@@ -4244,8 +4363,11 @@ function setupGlobalSliders() {
       const numInputId = e.target.id.replace('-slider', '');
       const numInput = document.getElementById(numInputId);
       if (numInput) {
+        if (numInput.classList.contains('input-locked')) {
+          e.target.value = numInput.value;
+          return;
+        }
         numInput.value = e.target.value;
-        // Trigger both input and change events so the calculator recalculates
         numInput.dispatchEvent(new Event('input', { bubbles: true }));
         numInput.dispatchEvent(new Event('change', { bubbles: true }));
       }
@@ -4256,5 +4378,58 @@ function setupGlobalSliders() {
       }
     }
   });
+
+  // Low sensitivity touch dragging for range sliders on mobile/Android
+  document.body.addEventListener('touchstart', (e) => {
+    const slider = e.target.closest('.range-slider');
+    if (!slider) return;
+
+    const numInputId = slider.id.replace('-slider', '');
+    const numInput = document.getElementById(numInputId);
+    if (numInput && numInput.classList.contains('input-locked')) {
+      e.preventDefault();
+      return;
+    }
+
+    e.preventDefault();
+
+    const rect = slider.getBoundingClientRect();
+    const width = rect.width || 200;
+    const min = parseFloat(slider.getAttribute('min')) || 0;
+    const max = parseFloat(slider.getAttribute('max')) || 100;
+    const step = parseFloat(slider.getAttribute('step')) || 1;
+    const startVal = parseFloat(slider.value) || min;
+    const startX = e.touches[0].clientX;
+    
+    // 0.3x multiplier for low touch sensitivity on mobile/Android
+    const multiplier = 0.3;
+
+    const onTouchMove = (moveEvent) => {
+      const currentX = moveEvent.touches[0].clientX;
+      const deltaX = currentX - startX;
+      
+      let deltaVal = (deltaX / width) * (max - min) * multiplier;
+      let newVal = startVal + deltaVal;
+
+      newVal = Math.round(newVal / step) * step;
+      newVal = Math.max(min, Math.min(max, newVal));
+
+      slider.value = newVal;
+      
+      if (numInput && !numInput.classList.contains('input-locked')) {
+        numInput.value = newVal;
+        numInput.dispatchEvent(new Event('input', { bubbles: true }));
+        numInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    };
+
+    const onTouchEnd = () => {
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
+    };
+
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', onTouchEnd);
+  }, { passive: false });
 }
 

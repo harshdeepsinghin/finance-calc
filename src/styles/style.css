@@ -601,6 +601,65 @@ header {
   opacity: 1;
 }
 
+/* Global Lock Button */
+.global-lock-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.35rem 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.global-lock-btn:hover {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+}
+
+.global-lock-btn:active {
+  transform: scale(0.95);
+}
+
+.global-lock-btn.locked {
+  color: var(--warning-color);
+  border-color: var(--warning-color);
+  background-color: rgba(255, 159, 10, 0.05);
+}
+
+[data-theme="dark"] .global-lock-btn.locked {
+  background-color: rgba(255, 214, 10, 0.08);
+}
+
+/* Locked Group Modifications */
+.locked-group .draggable-label {
+  cursor: not-allowed !important;
+  border-bottom: none !important;
+}
+
+.locked-group .draggable-label::after {
+  display: none !important;
+}
+
+.locked-group .range-slider {
+  opacity: 0.4;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+.locked-group .step-btn {
+  opacity: 0.4;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
 .input-val-display {
   display: none;
   /* hidden now because the value is directly inside the input field */
@@ -2387,51 +2446,101 @@ body.modal-open {
 }
 
 /* ==========================================================================
-   Sidebar Edge-Toggle Handle & Real-Time Resizing
+   Sidebar Edge-Toggle Handle (Notion-like Minimal Hover Style)
    ========================================================================== */
 .sidebar-toggle-handle {
   position: fixed;
-  top: 50%;
+  top: 65px;
+  bottom: 0;
   left: 260px; /* Aligns exactly with expanded sidebar width */
-  transform: translate(-50%, -50%) rotate(180deg); /* Points left (collapse) when open */
-  width: 18px;
-  height: 80px;
+  width: 20px; /* Wide hover/drag active area */
+  transform: translateX(-50%);
   cursor: ew-resize;
-  z-index: 1000;
+  z-index: 95; /* Keep below header navbar (z-index 100) */
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
   background: transparent;
-  border: none;
-  box-shadow: none;
-  padding: 0;
 }
 
-.sidebar-toggle-handle svg {
-  display: block;
-  overflow: visible;
+/* The vertical highlight line */
+.sidebar-toggle-handle .handle-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  background-color: transparent;
+  transition: background-color 0.2s;
+  pointer-events: none;
 }
 
-.sidebar-toggle-handle svg path {
-  fill: var(--bg-secondary);
-  stroke: var(--border-color);
-  stroke-width: 1.5px;
-  transition: fill 0.2s, stroke 0.2s, filter 0.2s;
-  filter: drop-shadow(2px 0 4px rgba(0, 0, 0, 0.06));
+.sidebar-toggle-handle:hover .handle-line,
+.sidebar-dragging-active .sidebar-toggle-handle .handle-line {
+  background-color: var(--border-color);
 }
 
-.sidebar-toggle-handle:hover svg path {
-  fill: var(--input-bg);
-  stroke: var(--accent-color);
-  filter: drop-shadow(3px 0 6px rgba(0, 0, 0, 0.12));
+.sidebar-toggle-handle:hover:active .handle-line {
+  background-color: var(--accent-color);
 }
 
-/* Dock to left edge and rotate chevron pointing right when sidebar is collapsed */
+/* The circular toggle button */
+.sidebar-toggle-handle .handle-button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  opacity: 0; /* Hidden by default on desktop, shown on hover */
+  transform: scale(0.8);
+  transition: opacity 0.2s, transform 0.2s, background-color 0.2s, color 0.2s, border-color 0.2s;
+  pointer-events: auto;
+}
+
+/* Hovering the handle zone fades in the button */
+.sidebar-toggle-handle:hover .handle-button,
+.sidebar-dragging-active .sidebar-toggle-handle .handle-button {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.sidebar-toggle-handle .handle-button:hover {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--accent-color);
+}
+
+.sidebar-toggle-handle .handle-button svg {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: rotate(0deg);
+}
+
+/* Docked to left edge when sidebar is collapsed */
 .app-container.sidebar-collapsed .sidebar-toggle-handle {
   left: 0;
-  transform: translate(0, -50%) rotate(0deg); /* Points right (expand) when collapsed */
+  transform: none; /* Align flush */
+  width: 24px; /* Slightly wider target at screen edge */
+}
+
+/* Show collapsed line flush at left edge on hover */
+.app-container.sidebar-collapsed .sidebar-toggle-handle .handle-line {
+  left: 0;
+  transform: none;
+}
+
+/* When collapsed, point the arrow to the right (rotate 180deg) */
+.app-container.sidebar-collapsed .sidebar-toggle-handle .handle-button svg {
+  transform: rotate(180deg);
 }
 
 /* Disable transitions entirely during dragging for real-time tracking */
@@ -2443,8 +2552,25 @@ body.modal-open {
   transition: none !important;
 }
 
-@media (max-width: 1100px) {
-  .sidebar-toggle-handle {
-    display: none !important;
+/* Always show toggle button with low opacity on touch devices so it is visible */
+@media (hover: none), (max-width: 1100px) {
+  .sidebar-toggle-handle .handle-button {
+    opacity: 0.8;
+    transform: scale(1);
+    background-color: var(--bg-secondary);
+  }
+  
+  .sidebar-toggle-handle .handle-line {
+    width: 3px;
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  [data-theme="dark"] .sidebar-toggle-handle .handle-line {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .sidebar-toggle-handle:hover .handle-line,
+  .sidebar-dragging-active .sidebar-toggle-handle .handle-line {
+    background-color: var(--border-color);
   }
 }

@@ -568,57 +568,1118 @@ const FinanceTerminologies = {
         "definition": "The total amount of cash you withdrew and spent over the entire time."
       }
     }
+  },
+  "waiting_period": {
+    "id": "waiting_period",
+    "tiers": {
+      "professional": {
+        "label": "Deferral Period",
+        "definition": "The duration during which the initial investment compounds before systematic withdrawals or distributions begin."
+      },
+      "investor": {
+        "label": "Waiting Period",
+        "definition": "The number of years you let your lump sum investment compound before starting to withdraw monthly income."
+      },
+      "simple": {
+        "label": "Years Before Withdrawing",
+        "definition": "The number of years you wait before starting to take money out of your account."
+      }
+    }
+  },
+  "current_age": {
+    "id": "current_age",
+    "tiers": {
+      "professional": {
+        "label": "Current Age",
+        "definition": "The chronological age of the primary beneficiary at the start date of the financial projection plan."
+      },
+      "investor": {
+        "label": "Current Age",
+        "definition": "Your current age today in years."
+      },
+      "simple": {
+        "label": "Your Age Now",
+        "definition": "How old you are today."
+      }
+    }
+  },
+  "retire_age": {
+    "id": "retire_age",
+    "tiers": {
+      "professional": {
+        "label": "Retirement Age",
+        "definition": "The target age at which active employment income ceases and the wealth decumulation phase begins."
+      },
+      "investor": {
+        "label": "Retirement Age",
+        "definition": "The age at which you plan to stop working and retire."
+      },
+      "simple": {
+        "label": "Age You Stop Working",
+        "definition": "The age you want to retire."
+      }
+    }
+  },
+  "life_expectancy": {
+    "id": "life_expectancy",
+    "tiers": {
+      "professional": {
+        "label": "Actuarial Life Expectancy",
+        "definition": "The projected lifespan of the beneficiary, used to calculate the decumulation duration."
+      },
+      "investor": {
+        "label": "Life Expectancy",
+        "definition": "The age up to which you expect to live, used to calculate how long your retirement corpus needs to last."
+      },
+      "simple": {
+        "label": "Expected Lifespan",
+        "definition": "How long you expect to live (used to plan your money)."
+      }
+    }
+  },
+  "monthly_expenses": {
+    "id": "monthly_expenses",
+    "tiers": {
+      "professional": {
+        "label": "Monthly Household Outlays",
+        "definition": "The aggregate monthly cash outflows required to maintain a given standard of living."
+      },
+      "investor": {
+        "label": "Monthly Expenses",
+        "definition": "Your average monthly living costs today (housing, food, bills, lifestyle)."
+      },
+      "simple": {
+        "label": "Monthly Spending",
+        "definition": "The total money you spend each month."
+      }
+    }
+  },
+  "annual_expenses": {
+    "id": "annual_expenses",
+    "tiers": {
+      "professional": {
+        "label": "Annual Consolidated Outlays",
+        "definition": "The aggregate annual cash outflows required to sustain household operations and living standard."
+      },
+      "investor": {
+        "label": "Annual Expenses",
+        "definition": "Your total living costs for a full year."
+      },
+      "simple": {
+        "label": "Yearly Spending",
+        "definition": "The total money you spend in a year."
+      }
+    }
+  },
+  "swr": {
+    "id": "swr",
+    "tiers": {
+      "professional": {
+        "label": "Safe Withdrawal Rate (SWR)",
+        "definition": "The annualized percentage of the retirement corpus that can be safely withdrawn each year, adjusted for inflation, with low risk of depletion."
+      },
+      "investor": {
+        "label": "Safe Withdrawal Rate",
+        "definition": "The percentage of your total savings you can safely withdraw each year without running out of money."
+      },
+      "simple": {
+        "label": "Safe Cashout Rate",
+        "definition": "The safe percentage of savings you can spend each year in retirement."
+      }
+    }
+  },
+  "current_savings": {
+    "id": "current_savings",
+    "tiers": {
+      "professional": {
+        "label": "Accumulated Financial Assets",
+        "definition": "The current net asset value of all liquid investments and cash equivalents dedicated to this plan."
+      },
+      "investor": {
+        "label": "Current Savings",
+        "definition": "The total amount of money you have saved and invested so far."
+      },
+      "simple": {
+        "label": "Money Saved Already",
+        "definition": "The amount of money you have saved up until today."
+      }
+    }
+  },
+  "monthly_savings": {
+    "id": "monthly_savings",
+    "tiers": {
+      "professional": {
+        "label": "Monthly Capital Accumulation",
+        "definition": "The amount of periodic monthly savings allocated to purchase financial assets."
+      },
+      "investor": {
+        "label": "Monthly Savings",
+        "definition": "The amount of money you save and invest every month."
+      },
+      "simple": {
+        "label": "Money Saved Each Month",
+        "definition": "The amount of money you set aside monthly."
+      }
+    }
+  },
+  "target_goal": {
+    "id": "target_goal",
+    "tiers": {
+      "professional": {
+        "label": "Target Capital Obligation",
+        "definition": "The nominal funding target required to meet a specific financial goal or liability at a future date."
+      },
+      "investor": {
+        "label": "Goal Target Value",
+        "definition": "The total cost of your financial goal in today's money."
+      },
+      "simple": {
+        "label": "Goal Target Amount",
+        "definition": "The target amount of money you want to save up for your goal."
+      }
+    }
+  },
+  "college_cost": {
+    "id": "college_cost",
+    "tiers": {
+      "professional": {
+        "label": "Higher Education Capital Requirement",
+        "definition": "The total estimated cost of tuition, housing, and academic fees for higher education."
+      },
+      "investor": {
+        "label": "College Cost",
+        "definition": "The estimated cost of college education in today's value."
+      },
+      "simple": {
+        "label": "College Cost",
+        "definition": "The cost of higher education or college."
+      }
+    }
+  },
+  "years_to_college": {
+    "id": "years_to_college",
+    "tiers": {
+      "professional": {
+        "label": "Accrual Period to Education Phase",
+        "definition": "The duration in years before the beneficiary enters higher education and withdrawals begin."
+      },
+      "investor": {
+        "label": "Years to College",
+        "definition": "The number of years remaining before your child starts college."
+      },
+      "simple": {
+        "label": "Years Before College",
+        "definition": "The number of years left before college starts."
+      }
+    }
+  },
+  "wedding_cost": {
+    "id": "wedding_cost",
+    "tiers": {
+      "professional": {
+        "label": "Marriage Capital Outlay",
+        "definition": "The total projected financial cost of the wedding and associated events."
+      },
+      "investor": {
+        "label": "Wedding Cost",
+        "definition": "The estimated cost of the wedding in today's value."
+      },
+      "simple": {
+        "label": "Wedding Cost",
+        "definition": "The estimated cost of the wedding."
+      }
+    }
+  },
+  "years_to_marriage": {
+    "id": "years_to_marriage",
+    "tiers": {
+      "professional": {
+        "label": "Accrual Period to Marriage Event",
+        "definition": "The duration in years remaining before the projected marriage event."
+      },
+      "investor": {
+        "label": "Years to Wedding",
+        "definition": "The number of years left before the wedding takes place."
+      },
+      "simple": {
+        "label": "Years Before Wedding",
+        "definition": "The number of years left before the wedding."
+      }
+    }
+  },
+  "property_value": {
+    "id": "property_value",
+    "tiers": {
+      "professional": {
+        "label": "Real Estate Acquisition Cost",
+        "definition": "The total purchase price of the target real estate asset."
+      },
+      "investor": {
+        "label": "Property Cost",
+        "definition": "The current cost or purchase price of the house/property you want to buy."
+      },
+      "simple": {
+        "label": "House Cost",
+        "definition": "The cost of the house or property."
+      }
+    }
+  },
+  "down_pay_pct": {
+    "id": "down_pay_pct",
+    "tiers": {
+      "professional": {
+        "label": "Down Payment Equity Ratio",
+        "definition": "The percentage of the property value paid upfront as equity, not funded by debt."
+      },
+      "investor": {
+        "label": "Down Payment %",
+        "definition": "The percentage of the home cost you plan to pay upfront in cash."
+      },
+      "simple": {
+        "label": "Upfront Cash %",
+        "definition": "The percentage of the house cost you pay upfront."
+      }
+    }
+  },
+  "target_amount": {
+    "id": "target_amount",
+    "tiers": {
+      "professional": {
+        "label": "Target Liquidation Value",
+        "definition": "The specific cash sum required at the end of the investment plan."
+      },
+      "investor": {
+        "label": "Target Amount",
+        "definition": "The final target amount of money you want to reach."
+      },
+      "simple": {
+        "label": "Target Amount",
+        "definition": "The target money you want to accumulate."
+      }
+    }
+  },
+  "target_age": {
+    "id": "target_age",
+    "tiers": {
+      "professional": {
+        "label": "Target Beneficiary Age",
+        "definition": "The specific age of the primary beneficiary when the milestone is achieved."
+      },
+      "investor": {
+        "label": "Target Age",
+        "definition": "The age you want to reach when this goal is complete."
+      },
+      "simple": {
+        "label": "Target Age",
+        "definition": "The age you want to be when this is achieved."
+      }
+    }
+  },
+  "equity_assets": {
+    "id": "equity_assets",
+    "tiers": {
+      "professional": {
+        "label": "Equity Asset Allocation",
+        "definition": "The percentage of the total portfolio invested in volatile, high-return equity assets (stocks, mutual funds)."
+      },
+      "investor": {
+        "label": "Equity Allocation %",
+        "definition": "The percentage of your money invested in stocks or equity mutual funds."
+      },
+      "simple": {
+        "label": "Stocks / Equity %",
+        "definition": "The percentage of your money in stocks or equity funds."
+      }
+    }
+  },
+  "debt_assets": {
+    "id": "debt_assets",
+    "tiers": {
+      "professional": {
+        "label": "Fixed Income Asset Allocation",
+        "definition": "The percentage of the total portfolio invested in low-volatility fixed income assets (bonds, FDs)."
+      },
+      "investor": {
+        "label": "Debt Allocation %",
+        "definition": "The percentage of your money invested in safe bonds, FDs, or debt mutual funds."
+      },
+      "simple": {
+        "label": "Bonds / FDs %",
+        "definition": "The percentage of your money in safe options like FDs or bonds."
+      }
+    }
+  },
+  "liabilities": {
+    "id": "liabilities",
+    "tiers": {
+      "professional": {
+        "label": "Aggregate Liabilities",
+        "definition": "The sum of all outstanding debts, loans, mortgages, and other financial obligations."
+      },
+      "investor": {
+        "label": "Total Outstanding Loans / Debts",
+        "definition": "The total amount of all loans and debts you owe."
+      },
+      "simple": {
+        "label": "Total Money Owed",
+        "definition": "The total amount of money you owe (loans, debts)."
+      }
+    }
+  },
+  "annual_savings": {
+    "id": "annual_savings",
+    "tiers": {
+      "professional": {
+        "label": "Annual Capital Allocation",
+        "definition": "The total sum of savings dedicated to investment purchases on an annual basis."
+      },
+      "investor": {
+        "label": "Annual Savings",
+        "definition": "The amount of money you save and invest every year."
+      },
+      "simple": {
+        "label": "Yearly Savings",
+        "definition": "The total money you save in a year."
+      }
+    }
+  },
+  "target_equity": {
+    "id": "target_equity",
+    "tiers": {
+      "professional": {
+        "label": "Target Equity Ratio",
+        "definition": "The desired percentage of the portfolio to be held in equity assets after rebalancing."
+      },
+      "investor": {
+        "label": "Target Equity %",
+        "definition": "The percentage of your portfolio you want to hold in stocks/equity."
+      },
+      "simple": {
+        "label": "Target Stocks %",
+        "definition": "The percentage of your portfolio you want to keep in stocks."
+      }
+    }
+  },
+  "target_debt": {
+    "id": "target_debt",
+    "tiers": {
+      "professional": {
+        "label": "Target Fixed Income Ratio",
+        "definition": "The desired percentage of the portfolio to be held in debt assets after rebalancing."
+      },
+      "investor": {
+        "label": "Target Debt %",
+        "definition": "The percentage of your portfolio you want to hold in safe bonds/FDs."
+      },
+      "simple": {
+        "label": "Target Bonds %",
+        "definition": "The percentage of your portfolio you want to keep in bonds."
+      }
+    }
+  },
+  "target_gold": {
+    "id": "target_gold",
+    "tiers": {
+      "professional": {
+        "label": "Target Commodity Allocation",
+        "definition": "The desired percentage of the portfolio to be held in gold or commodities."
+      },
+      "investor": {
+        "label": "Target Gold %",
+        "definition": "The percentage of your portfolio you want to hold in gold."
+      },
+      "simple": {
+        "label": "Target Gold %",
+        "definition": "The percentage of your portfolio you want to keep in gold."
+      }
+    }
+  },
+  "tax_rate": {
+    "id": "tax_rate",
+    "tiers": {
+      "professional": {
+        "label": "Marginal Tax Rate",
+        "definition": "The flat tax rate percentage applied to investment gains or income."
+      },
+      "investor": {
+        "label": "Flat Tax Rate",
+        "definition": "The flat percentage tax rate applied to your returns."
+      },
+      "simple": {
+        "label": "Tax Rate %",
+        "definition": "The percentage of tax you pay on your gains."
+      }
+    }
+  },
+  "prepay_monthly": {
+    "id": "prepay_monthly",
+    "tiers": {
+      "professional": {
+        "label": "Periodic Debt Prepayment",
+        "definition": "The additional monthly principal payment made above the scheduled EMI to accelerate loan payoff."
+      },
+      "investor": {
+        "label": "Monthly Prepayment",
+        "definition": "The extra money you pay towards your loan principal each month to close it early."
+      },
+      "simple": {
+        "label": "Extra Monthly Payment",
+        "definition": "The extra money you pay each month to finish your loan faster."
+      }
+    }
+  },
+  "fixed_expenses": {
+    "id": "fixed_expenses",
+    "tiers": {
+      "professional": {
+        "label": "Fixed Nondiscretionary Outlays",
+        "definition": "Essential recurring expenses that cannot be easily adjusted in the short term (rent, EMIs)."
+      },
+      "investor": {
+        "label": "Essential Fixed Expenses",
+        "definition": "Your unavoidable monthly costs like rent, EMIs, and bills."
+      },
+      "simple": {
+        "label": "Fixed Expenses",
+        "definition": "Monthly bills and expenses that do not change (rent, loan payments)."
+      }
+    }
+  },
+  "food_expenses": {
+    "id": "food_expenses",
+    "tiers": {
+      "professional": {
+        "label": "Discretionary Household Outlays",
+        "definition": "Monthly outlays on food, groceries, household items, and basic lifestyle."
+      },
+      "investor": {
+        "label": "Food & Household Expenses",
+        "definition": "Average monthly spending on groceries, dining, and household items."
+      },
+      "simple": {
+        "label": "Groceries & Food",
+        "definition": "Monthly spending on groceries and meals."
+      }
+    }
+  },
+  "insurance_utilities": {
+    "id": "insurance_utilities",
+    "tiers": {
+      "professional": {
+        "label": "Utility and Risk Management Expenses",
+        "definition": "Expenditures on utilities, cellular, internet, and insurance policies."
+      },
+      "investor": {
+        "label": "Utilities & Insurance Bills",
+        "definition": "Monthly costs for electricity, internet, and insurance premiums."
+      },
+      "simple": {
+        "label": "Utilities & Insurance",
+        "definition": "Electricity, internet, phone bills, and insurance costs."
+      }
+    }
+  },
+  "coverage_months": {
+    "id": "coverage_months",
+    "tiers": {
+      "professional": {
+        "label": "Coverage Horizon (Months)",
+        "definition": "The number of months of expenses that the emergency fund is designed to cover."
+      },
+      "investor": {
+        "label": "Emergency Fund Size (Months)",
+        "definition": "The number of months of expenses you want your emergency fund to cover."
+      },
+      "simple": {
+        "label": "Months of Safety Net",
+        "definition": "The number of months you want your safety net to last if you lose your income."
+      }
+    }
+  },
+  "depletion_year": {
+    "id": "depletion_year",
+    "tiers": {
+      "professional": {
+        "label": "Depletion Horizon",
+        "definition": "The projected calendar year or elapsed duration when the accumulated corpus is completely exhausted."
+      },
+      "investor": {
+        "label": "Corpus Lifespan",
+        "definition": "The number of years your savings/corpus will last under the selected withdrawal rate before hitting zero."
+      },
+      "simple": {
+        "label": "How Long Money Lasts",
+        "definition": "The number of years your saved money will last before it runs out."
+      }
+    }
+  },
+  "inflated_expenses": {
+    "id": "inflated_expenses",
+    "tiers": {
+      "professional": {
+        "label": "Inflation-Adjusted Periodic Outlays",
+        "definition": "The projected future monthly expenses, increased to account for purchasing power inflation."
+      },
+      "investor": {
+        "label": "Future Monthly Expenses",
+        "definition": "Your estimated monthly expenses at the time of retirement, adjusted for inflation."
+      },
+      "simple": {
+        "label": "Future Monthly Costs",
+        "definition": "What your monthly expenses will be in the future after prices rise."
+      }
+    }
+  },
+  "fire_number": {
+    "id": "fire_number",
+    "tiers": {
+      "professional": {
+        "label": "Financial Independence Target Corpus",
+        "definition": "The total wealth required to achieve financial independence, allowing withdrawals to sustain living costs indefinitely."
+      },
+      "investor": {
+        "label": "FIRE Target Corpus",
+        "definition": "The total savings target needed to retire early under the FIRE framework."
+      },
+      "simple": {
+        "label": "Early Retirement Target",
+        "definition": "The total money you need saved to stop working early."
+      }
+    }
+  },
+  "lean_fire": {
+    "id": "lean_fire",
+    "tiers": {
+      "professional": {
+        "label": "Lean Financial Independence Target",
+        "definition": "The capital reserve required to cover essential nondiscretionary outlays in perpetuity."
+      },
+      "investor": {
+        "label": "Lean FIRE Corpus",
+        "definition": "The total savings target for a minimalist early retirement (essential expenses only)."
+      },
+      "simple": {
+        "label": "Minimalist Retirement Target",
+        "definition": "The bare minimum savings needed to cover basic bills and retire early."
+      }
+    }
+  },
+  "fat_fire": {
+    "id": "fat_fire",
+    "tiers": {
+      "professional": {
+        "label": "Discretionary Financial Independence Target",
+        "definition": "The capital reserve required to cover premium discretionary outlays and lifestyle additions in retirement."
+      },
+      "investor": {
+        "label": "Fat FIRE Corpus",
+        "definition": "The total savings target for an abundant, comfortable early retirement (lifestyle and travel included)."
+      },
+      "simple": {
+        "label": "Comfortable Retirement Target",
+        "definition": "The savings needed to retire early with a comfortable, relaxed lifestyle."
+      }
+    }
+  },
+  "years_to_fire": {
+    "id": "years_to_fire",
+    "tiers": {
+      "professional": {
+        "label": "Accumulation Duration to Financial Independence",
+        "definition": "The projected timeframe in years required to reach the target FIRE corpus."
+      },
+      "investor": {
+        "label": "Years to FIRE",
+        "definition": "The estimated number of years left before you reach your FIRE savings goal."
+      },
+      "simple": {
+        "label": "Years to Retire Early",
+        "definition": "The number of years left before you can stop working."
+      }
+    }
+  },
+  "inflated_goal": {
+    "id": "inflated_goal",
+    "tiers": {
+      "professional": {
+        "label": "Inflation-Adjusted Capital Obligation",
+        "definition": "The projected future cost of the financial goal, escalated by the inflation rate."
+      },
+      "investor": {
+        "label": "Future Goal Cost",
+        "definition": "The estimated cost of your goal at the target date, adjusted for inflation."
+      },
+      "simple": {
+        "label": "Future Cost of Goal",
+        "definition": "What your goal will cost in the future after prices rise."
+      }
+    }
+  },
+  "inflated_cost": {
+    "id": "inflated_cost",
+    "tiers": {
+      "professional": {
+        "label": "Inflation-Adjusted Education Liability",
+        "definition": "The projected future cost of college tuition and fees, escalated by inflation."
+      },
+      "investor": {
+        "label": "Future College Cost",
+        "definition": "The estimated cost of college education at the target date, adjusted for inflation."
+      },
+      "simple": {
+        "label": "Future College Cost",
+        "definition": "What college will cost in the future after price increases."
+      }
+    }
+  },
+  "inflated_downpayment": {
+    "id": "inflated_downpayment",
+    "tiers": {
+      "professional": {
+        "label": "Inflation-Adjusted Down Payment Liability",
+        "definition": "The projected future down payment amount required, adjusted for real estate inflation."
+      },
+      "investor": {
+        "label": "Future Down Payment Needed",
+        "definition": "The estimated down payment cash needed at the target purchase date, adjusted for inflation."
+      },
+      "simple": {
+        "label": "Future Down Payment",
+        "definition": "The cash you will need upfront to buy the house in the future."
+      }
+    }
+  },
+  "inflated_corpus": {
+    "id": "inflated_corpus",
+    "tiers": {
+      "professional": {
+        "label": "Inflation-Adjusted Target Corpus",
+        "definition": "The projected capital target required, increased to maintain purchasing power equivalence in the future."
+      },
+      "investor": {
+        "label": "Future Target Corpus",
+        "definition": "The target savings amount adjusted upwards to account for inflation over the term."
+      },
+      "simple": {
+        "label": "Future Target Corpus",
+        "definition": "The inflation-adjusted target amount you will need in the future."
+      }
+    }
+  },
+  "projected_assets": {
+    "id": "projected_assets",
+    "tiers": {
+      "professional": {
+        "label": "Projected Total Assets",
+        "definition": "The estimated future market value of all investment assets at the end of the projection term."
+      },
+      "investor": {
+        "label": "Projected Total Assets",
+        "definition": "The estimated value of all your savings and assets in the future."
+      },
+      "simple": {
+        "label": "Your Future Assets",
+        "definition": "The estimated total value of all your saved money in the future."
+      }
+    }
+  },
+  "projected_nw": {
+    "id": "projected_nw",
+    "tiers": {
+      "professional": {
+        "label": "Projected Net Worth",
+        "definition": "The estimated future net worth (total projected assets minus total projected liabilities)."
+      },
+      "investor": {
+        "label": "Projected Net Worth",
+        "definition": "The estimated value of all your assets minus any debts in the future."
+      },
+      "simple": {
+        "label": "Your Future Net Worth",
+        "definition": "The total value of everything you own minus what you owe in the future."
+      }
+    }
+  },
+  "total_portfolio": {
+    "id": "total_portfolio",
+    "tiers": {
+      "professional": {
+        "label": "Total Portfolio Valuation",
+        "definition": "The aggregate market value of all asset classes combined within the investment portfolio."
+      },
+      "investor": {
+        "label": "Total Portfolio Value",
+        "definition": "The total value of all your current investments combined."
+      },
+      "simple": {
+        "label": "Total Investments Value",
+        "definition": "The total value of all your investments added together."
+      }
+    }
+  },
+  "rebalance_action": {
+    "id": "rebalance_action",
+    "tiers": {
+      "professional": {
+        "label": "Asset Allocation Adjustment Directive",
+        "definition": "The required action (Buy/Sell) to align current asset allocation percentages back to the target asset mix."
+      },
+      "investor": {
+        "label": "Rebalance Action",
+        "definition": "The specific buy/sell actions required to bring your portfolio back to its target asset mix."
+      },
+      "simple": {
+        "label": "Portfolio Adjustment",
+        "definition": "The actions you need to take to adjust and balance your investments."
+      }
+    }
+  },
+  "emi_result": {
+    "id": "emi_result",
+    "tiers": {
+      "professional": {
+        "label": "Equated Monthly Installment (EMI)",
+        "definition": "The fixed monthly payment made by a borrower to a lender at a specified date to service interest and principal."
+      },
+      "investor": {
+        "label": "Monthly EMI",
+        "definition": "The fixed monthly payment you pay to repay your loan."
+      },
+      "simple": {
+        "label": "Monthly Loan Payment",
+        "definition": "The amount of money you pay each month for the loan."
+      }
+    }
+  },
+  "total_interest": {
+    "id": "total_interest",
+    "tiers": {
+      "professional": {
+        "label": "Cumulative Debt Service Interest",
+        "definition": "The total interest paid over the lifespan of the loan, representing the cost of borrowing."
+      },
+      "investor": {
+        "label": "Total Interest Payable",
+        "definition": "The total interest cost you will pay to the bank over the loan term."
+      },
+      "simple": {
+        "label": "Total Interest Cost",
+        "definition": "The extra money you pay to the bank on top of the original loan amount."
+      }
+    }
+  },
+  "total_payment": {
+    "id": "total_payment",
+    "tiers": {
+      "professional": {
+        "label": "Total Debt Amortization Payment",
+        "definition": "The sum of the principal borrowed and cumulative interest paid, representing total out-of-pocket loan cost."
+      },
+      "investor": {
+        "label": "Total Principal + Interest",
+        "definition": "The total sum of all EMI payments made over the full loan term."
+      },
+      "simple": {
+        "label": "Total Money Paid Back",
+        "definition": "The total money you pay back to the bank (original loan + interest)."
+      }
+    }
+  },
+  "total_interest_saved": {
+    "id": "total_interest_saved",
+    "tiers": {
+      "professional": {
+        "label": "Accelerated Amortization Interest Savings",
+        "definition": "The reduction in cumulative interest expense achieved through prepayment of loan principal."
+      },
+      "investor": {
+        "label": "Total Interest Saved",
+        "definition": "The total amount of interest money you save by prepaying your loan."
+      },
+      "simple": {
+        "label": "Total Interest Saved",
+        "definition": "The interest money you save by paying extra early."
+      }
+    }
+  },
+  "months_saved": {
+    "id": "months_saved",
+    "tiers": {
+      "professional": {
+        "label": "Debt Maturity Reduction (Periods)",
+        "definition": "The reduction in the loan term (number of monthly payment periods saved) due to principal prepayments."
+      },
+      "investor": {
+        "label": "Tenure Reduction (Months)",
+        "definition": "The number of months by which your loan tenure is shortened due to prepayments."
+      },
+      "simple": {
+        "label": "Months Cut Off Loan",
+        "definition": "The number of months you save, finishing your loan early."
+      }
+    }
+  },
+  "new_total_interest": {
+    "id": "new_total_interest",
+    "tiers": {
+      "professional": {
+        "label": "Revised Cumulative Interest",
+        "definition": "The updated total interest expense payable over the shortened lifespan of the loan after prepayments."
+      },
+      "investor": {
+        "label": "New Total Interest",
+        "definition": "The updated total interest you will pay after accounting for prepayments."
+      },
+      "simple": {
+        "label": "New Interest Cost",
+        "definition": "The revised total interest cost after prepaying."
+      }
+    }
+  },
+  "target_fund": {
+    "id": "target_fund",
+    "tiers": {
+      "professional": {
+        "label": "Target Liquidity Reserve",
+        "definition": "The total capital required to be held in low-risk, highly liquid assets to cover essential emergency outlays."
+      },
+      "investor": {
+        "label": "Emergency Fund Target",
+        "definition": "The total target savings amount required for your emergency safety net."
+      },
+      "simple": {
+        "label": "Safety Net Goal",
+        "definition": "The total money you should save in your emergency safety net."
+      }
+    }
+  },
+  "monthly_total": {
+    "id": "monthly_total",
+    "tiers": {
+      "professional": {
+        "label": "Discretionary and Nondiscretionary Outlays",
+        "definition": "The aggregate monthly essential expenses used to size the emergency reserve."
+      },
+      "investor": {
+        "label": "Monthly Expense Total",
+        "definition": "The sum of all your monthly essential living costs."
+      },
+      "simple": {
+        "label": "Total Monthly Spending",
+        "definition": "The total money you spend on bills and food each month."
+      }
+    }
+  },
+  "allocation_cash": {
+    "id": "allocation_cash",
+    "tiers": {
+      "professional": {
+        "label": "Liquid Currency Reserve Allocation",
+        "definition": "The cash portion of the emergency fund kept in instant-access savings accounts or physical cash."
+      },
+      "investor": {
+        "label": "Liquid Cash Portion",
+        "definition": "The amount of your emergency fund to keep in instant-access cash or savings accounts."
+      },
+      "simple": {
+        "label": "Instant Cash Safety",
+        "definition": "The money you keep in cash or normal savings accounts for instant use."
+      }
+    }
+  },
+  "fi_age": {
+    "id": "fi_age",
+    "tiers": {
+      "professional": {
+        "label": "Financial Independence Benchmark Age",
+        "definition": "The projected age of the primary beneficiary when portfolio distributions can cover annual outlays indefinitely."
+      },
+      "investor": {
+        "label": "Financial Independence Age",
+        "definition": "The estimated age at which you will achieve financial independence."
+      },
+      "simple": {
+        "label": "Age You Achieve Freedom",
+        "definition": "The age you will be when you have enough saved to not need a salary."
+      }
+    }
+  },
+  "fi_corpus": {
+    "id": "fi_corpus",
+    "tiers": {
+      "professional": {
+        "label": "Financial Independence Target Capital",
+        "definition": "The nominal corpus required to achieve financial independence under a given withdrawal strategy."
+      },
+      "investor": {
+        "label": "FI Target Corpus",
+        "definition": "The target savings amount required to achieve financial independence."
+      },
+      "simple": {
+        "label": "Financial Freedom Target",
+        "definition": "The target money you need to achieve financial independence."
+      }
+    }
+  },
+  "years_to_fi": {
+    "id": "years_to_fi",
+    "tiers": {
+      "professional": {
+        "label": "Accumulation Duration to Financial Independence",
+        "definition": "The projected number of years required to accumulate the target FI corpus."
+      },
+      "investor": {
+        "label": "Years to FI",
+        "definition": "The number of years remaining before you reach your financial independence goal."
+      },
+      "simple": {
+        "label": "Years to Financial Freedom",
+        "definition": "The number of years left before you reach financial freedom."
+      }
+    }
+  },
+  "net_worth": {
+    "id": "net_worth",
+    "tiers": {
+      "professional": {
+        "label": "Aggregate Net Worth",
+        "definition": "The total value of financial and non-financial assets owned minus the total value of outstanding liabilities."
+      },
+      "investor": {
+        "label": "Current Net Worth",
+        "definition": "The total value of everything you own (money, property) minus everything you owe."
+      },
+      "simple": {
+        "label": "Your Total Net Worth",
+        "definition": "The actual value of all your savings and properties minus your debts."
+      }
+    }
   }
 };
 
 const termIdMapping = {
-  // Inputs
-  'monthly_sip': 'periodic_investment',
-  'starting_sip': 'periodic_investment',
-  'monthly_withdrawal': 'systematic_withdrawal',
-  'principal': 'principal',
-  'initial_corpus': 'principal',
-  'target_corpus': 'future_value',
-  'return_rate': 'expected_return',
-  'years': 'time_horizon',
-  'duration': 'time_horizon',
-  'tenure': 'time_horizon',
-  'years_to_goal': 'time_horizon',
-  'years_to_fi': 'time_horizon',
-  'step_up_pct': 'annual_increment',
-  'annual_step_up': 'annual_increment',
-  'compounding-freq': 'compounding_frequency',
-  'compounding_freq': 'compounding_frequency',
-  'inflation-rate': 'inflation_rate',
-  'inflation_rate': 'inflation_rate',
-  
-  // Results / Outputs
-  'total-invested': 'total_invested',
-  'total-gains': 'total_wealth_gained',
-  'total-corpus': 'future_value',
-  'remaining-corpus': 'future_value',
-  'required-sip': 'periodic_investment',
-  'required-lump': 'principal',
-  'adjusted-corpus': 'real_future_value',
-  'post-tax-corpus': 'post_tax_future_value',
-  'final-gains': 'total_wealth_gained',
-  'total-withdrawn': 'total_withdrawals',
-  'estimated-gains': 'total_wealth_gained',
-  'gains-portion': 'total_wealth_gained',
-  'required-corpus': 'principal',
-  
-  // Table headers matching text (clean values)
-  'monthly sip': 'periodic_investment',
-  'returns': 'total_wealth_gained',
-  'interest earned': 'total_wealth_gained',
-  'gains': 'total_wealth_gained',
-  'corpus': 'future_value',
-  'ending balance': 'future_value',
-  'real corpus': 'real_future_value',
-  'real value': 'real_future_value',
-  'taxable gains': 'capital_gains',
-  'estimated tax': 'tax_liability',
-  'post-tax corpus': 'post_tax_future_value'
+  "monthly_sip": "periodic_investment",
+  "starting_sip": "periodic_investment",
+  "monthly_withdrawal": "systematic_withdrawal",
+  "principal": "principal",
+  "initial_corpus": "principal",
+  "target_corpus": "future_value",
+  "return_rate": "expected_return",
+  "years": "time_horizon",
+  "duration": "time_horizon",
+  "tenure": "time_horizon",
+  "years_to_goal": "time_horizon",
+  "years_to_fi": "time_horizon",
+  "step_up_pct": "annual_increment",
+  "annual_step_up": "annual_increment",
+  "compounding-freq": "compounding_frequency",
+  "compounding_freq": "compounding_frequency",
+  "inflation-rate": "inflation_rate",
+  "inflation_rate": "inflation_rate",
+  "total-invested": "total_invested",
+  "total-gains": "total_wealth_gained",
+  "total-corpus": "future_value",
+  "remaining-corpus": "future_value",
+  "required-sip": "periodic_investment",
+  "required-lump": "principal",
+  "adjusted-corpus": "real_future_value",
+  "post-tax-corpus": "post_tax_future_value",
+  "final-gains": "total_wealth_gained",
+  "total-withdrawn": "total_withdrawals",
+  "estimated-gains": "total_wealth_gained",
+  "gains-portion": "total_wealth_gained",
+  "required-corpus": "principal",
+  "monthly sip": "periodic_investment",
+  "returns": "total_wealth_gained",
+  "interest earned": "total_wealth_gained",
+  "gains": "total_wealth_gained",
+  "corpus": "future_value",
+  "ending balance": "future_value",
+  "real corpus": "real_future_value",
+  "real value": "real_future_value",
+  "taxable gains": "capital_gains",
+  "estimated tax": "tax_liability",
+  "post-tax corpus": "post_tax_future_value",
+  "waiting_period": "waiting_period",
+  "desired_withdrawal": "systematic_withdrawal",
+  "current_age": "current_age",
+  "retire_age": "retire_age",
+  "life_expectancy": "life_expectancy",
+  "monthly_expenses": "monthly_expenses",
+  "pre_return": "expected_return",
+  "post_return": "expected_return",
+  "annual_expenses": "annual_expenses",
+  "swr": "swr",
+  "current_savings": "current_savings",
+  "monthly_savings": "monthly_savings",
+  "target_goal": "target_goal",
+  "college_cost": "college_cost",
+  "years_to_college": "years_to_college",
+  "wedding_cost": "wedding_cost",
+  "years_to_marriage": "years_to_marriage",
+  "property_value": "property_value",
+  "down_pay_pct": "down_pay_pct",
+  "target_amount": "target_amount",
+  "target_age": "target_age",
+  "equity_assets": "equity_assets",
+  "debt_assets": "debt_assets",
+  "liabilities": "liabilities",
+  "annual_savings": "annual_savings",
+  "growth_rate": "expected_return",
+  "equity_val": "principal",
+  "debt_val": "principal",
+  "gold_val": "principal",
+  "cash_val": "principal",
+  "target_equity": "target_equity",
+  "target_debt": "target_debt",
+  "target_gold": "target_gold",
+  "initial_val": "principal",
+  "final_val": "principal",
+  "amount": "principal",
+  "nominal_return": "expected_return",
+  "tax_rate": "tax_rate",
+  "loan_amount": "principal",
+  "interest_rate": "expected_return",
+  "prepay_monthly": "prepay_monthly",
+  "fixed_expenses": "fixed_expenses",
+  "food_expenses": "food_expenses",
+  "insurance_utilities": "insurance_utilities",
+  "coverage_months": "coverage_months",
+  "net_worth": "net_worth",
+  "depletion-year": "depletion_year",
+  "inflated-expenses": "inflated_expenses",
+  "fire-number": "fire_number",
+  "lean-fire": "lean_fire",
+  "fat-fire": "fat_fire",
+  "years-to-fire": "years_to_fire",
+  "inflated-goal": "inflated_goal",
+  "inflated-cost": "inflated_cost",
+  "inflated-downpayment": "inflated_downpayment",
+  "inflated-corpus": "inflated_corpus",
+  "net-worth": "net_worth",
+  "projected-assets": "projected_assets",
+  "projected-nw": "projected_nw",
+  "total-portfolio": "total_portfolio",
+  "rebalance-action": "rebalance_action",
+  "cagr-result": "cagr",
+  "absolute-return": "absolute_return",
+  "xirr-result": "xirr",
+  "future-nominal": "future_value",
+  "purchasing-power": "real_future_value",
+  "post-tax-nominal": "post_tax_future_value",
+  "real-return-result": "real_rate",
+  "emi-result": "emi_result",
+  "total-interest": "total_interest",
+  "total-payment": "total_payment",
+  "total-interest-saved": "total_interest_saved",
+  "months-saved": "months_saved",
+  "new-total-interest": "new_total_interest",
+  "target-fund": "target_fund",
+  "monthly-total": "monthly_total",
+  "allocation-cash": "allocation_cash",
+  "fi-age": "fi_age",
+  "fi-corpus": "fi_corpus",
+  "years-to-fi": "years_to_fi"
 };
 
 let preservedLevelSettings = {};
@@ -1345,6 +2406,18 @@ function setupSidebarToggle() {
   backdrop.addEventListener('click', () => {
     appContainer.classList.remove('sidebar-open');
   });
+
+  const workspace = document.querySelector('.calculator-workspace');
+  if (workspace) {
+    workspace.addEventListener('click', (e) => {
+      if (window.innerWidth > 1100 && !appContainer.classList.contains('sidebar-collapsed')) {
+        if (!e.target.closest('#sidebar-toggle')) {
+          appContainer.classList.add('sidebar-collapsed');
+          localStorage.setItem('sidebar-collapsed', 'true');
+        }
+      }
+    });
+  }
 }
 
 function setupDraggableLabels() {

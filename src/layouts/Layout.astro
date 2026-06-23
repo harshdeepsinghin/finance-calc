@@ -21,6 +21,7 @@ const {
 } = Astro.props;
 
 const currentPath = Astro.url.pathname;
+const isCalculator = currentPath.includes('/calculators/');
 const adsenseClientId = 'ca-pub-XXXXXXXXXXXXXX'; // Replace with your real publisher ID
 const showAds = adsenseClientId && !adsenseClientId.includes('XXXXXXXXXXXXXX');
 const socialImage = new URL('/assets/MoneyInFuture_Logo_Light_Mode.png', Astro.site || 'https://moneyinfuture.com').href;
@@ -113,12 +114,17 @@ if (canonicalUrl.endsWith('/index.html')) {
 </head>
 <body>
   <div class="app-container">
+    <script is:inline>
+      if (localStorage.getItem('sidebar-collapsed') === 'true' && window.innerWidth > 1100) {
+        document.querySelector('.app-container').classList.add('sidebar-collapsed');
+      }
+    </script>
     <Header />
     
     <div class="main-content">
       <Sidebar currentUrl={currentPath} />
       
-      <main class="calculator-workspace">
+      <main class={`calculator-workspace ${!isCalculator ? 'centered-layout' : ''}`}>
         <slot />
       </main>
     </div>

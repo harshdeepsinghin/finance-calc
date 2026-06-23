@@ -19,19 +19,19 @@ import Layout from '../layouts/Layout.astro';
 
     <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-bottom: 3rem;">
       <!-- Simple Tier Description -->
-      <div style="border-left: 4px solid var(--success-color); padding-left: 1.5rem; margin-bottom: 1.5rem;">
+      <div style="border-left: 4px solid var(--level-simple-color); padding-left: 1.5rem; margin-bottom: 1.5rem;">
         <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem; color: var(--text-primary);">Simple Level (Beginner)</h2>
         <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
           Designed for individuals beginning their financial journey. This level uses simple, everyday terms and hides advanced economic factors to prevent cognitive overload.
         </p>
         <ul style="padding-left: 1.25rem; color: var(--text-secondary);">
-          <li><strong>Plain English:</strong> Parameters like <em>Principal</em> are renamed to <em>Starting Money</em>, and <em>SIP</em> is renamed to <em>Money Added Every Month</em>.</li>
+          <li><strong>Plain English:</strong> Parameters like <em>Starting Money</em> are renamed, and <em>SIP</em> is renamed to <em>Money Added Every Month</em>.</li>
           <li><strong>Clean Interface:</strong> Hides complex elements like Compounding Frequencies, Inflation Rates, and Capital Gains Taxes, running calculations on safe defaults behind the scenes.</li>
         </ul>
       </div>
 
       <!-- Investor Tier Description -->
-      <div style="border-left: 4px solid var(--accent-color); padding-left: 1.5rem; margin-bottom: 1.5rem;">
+      <div style="border-left: 4px solid var(--level-investor-color); padding-left: 1.5rem; margin-bottom: 1.5rem;">
         <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem; color: var(--text-primary);">Investor Level (Intermediate)</h2>
         <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
           Designed for active retail investors who understand standard brokerage terminology and follow mutual fund SIP portfolios.
@@ -43,7 +43,7 @@ import Layout from '../layouts/Layout.astro';
       </div>
 
       <!-- Professional Tier Description -->
-      <div style="border-left: 4px solid #af52de; padding-left: 1.5rem; margin-bottom: 1.5rem;">
+      <div style="border-left: 4px solid var(--level-pro-color); padding-left: 1.5rem; margin-bottom: 1.5rem;">
         <h2 style="font-size: 1.4rem; margin-bottom: 0.5rem; color: var(--text-primary);">Professional Level (Advanced)</h2>
         <p style="color: var(--text-secondary); margin-bottom: 0.5rem;">
           Designed for financial planners, analysts, CAs, and experts who require industry-standard terminology.
@@ -66,9 +66,9 @@ import Layout from '../layouts/Layout.astro';
         <thead>
           <tr style="border-bottom: 1.5px solid var(--border-color); background: var(--input-bg);">
             <th style="padding: 0.75rem 1rem;">Core Concept</th>
-            <th style="padding: 0.75rem 1rem; color: #af52de;">Professional</th>
-            <th style="padding: 0.75rem 1rem; color: var(--accent-color);">Investor</th>
-            <th style="padding: 0.75rem 1rem; color: var(--success-color);">Simple</th>
+            <th style="padding: 0.75rem 1rem; color: var(--level-pro-color);">Professional</th>
+            <th style="padding: 0.75rem 1rem; color: var(--level-investor-color);">Investor</th>
+            <th style="padding: 0.75rem 1rem; color: var(--level-simple-color);">Simple</th>
           </tr>
         </thead>
         <tbody>

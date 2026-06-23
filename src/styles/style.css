@@ -21,6 +21,11 @@
   --color-lakhs: #b85c00;
   --color-crores: #1d753c;
   --color-decimals: #6e6e73;
+
+  /* Level Faded Colors (Light Mode - Blue based) */
+  --level-pro-color: #0071e3;
+  --level-investor-color: rgba(0, 113, 227, 0.7);
+  --level-simple-color: rgba(0, 113, 227, 0.45);
 }
 
 [data-theme="dark"] {
@@ -44,6 +49,11 @@
   --color-lakhs: #ffd60a;
   --color-crores: #32d74b;
   --color-decimals: #86868b;
+
+  /* Level Faded Colors (Dark Mode - Yellow based) */
+  --level-pro-color: #ffe600;
+  --level-investor-color: rgba(255, 230, 0, 0.7);
+  --level-simple-color: rgba(255, 230, 0, 0.45);
 }
 
 /* Global Reset & Base */
@@ -360,6 +370,10 @@ header {
   min-width: 0;
   /* allows content to shrink */
   width: 100%;
+}
+
+.calculator-workspace.centered-layout {
+  max-width: 800px;
 }
 
 /* Page Intro Header */
@@ -989,7 +1003,7 @@ table td:last-child {
 }
 
 /* If .seo-content immediately follows .calculator-header, remove duplicate top border and reduce top spacing */
-.calculator-header + .seo-content {
+.calculator-header+.seo-content {
   border-top: none;
   padding-top: 0;
   margin-top: 1.5rem;
@@ -2116,18 +2130,18 @@ body.modal-open {
 }
 
 .onboarding-btn-opt[data-level="simple"]:hover {
-  border-color: var(--success-color);
-  color: var(--success-color);
+  border-color: var(--level-simple-color);
+  color: var(--level-simple-color);
 }
 
 .onboarding-btn-opt[data-level="investor"]:hover {
-  border-color: var(--accent-color);
-  color: var(--accent-color);
+  border-color: var(--level-investor-color);
+  color: var(--level-investor-color);
 }
 
 .onboarding-btn-opt[data-level="professional"]:hover {
-  border-color: #af52de;
-  color: #af52de;
+  border-color: var(--level-pro-color);
+  color: var(--level-pro-color);
 }
 
 .onboarding-info-link {
@@ -2173,15 +2187,15 @@ body.modal-open {
 }
 
 .level-pill-btn[data-level="simple"]:hover {
-  color: var(--success-color);
+  color: var(--level-simple-color);
 }
 
 .level-pill-btn[data-level="investor"]:hover {
-  color: var(--accent-color);
+  color: var(--level-investor-color);
 }
 
 .level-pill-btn[data-level="professional"]:hover {
-  color: #af52de;
+  color: var(--level-pro-color);
 }
 
 .level-pill-btn.active {
@@ -2292,6 +2306,7 @@ body.modal-open {
     opacity: 0;
     transform: translate3d(0, 4px, 0);
   }
+
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0);
@@ -2338,20 +2353,20 @@ body.modal-open {
   .onboarding-card {
     padding: 1.5rem;
   }
-  
+
   .onboarding-header h2 {
     font-size: 1.5rem;
   }
-  
+
   .tier-icon-wrapper {
     font-size: 1.4rem;
     padding: 0.4rem;
   }
-  
+
   .tier-title {
     font-size: 1rem;
   }
-  
+
   .tier-summary {
     font-size: 0.82rem;
   }

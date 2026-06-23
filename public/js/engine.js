@@ -658,6 +658,64 @@ const FinanceEngine = {
       
       // Clear container
       container.innerHTML = '';
+
+      // Map chart keys to result element IDs
+      const keyToIdMap = {
+        invested: 'total-invested',
+        gains: ['total-gains', 'interest-portion', 'estimated-gains', 'total-interest', 'interest-earned', 'gains-portion', 'final-gains'],
+        nominal: ['total-corpus', 'future-value', 'final-amount', 'remaining-corpus', 'required-corpus', 'nest-egg', 'target-corpus', 'ending-balance', 'corpus', 'value'],
+        real: 'adjusted-corpus',
+        postTax: 'post-tax-corpus',
+        posttax: 'post-tax-corpus',
+        'post-tax': 'post-tax-corpus'
+      };
+
+      const isMetricEnabled = (key) => {
+        let el = document.getElementById(key);
+        if (!el) {
+          const ids = keyToIdMap[key];
+          if (ids) {
+            if (Array.isArray(ids)) {
+              for (const id of ids) {
+                el = document.getElementById(id);
+                if (el) break;
+              }
+            } else {
+              el = document.getElementById(ids);
+            }
+          }
+        }
+        if (!el) {
+          el = document.querySelector(`[id*="${key}"]`);
+        }
+        if (el) {
+          const card = el.closest('.metric-card');
+          if (card) {
+            const display = card.style.display;
+            const isImportantNone = card.style.getPropertyValue('display') === 'none';
+            if (display === 'none' || isImportantNone || window.getComputedStyle(card).display === 'none') {
+              return false;
+            }
+          }
+        }
+        return true;
+      };
+
+      const activeKeys = [];
+      const activeColors = [];
+      const activeLabels = [];
+
+      valueKeys.forEach((key, idx) => {
+        if (isMetricEnabled(key)) {
+          activeKeys.push(key);
+          activeColors.push(colors[idx]);
+          activeLabels.push(lineLabels ? lineLabels[idx] : null);
+        }
+      });
+
+      valueKeys = activeKeys;
+      colors = activeColors;
+      lineLabels = lineLabels ? activeLabels : null;
     
     // Store data for ResizeObserver
     container.chartData = { type: 'line', data, valueKeys, colors, lineLabels };
@@ -824,6 +882,16 @@ const FinanceEngine = {
         }
         return label;
       });
+    }
+
+    // Rebuild the HTML legend dynamically to keep it in sync
+    const legendContainer = document.getElementById('chart-legend-container');
+    if (legendContainer) {
+      legendContainer.innerHTML = valueKeys.map((key, index) => {
+        const color = colors[index];
+        const label = labels[index];
+        return `<div class="legend-item"><span class="legend-color" style="background-color: ${color};"></span>${label}</div>`;
+      }).join('');
     }
 
     // Track visibility per series (all visible by default)

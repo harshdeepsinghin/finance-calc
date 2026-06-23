@@ -2407,16 +2407,131 @@ function setupSidebarToggle() {
     appContainer.classList.remove('sidebar-open');
   });
 
-  const workspace = document.querySelector('.calculator-workspace');
-  if (workspace) {
-    workspace.addEventListener('click', (e) => {
-      if (window.innerWidth > 1100 && !appContainer.classList.contains('sidebar-collapsed')) {
-        if (!e.target.closest('#sidebar-toggle')) {
+  const sidebar = document.getElementById('global-sidebar');
+  if (sidebar) {
+    let handle = document.getElementById('sidebar-toggle-handle');
+    if (!handle) {
+      handle = document.createElement('div');
+      handle.id = 'sidebar-toggle-handle';
+      handle.className = 'sidebar-toggle-handle';
+      handle.setAttribute('title', 'Drag to resize sidebar or click to toggle');
+      handle.innerHTML = `
+        <svg class="sidebar-handle-svg" viewBox="0 0 18 80" width="18" height="80">
+          <path d="M 0 6 Q 0 0 6 3 L 15 36 Q 18 40 15 44 L 6 77 Q 0 80 0 74 Z" />
+        </svg>
+      `;
+      sidebar.parentNode.insertBefore(handle, sidebar.nextSibling);
+    }
+
+    let isDragging = false;
+    let startX = 0;
+    let startCollapsed = false;
+    let hasDragged = false;
+    const dragThreshold = 5; // px
+
+    const onMouseDown = (e) => {
+      if (e.type === 'mousedown' && e.button !== 0) return;
+      if (window.innerWidth <= 1100) return;
+
+      isDragging = true;
+      hasDragged = false;
+      startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+      startCollapsed = appContainer.classList.contains('sidebar-collapsed');
+
+      appContainer.classList.add('sidebar-dragging-active');
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+
+      document.addEventListener('mousemove', onMouseMove, { passive: false });
+      document.addEventListener('touchmove', onMouseMove, { passive: false });
+      document.addEventListener('mouseup', onMouseUp);
+      document.addEventListener('touchend', onMouseUp);
+    };
+
+    const onMouseMove = (e) => {
+      if (!isDragging) return;
+
+      const currentX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+      const deltaX = currentX - startX;
+
+      if (Math.abs(deltaX) > dragThreshold) {
+        hasDragged = true;
+      }
+
+      let newWidth;
+      if (startCollapsed) {
+        newWidth = Math.max(0, Math.min(260, deltaX));
+      } else {
+        newWidth = Math.max(0, Math.min(260, 260 + deltaX));
+      }
+
+      sidebar.style.width = `${newWidth}px`;
+      sidebar.style.paddingLeft = newWidth > 32 ? '1rem' : '0';
+      sidebar.style.paddingRight = newWidth > 32 ? '1rem' : '0';
+      sidebar.style.transform = `translateX(${newWidth - 260}px)`;
+
+      handle.style.left = `${newWidth}px`;
+      if (newWidth <= 0) {
+        handle.style.transform = 'translate(0, -50%) rotate(0deg)';
+      } else {
+        handle.style.transform = 'translate(-50%, -50%) rotate(180deg)';
+      }
+    };
+
+    const onMouseUp = (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('touchmove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.removeEventListener('touchend', onMouseUp);
+
+      appContainer.classList.remove('sidebar-dragging-active');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+
+      sidebar.style.width = '';
+      sidebar.style.paddingLeft = '';
+      sidebar.style.paddingRight = '';
+      sidebar.style.transform = '';
+      handle.style.left = '';
+      handle.style.transform = '';
+      handle.style.borderRadius = '';
+
+      if (!hasDragged) {
+        // Simple click to toggle
+        const isCollapsed = appContainer.classList.contains('sidebar-collapsed');
+        if (isCollapsed) {
+          appContainer.classList.remove('sidebar-collapsed');
+          localStorage.setItem('sidebar-collapsed', 'false');
+        } else {
+          appContainer.classList.add('sidebar-collapsed');
+          localStorage.setItem('sidebar-collapsed', 'true');
+        }
+      } else {
+        // Drag end snap
+        const currentX = e.type === 'touchend' ? (e.changedTouches[0] ? e.changedTouches[0].clientX : startX) : e.clientX;
+        const deltaX = currentX - startX;
+        let finalWidth;
+        if (startCollapsed) {
+          finalWidth = Math.max(0, Math.min(260, deltaX));
+        } else {
+          finalWidth = Math.max(0, Math.min(260, 260 + deltaX));
+        }
+
+        if (finalWidth > 130) {
+          appContainer.classList.remove('sidebar-collapsed');
+          localStorage.setItem('sidebar-collapsed', 'false');
+        } else {
           appContainer.classList.add('sidebar-collapsed');
           localStorage.setItem('sidebar-collapsed', 'true');
         }
       }
-    });
+    };
+
+    handle.addEventListener('mousedown', onMouseDown);
+    handle.addEventListener('touchstart', onMouseDown, { passive: true });
   }
 }
 

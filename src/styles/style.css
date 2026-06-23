@@ -2385,3 +2385,66 @@ body.modal-open {
     font-size: 0.78rem;
   }
 }
+
+/* ==========================================================================
+   Sidebar Edge-Toggle Handle & Real-Time Resizing
+   ========================================================================== */
+.sidebar-toggle-handle {
+  position: fixed;
+  top: 50%;
+  left: 260px; /* Aligns exactly with expanded sidebar width */
+  transform: translate(-50%, -50%) rotate(180deg); /* Points left (collapse) when open */
+  width: 18px;
+  height: 80px;
+  cursor: ew-resize;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.sidebar-toggle-handle svg {
+  display: block;
+  overflow: visible;
+}
+
+.sidebar-toggle-handle svg path {
+  fill: var(--bg-secondary);
+  stroke: var(--border-color);
+  stroke-width: 1.5px;
+  transition: fill 0.2s, stroke 0.2s, filter 0.2s;
+  filter: drop-shadow(2px 0 4px rgba(0, 0, 0, 0.06));
+}
+
+.sidebar-toggle-handle:hover svg path {
+  fill: var(--input-bg);
+  stroke: var(--accent-color);
+  filter: drop-shadow(3px 0 6px rgba(0, 0, 0, 0.12));
+}
+
+/* Dock to left edge and rotate chevron pointing right when sidebar is collapsed */
+.app-container.sidebar-collapsed .sidebar-toggle-handle {
+  left: 0;
+  transform: translate(0, -50%) rotate(0deg); /* Points right (expand) when collapsed */
+}
+
+/* Disable transitions entirely during dragging for real-time tracking */
+.sidebar-dragging-active .sidebar {
+  transition: none !important;
+}
+
+.sidebar-dragging-active .sidebar-toggle-handle {
+  transition: none !important;
+}
+
+@media (max-width: 1100px) {
+  .sidebar-toggle-handle {
+    display: none !important;
+  }
+}
